@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://bec754stvpw4h"]
+
+[node name="Hud" type="CanvasLayer" unique_id=218766584]
+
+[node name="Lives" type="Label" parent="." unique_id=809912451]
+offset_left = 821.0
+offset_top = 32.0
+offset_right = 916.0
+offset_bottom = 76.0
+text = "Lives: 3"
+
+[node name="Score" type="Label" parent="." unique_id=726561411]
+offset_left = 448.0
+offset_top = 30.0
+offset_right = 504.0
+offset_bottom = 58.0
+text = "Score 0"
+horizontal_alignment = 1
+
+[node name="MessageLabel" type="Label" parent="." unique_id=324492922]
+offset_right = 962.0
+offset_bottom = 718.0
+horizontal_alignment = 1
+vertical_alignment = 1

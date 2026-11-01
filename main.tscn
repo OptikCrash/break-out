@@ -1,0 +1,84 @@
+[gd_scene format=3 uid="uid://y2o3nlh4h0cf"]
+
+[ext_resource type="PackedScene" uid="uid://bq3iit4ymvq6c" path="res://paddle.tscn" id="1_0xm2m"]
+[ext_resource type="Script" uid="uid://b4etnqvttnb4b" path="res://main.gd" id="1_1bvp3"]
+[ext_resource type="PackedScene" uid="uid://cvngfod5x8bwh" path="res://ball.tscn" id="2_0xm2m"]
+[ext_resource type="PackedScene" uid="uid://bec754stvpw4h" path="res://HUD.tscn" id="2_7mycd"]
+[ext_resource type="Script" uid="uid://cvp656wc3w05v" path="res://hud.gd" id="3_272bh"]
+[ext_resource type="Script" uid="uid://be4ivgqyb7ggs" path="res://bricks.gd" id="3_h2yge"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pcsof"]
+size = Vector2(20, 710)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_uafpu"]
+size = Vector2(960, 20)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_uvjiu"]
+size = Vector2(20, 710)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wx6e8"]
+size = Vector2(980, 20)
+
+[node name="Main" type="Node2D" unique_id=2083513692]
+script = ExtResource("1_1bvp3")
+
+[node name="Hud" parent="." unique_id=218766584 instance=ExtResource("2_7mycd")]
+script = ExtResource("3_272bh")
+
+[node name="Ball" parent="." unique_id=1745437129 node_paths=PackedStringArray("paddle") instance=ExtResource("2_0xm2m")]
+position = Vector2(498, 637)
+speed = 400.0
+paddle = NodePath("../Paddle")
+
+[node name="Paddle" parent="." unique_id=1334473946 instance=ExtResource("1_0xm2m")]
+position = Vector2(500, 668)
+
+[node name="Walls" type="StaticBody2D" parent="." unique_id=474614474]
+collision_mask = 0
+
+[node name="Left" type="CollisionShape2D" parent="Walls" unique_id=80632880]
+position = Vector2(0, 365)
+shape = SubResource("RectangleShape2D_pcsof")
+
+[node name="Top" type="CollisionShape2D" parent="Walls" unique_id=769717793]
+position = Vector2(480, 0)
+shape = SubResource("RectangleShape2D_uafpu")
+
+[node name="Right" type="CollisionShape2D" parent="Walls" unique_id=78594023]
+position = Vector2(960, 365)
+shape = SubResource("RectangleShape2D_uvjiu")
+
+[node name="LeftWall" type="ColorRect" parent="Walls" unique_id=738477466]
+offset_left = -10.0
+offset_top = 10.0
+offset_right = 10.0
+offset_bottom = 720.0
+color = Color(0.2509804, 0.36862746, 0.95686275, 1)
+
+[node name="TopWall" type="ColorRect" parent="Walls" unique_id=2118563524]
+offset_left = -1.0
+offset_top = -10.0
+offset_right = 960.0
+offset_bottom = 10.0
+color = Color(0.2509804, 0.36862746, 0.95686275, 1)
+
+[node name="RightWall" type="ColorRect" parent="Walls" unique_id=1939296816]
+offset_left = 950.0
+offset_top = 10.0
+offset_right = 970.0
+offset_bottom = 720.0
+color = Color(0.2509804, 0.36862746, 0.95686275, 1)
+
+[node name="Bricks" type="Node2D" parent="." unique_id=1836451092]
+script = ExtResource("3_h2yge")
+
+[node name="DeathZone" type="Area2D" parent="." unique_id=132079342]
+collision_layer = 0
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DeathZone" unique_id=639071732]
+position = Vector2(480, 730)
+shape = SubResource("RectangleShape2D_wx6e8")
+
+[connection signal="brick_broken" from="Ball" to="." method="_on_ball_brick_broken"]
+[connection signal="body_entered" from="DeathZone" to="." method="_on_death_zone_body_entered"]
