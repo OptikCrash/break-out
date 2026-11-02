@@ -7,39 +7,24 @@ Move with A/D or the arrow keys, launch with Space, and restart with R.
 
 ## Export for the web
 
-1. In Godot **4.7.2**, open **Editor → Manage Export Templates** and install
-   the matching **4.7.2** templates (the standard editor download does not include them).
-2. Open **Project → Export**, select the checked-in **Web** preset, and create
-   `build/web/` at the repository root.
-3. Choose **Export Project**, turn off **Export With Debug**, and save as
-   `build/web/index.html`.
+1. Open the project in Godot **4.7.2**. Under **Editor → Manage Export
+   Templates**, install the matching **4.7.2** export templates.
+2. Open **Project → Export → Add… → Web** to create a local export preset.
+3. Create an output folder outside the repository, choose **Export Project**,
+   turn off **Export With Debug**, and save as `index.html` in that folder.
+4. Serve the entire output folder over HTTP to preview it, rather than opening
+   `index.html` directly. For example, with Python 3, run this from that folder:
 
-Alternatively, with the templates installed, run from the repository root:
+   ```sh
+   python3 -m http.server 8000
+   ```
 
-```sh
-mkdir -p build/web
-godot --headless --path . --editor --import
-godot --headless --path . --export-release "Web" build/web/index.html
-```
+   Open <http://localhost:8000/> and click the game before using the keyboard.
 
-The preset uses the project's GL Compatibility renderer (WebGL 2) and disables
-thread support. This small game needs no worker threads, so hosting does not
-require cross-origin isolation headers. Test fixtures and build output are
-excluded from the export; generated files under `build/` are ignored by Git.
-
-To preview locally, serve the entire output directory over HTTP, for example
-with Python 3:
-
-```sh
-python3 -m http.server 8000 --directory build/web
-```
-
-Open <http://localhost:8000/> in a WebGL 2-capable browser and click the game
-before using the keyboard controls. Opening `index.html` directly via `file://`
-will not work. For sharing, upload **all** generated files together to an HTTPS
-static host that serves `.wasm` files as `application/wasm`; keep their names and
-relative paths intact. See Godot's [web export documentation](https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_web.html).
-Browser playtesting of the finished game remains milestone 7 in `PLAN.md`.
+Keep all generated files together when sharing the build through an HTTPS web
+host. These are editor export instructions only; verified export presets,
+settings, and browser testing of the finished game belong to milestone 7 in
+`PLAN.md`.
 
 ## Headless checks
 

@@ -14,7 +14,3 @@
 - PR descriptions explain the Godot concept and why the approach was chosen,
   including alternatives considered. For CI, editor import builds the resource
   cache before standalone headless tests; plain processes avoid an addon dependency.
-- Web exports use the checked-in `Web` preset, matching 4.7.2 export templates,
-  and `build/web/index.html`. Keep threads/extensions disabled for ordinary static
-  hosting without cross-origin isolation headers. Serve the whole output over HTTP
-  locally (HTTPS when shared), rather than opening the HTML as a file.
