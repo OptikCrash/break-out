@@ -1,17 +1,19 @@
 [gd_scene format=3 uid="uid://dye4ftka8h6ij"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_nkspu"]
-size = Vector2(80, 40)
+size = Vector2(64, 32)
 
 [node name="Brick" type="StaticBody2D" unique_id=1031045796 groups=["brick"]]
 collision_layer = 8
 collision_mask = 0
 
-[node name="ColorRect" type="ColorRect" parent="." unique_id=309459839]
-offset_right = 80.0
-offset_bottom = 40.0
-color = Color(0.7457138, 0.27613437, 0.2520104, 0.96862745)
-
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1292863273]
-position = Vector2(40, 20)
+position = Vector2(32, 16)
 shape = SubResource("RectangleShape2D_nkspu")
+
+[node name="ColorRect" type="ColorRect" parent="CollisionShape2D" unique_id=309459839]
+offset_left = -32.0
+offset_top = -16.0
+offset_right = 32.0
+offset_bottom = 16.0
+color = Color(0.7457138, 0.27613437, 0.2520104, 0.96862745)

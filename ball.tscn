@@ -1,23 +1,20 @@
 [gd_scene format=3 uid="uid://cvngfod5x8bwh"]
 
 [ext_resource type="Script" uid="uid://cktggu8qma0xk" path="res://ball.gd" id="1_x8fbi"]
+[ext_resource type="Texture2D" uid="uid://odaiej3by05f" path="res://assets/ball.png" id="2_41u45"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_wx6e8"]
-radius = 16.124516
+radius = 16.0
 
 [node name="Ball" type="CharacterBody2D" unique_id=1745437129]
 collision_layer = 4
 collision_mask = 15
 script = ExtResource("1_x8fbi")
 speed = null
-launched = null
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=708792081]
 shape = SubResource("CircleShape2D_wx6e8")
 
-[node name="ColorRect" type="ColorRect" parent="." unique_id=308047293]
-offset_left = -15.0
-offset_top = -15.0
-offset_right = 15.0
-offset_bottom = 14.0
-color = Color(0.47983426, 0.47983432, 0.47983426, 1)
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=438805240]
+position = Vector2(0, 9.536743e-07)
+texture = ExtResource("2_41u45")

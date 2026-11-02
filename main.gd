@@ -1,8 +1,8 @@
 extends Node2D
 
 @export var lives = 3
-@onready var ball := $Ball
-@onready var bricks := $Bricks
+@onready var ball := $PlayArea/Ball
+@onready var bricks := $PlayArea/Bricks
 @onready var hud := $Hud
 var score = 0
 var bricks_left = 0
