@@ -16,3 +16,6 @@ code; M3 makes this data-driven per level).
 **Launch**:
 The player input (and the moment) that sends the ball moving for the first time, or after a life
 is lost. Always mostly vertical with a small random lean; avoid "serve" for this.
+The direction is normalized from `(lean, -1)`, with lean sampled from -0.3 to 0.3.
+An exact zero sample uses 0.3 so it cannot travel perfectly vertically. A dead-center
+paddle hit uses this same rule, keeping the ball's current speed.

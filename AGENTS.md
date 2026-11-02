@@ -17,6 +17,10 @@
 
 Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the sources of truth.
 
+- Ball direction rules live in `ball_rules.gd`, a plain `RefCounted` script that
+  headless tests can preload without a scene. Seed the random generator before
+  each call when comparing launch and center-hit behavior.
+
 ## Scenes
 
 - Attach a scene's script to that scene's own root (in its `.tscn`), not on the instance in
