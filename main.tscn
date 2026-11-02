@@ -4,7 +4,6 @@
 [ext_resource type="Script" uid="uid://b4etnqvttnb4b" path="res://main.gd" id="1_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://cvngfod5x8bwh" path="res://ball.tscn" id="2_0xm2m"]
 [ext_resource type="PackedScene" uid="uid://bec754stvpw4h" path="res://HUD.tscn" id="2_7mycd"]
-[ext_resource type="Script" uid="uid://cvp656wc3w05v" path="res://hud.gd" id="3_272bh"]
 [ext_resource type="Script" uid="uid://be4ivgqyb7ggs" path="res://bricks.gd" id="3_h2yge"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wx6e8"]
@@ -89,7 +88,6 @@ offset_bottom = 960.0
 color = Color(0.2509804, 0.36862746, 0.95686275, 1)
 
 [node name="Hud" parent="." unique_id=218766584 instance=ExtResource("2_7mycd")]
-script = ExtResource("3_272bh")
 
 [connection signal="brick_broken" from="PlayArea/Ball" to="." method="_on_ball_brick_broken"]
 [connection signal="body_entered" from="PlayArea/DeathZone" to="." method="_on_death_zone_body_entered"]

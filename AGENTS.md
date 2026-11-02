@@ -21,6 +21,13 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   headless tests can preload without a scene. Seed the random generator before
   each call when comparing launch and center-hit behavior.
 
+## Scenes
+
+- Attach a scene's script to that scene's own root (in its `.tscn`), not on the instance in
+  the parent scene. An instance-level `script =` line in `main.tscn` is an override that a bare
+  `instantiate()` of the child scene won't have. `SceneState` (`load(...).get_state()`) lets a
+  headless test check for such overrides, as `tests/hud_script_test.gd` does.
+
 ## UI layout
 
 - Some scenes were built when the window was Godot's default 1152x648. Controls placed with
