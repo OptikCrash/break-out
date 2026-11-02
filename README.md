@@ -5,6 +5,27 @@ The Godot project is at the repository root. Open `project.godot` in Godot
 4.7.2 and press F6 on `main.tscn`, or F5 to run the project.
 Move with A/D or the arrow keys, launch with Space, and restart with R.
 
+## Export for the web
+
+1. Open the project in Godot **4.7.2**. Under **Editor → Manage Export
+   Templates**, install the matching **4.7.2** export templates.
+2. Open **Project → Export → Add… → Web** to create a local export preset.
+3. Create an output folder outside the repository, choose **Export Project**,
+   turn off **Export With Debug**, and save as `index.html` in that folder.
+4. Serve the entire output folder over HTTP to preview it, rather than opening
+   `index.html` directly. For example, with Python 3, run this from that folder:
+
+   ```sh
+   python3 -m http.server 8000
+   ```
+
+   Open <http://localhost:8000/> and click the game before using the keyboard.
+
+Keep all generated files together when sharing the build through an HTTPS web
+host. These are editor export instructions only; verified export presets,
+settings, and browser testing of the finished game belong to milestone 7 in
+`PLAN.md`.
+
 ## Headless checks
 
 On Linux, install Godot **4.7.2** as `godot` on PATH, plus Bash and GNU
