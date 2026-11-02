@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+const BallRules = preload("res://ball_rules.gd")
+
 @export var speed := 550.0
 @export var paddle: Node2D
 signal brick_broken
@@ -14,7 +16,7 @@ func _physics_process(delta: float) -> void:
 		if  Input.is_action_just_pressed("launch"):
 			launched = true;
 			# Mostly straight up, with a small random lean left or right.
-			velocity = Vector2(randf_range(-0.3, 0.3), -1).normalized() * speed
+			velocity = BallRules.launch_direction() * speed
 		return
 		
 	var collision := move_and_collide(velocity * delta)
@@ -31,7 +33,7 @@ func _physics_process(delta: float) -> void:
 
 			var x_dir: float = (ball_x - paddle_x) / 64.0
 
-			velocity = Vector2(x_dir, -1.0).normalized() * current_speed
+			velocity = BallRules.paddle_direction(x_dir) * current_speed
 		else:
 			velocity = velocity.bounce(collision.get_normal())
 			if hit.is_in_group("brick"):
