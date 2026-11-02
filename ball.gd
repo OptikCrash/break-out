@@ -35,8 +35,14 @@ func _physics_process(delta: float) -> void:
 		else:
 			velocity = velocity.bounce(collision.get_normal())
 			if hit.is_in_group("brick"):
-				hit.queue_free()
-				brick_broken.emit()
+				_break_brick(hit)
+
+func _break_brick(brick: Node) -> void:
+	# queue_free() leaves the collider alive until the frame ends.
+	if brick.is_queued_for_deletion():
+		return
+	brick.queue_free()
+	brick_broken.emit()
 
 func reset() -> void:
 	launched = false
