@@ -7,10 +7,7 @@ var launched := false
 
 func _physics_process(delta: float) -> void:
 	if not launched:
-		var paddlePosition = paddle.position
-		# Half the paddle's height (8) plus the ball's radius (16): resting on top, no gap.
-		paddlePosition.y = paddlePosition.y - 24
-		position = paddlePosition
+		_rest_on_paddle()
 		if  Input.is_action_just_pressed("launch"):
 			launched = true;
 			# Mostly straight up, with a small random lean left or right.
@@ -44,5 +41,11 @@ func _break_brick(brick: Node) -> void:
 	brick.queue_free()
 	brick_broken.emit()
 
+func _rest_on_paddle() -> void:
+	# Half the paddle's height (8) plus the ball's radius (16): resting on top, no gap.
+	position = paddle.position + Vector2(0, -24)
+
 func reset() -> void:
 	launched = false
+	# Winning stops physics, so placement cannot wait for the next physics tick.
+	_rest_on_paddle()

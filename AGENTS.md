@@ -15,6 +15,9 @@
   including alternatives considered. For CI, editor import builds the resource
   cache before standalone headless tests; plain processes avoid an addon dependency.
 
+- Winning disables ball physics immediately after `reset()`. Reset must place the ball
+  on the paddle synchronously; waiting for `_physics_process()` leaves it in flight.
+
 Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the sources of truth.
 
 ## UI layout
