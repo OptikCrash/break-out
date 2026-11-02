@@ -1,0 +1,39 @@
+name: ci
+
+on:
+  pull_request:
+    branches: [develop]
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: ci
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot 4.7.2
+        env:
+          GODOT_VERSION: 4.7.2
+        run: |
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/godot.zip" \
+            "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          install -m 755 "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64" "$RUNNER_TEMP/godot/godot"
+          echo "$RUNNER_TEMP/godot" >> "$GITHUB_PATH"
+      - name: Headless import check
+        shell: bash
+        run: |
+          set -euo pipefail
+          godot --version
+          godot --headless --path . --editor --import 2>&1 | tee "$RUNNER_TEMP/import.log"
+          # Import errors do not always produce a nonzero Godot exit code.
+          if grep -Eq '(^|[[:space:]])(SCRIPT ERROR|ERROR):' "$RUNNER_TEMP/import.log"; then
+            exit 1
+          fi
+      - name: Test runner regression checks
+        run: scripts/test-runner.sh
+      - name: Headless tests
+        run: scripts/run-tests.sh

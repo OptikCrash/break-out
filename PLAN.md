@@ -74,6 +74,14 @@ sound.
 
 ### M6: Local high scores
 
+### M7: Web export
+
+The goal stated up front: a small, finished, polished game Chris can share as a web build.
+Produce and verify an actual exported HTML5/Web build (not just the editor instructions README
+already covers) — export presets/settings, confirming input (keyboard, and whatever M2 added)
+and audio (if M5 added sound) work in a browser, and a checked-in or documented way to reproduce
+the export. Comes last, once every other milestone's features are in the build being shared.
+
 ## Scope rule
 
 A milestone starts only after Chris says go for it. Finishing one milestone is not a go for the

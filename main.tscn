@@ -37,7 +37,6 @@ color = Color(0.08468992, 0.08468992, 0.08468992, 1)
 
 [node name="Ball" parent="PlayArea" unique_id=1745437129 node_paths=PackedStringArray("paddle") instance=ExtResource("2_0xm2m")]
 position = Vector2(576, 868)
-speed = 550.0
 paddle = NodePath("../Paddle")
 
 [node name="Paddle" parent="PlayArea" unique_id=1334473946 instance=ExtResource("1_0xm2m")]
