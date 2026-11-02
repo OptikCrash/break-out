@@ -5,6 +5,42 @@ The Godot project is at the repository root. Open `project.godot` in Godot
 4.7.2 and press F6 on `main.tscn`, or F5 to run the project.
 Move with A/D or the arrow keys, launch with Space, and restart with R.
 
+## Export for the web
+
+1. In Godot **4.7.2**, open **Editor → Manage Export Templates** and install
+   the matching **4.7.2** templates (the standard editor download does not include them).
+2. Open **Project → Export**, select the checked-in **Web** preset, and create
+   `build/web/` at the repository root.
+3. Choose **Export Project**, turn off **Export With Debug**, and save as
+   `build/web/index.html`.
+
+Alternatively, with the templates installed, run from the repository root:
+
+```sh
+mkdir -p build/web
+godot --headless --path . --editor --import
+godot --headless --path . --export-release "Web" build/web/index.html
+```
+
+The preset uses the project's GL Compatibility renderer (WebGL 2) and disables
+thread support. This small game needs no worker threads, so hosting does not
+require cross-origin isolation headers. Test fixtures and build output are
+excluded from the export; generated files under `build/` are ignored by Git.
+
+To preview locally, serve the entire output directory over HTTP, for example
+with Python 3:
+
+```sh
+python3 -m http.server 8000 --directory build/web
+```
+
+Open <http://localhost:8000/> in a WebGL 2-capable browser and click the game
+before using the keyboard controls. Opening `index.html` directly via `file://`
+will not work. For sharing, upload **all** generated files together to an HTTPS
+static host that serves `.wasm` files as `application/wasm`; keep their names and
+relative paths intact. See Godot's [web export documentation](https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_web.html).
+Browser playtesting of the finished game remains milestone 7 in `PLAN.md`.
+
 ## Headless checks
 
 On Linux, install Godot **4.7.2** as `godot` on PATH, plus Bash and GNU
