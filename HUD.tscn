@@ -1,6 +1,9 @@
 [gd_scene format=3 uid="uid://bec754stvpw4h"]
 
+[ext_resource type="Script" uid="uid://cvp656wc3w05v" path="res://hud.gd" id="1_hud"]
+
 [node name="Hud" type="CanvasLayer" unique_id=218766584]
+script = ExtResource("1_hud")
 
 [node name="Lives" type="Label" parent="." unique_id=809912451]
 offset_left = 821.0
