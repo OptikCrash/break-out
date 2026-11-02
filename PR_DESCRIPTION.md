@@ -50,6 +50,9 @@ its first frame, which would change gameplay code for a menu problem.
 - the text block is centred and every label fits on screen at 1920x1080 and 1280x720;
 - Space, Enter and a left click each load `main.tscn`, and the ball is not launched afterwards.
   The test failed before the `physics_frame` wait was added.
+- holding Space through the scene change does not launch the ball, and after letting go, the next
+  Space press does launch it. This proves the wait only skips the press that started the game
+  and doesn't block the launch input.
 
 Validation: headless editor import gave no errors, and all six `tests/*_test.gd` passed when run
 one by one with `godot --headless --path . --script ...` and checked for `ERROR:` output.

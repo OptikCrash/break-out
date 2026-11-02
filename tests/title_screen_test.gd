@@ -13,6 +13,7 @@ func run() -> void:
 	await check_layout()
 	for event in [_key(KEY_SPACE), _key(KEY_ENTER), _click()]:
 		await check_starts_game(event)
+	await check_held_space_then_launch()
 	quit(1 if failures else 0)
 
 func check_layout() -> void:
@@ -47,6 +48,33 @@ func check_starts_game(event: InputEvent) -> void:
 	if scene and scene.scene_file_path == GAME:
 		# Space is also the launch key: starting the game must not launch the ball too.
 		_check(not scene.get_node("PlayArea/Ball").launched, "%s must not launch the ball" % event.as_text())
+
+# Holding Space through the scene change must not launch the ball, but the
+# next real press in the game must still launch it.
+func check_held_space_then_launch() -> void:
+	change_scene_to_file(TITLE)
+	await process_frame
+	await process_frame
+	Input.parse_input_event(_key(KEY_SPACE))
+	for i in 4:
+		await physics_frame
+	var scene := current_scene
+	_check(scene != null and scene.scene_file_path == GAME, "Held Space must start the game")
+	if scene == null or scene.scene_file_path != GAME:
+		return
+	var ball = scene.get_node("PlayArea/Ball")
+	_check(not ball.launched, "Holding Space into the game must not launch the ball")
+	var release := _key(KEY_SPACE)
+	release.pressed = false
+	Input.parse_input_event(release)
+	await physics_frame
+	_check(not ball.launched, "Releasing Space must not launch the ball")
+	Input.parse_input_event(_key(KEY_SPACE))
+	await physics_frame
+	await physics_frame
+	_check(ball.launched, "A new Space press in the game must launch the ball")
+	Input.parse_input_event(release)
+	await physics_frame
 
 func _key(keycode: Key) -> InputEventKey:
 	var event := InputEventKey.new()
