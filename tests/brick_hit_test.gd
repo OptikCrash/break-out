@@ -28,12 +28,14 @@ func _run() -> void:
 	_check(game.bricks_left == 1, "Repeated hit removes exactly one remaining brick")
 	_check(not game.reset_ready, "One remaining brick does not trigger a win")
 
+	ball.position = Vector2(300, 200)
 	ball.launched = true
 	ball._break_brick(last_brick)
 	ball._break_brick(last_brick)
 	_check(broken_signals == 2, "Two distinct bricks emit exactly two signals")
 	_check(game.score == 20, "Repeated final hit leaves the total at 20 points")
 	_check(game.bricks_left == 0, "Repeated final hit leaves zero remaining bricks")
+	_check(ball.position == ball.paddle.position + Vector2(0, -24), "Win immediately returns the ball to paddle rest")
 	_check(game.reset_ready, "Final brick enables restart")
 	_check(not ball.launched and not ball.is_physics_processing(), "Win resets and stops the ball")
 	_check(game.get_node("Hud/MessageLabel").text == "You Win!\nPress R to restart", "Final brick displays the win message")
