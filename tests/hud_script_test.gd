@@ -11,6 +11,10 @@ func check_script() -> void:
 		push_error("HUD.tscn root must have hud.gd attached")
 		quit(1)
 		return
+	if hud.get_node("Level").text != "Level: 1":
+		push_error("HUD must show Level: 1")
+		quit(1)
+		return
 	hud.update_lives(2)
 	hud.update_score(40)
 	hud.update_message("Paused")
