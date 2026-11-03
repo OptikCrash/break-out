@@ -10,10 +10,12 @@ const DEFINITIONS = [
 	preload("res://effects/multi_ball.tres"),
 	preload("res://effects/breaker.tres"),
 	preload("res://effects/sticky_paddle.tres"),
+	preload("res://effects/blaster.tres"),
 	preload("res://effects/force_field.tres"),
 	preload("res://effects/companion_paddle.tres"),
 ]
 const CAPSULE_SPEED := 240.0
+var shot_time_left := 0.0
 var active: Dictionary = {}
 
 static func random_effect(rng: RandomNumberGenerator) -> Resource:
@@ -40,6 +42,7 @@ func apply(effect: Resource) -> void:
 		active[effect.id] = {"definition": effect, "remaining": effect.duration}
 
 func advance(delta: float) -> void:
+	shot_time_left = maxf(0.0, shot_time_left - delta)
 	for id in active.keys():
 		active[id].remaining = maxf(0.0, active[id].remaining - delta)
 		if active[id].remaining == 0.0:
@@ -65,3 +68,10 @@ static func companion_follow_x(current: float, target: float, speed: float, delt
 
 static func companion_clamp_x(center: float, bounds: Vector2, half_width: float) -> float:
 	return clampf(center, bounds.x + half_width, bounds.y - half_width)
+
+# A refresh extends duration without bypassing an existing shot cooldown.
+func fire_blaster() -> bool:
+	if not active.has(&"blaster") or shot_time_left > 0.0:
+		return false
+	shot_time_left = active[&"blaster"].definition.shot_cooldown
+	return true

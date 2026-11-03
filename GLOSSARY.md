@@ -33,7 +33,10 @@ paddle hit uses this same rule, keeping the ball's current speed.
 **Power-up Action** (`power_action`):
 The shared input action for whatever a currently-active power-up lets the player trigger
 (releasing a Sticky Paddle catch, firing the Blaster, launching the Satellite Shield's balls).
-Bound to the same key as `launch`/accept; only one such power-up is ever active at a time.
+Bound to the same key as `launch`/accept. Provisional default (issue #64): each active
+power-up reads the action independently, with no arbitration. One press intentionally
+fires Blaster, releases Sticky catches and launches Satellite Shield balls in the same
+frame when those effects coexist. Satellite Shield is not implemented yet.
 
 **Multi-ball Life Rule**:
 With more than one ball in play, a ball reaching the Death Zone is just removed; a life is lost
@@ -125,6 +128,15 @@ Splitting an already split caught copy adds its pending rotation to the new spre
 The design does not specify this interaction; preserving the catch and applying the
 usual split spread are implementation defaults for review.
 
+**Blaster tuning (issue #64 provisional defaults)**:
+Blaster (`blaster`) lasts 10 seconds, awards 25 catch points and refreshes without
+stacking. Each press fires one bolt straight up from the paddle center, with exactly
+0.3 seconds between shots; holding the action does not repeat. Refreshing does not
+bypass cooldown. Bolts move at 1200 pixels/second (speed unspecified by the design),
+ignore balls, paddle and walls, and disappear on any brick contact or above the
+Play Area. They use the same damage as a Breaker ball: Resistant breaks in one hit,
+Reinforced still needs two hits, and Indestructible survives. No ammo count.
+Life loss and level completion clear bolts and cooldown along with the effect.
 **Force Field (issue #65)**:
 `force_field` is a power-up worth 25 catch points. Catching it sets three charges,
 replacing any remaining charges. Each subsequent hazard catch consumes one charge

@@ -81,11 +81,13 @@ See `PLAN.md` for scope and milestones.
 ## Capsules
 
 Custom levels can use `?` for a one-hit, zero-point Mystery Brick. It drops a random
-Wide Paddle, Slow Ball, Sticky Paddle, Extra Life, Multi-ball, Breaker, Shrink Paddle hazard, or
-Speed-up Ball hazard, or Force Field or Companion Paddle capsule. Companion Paddle creates two full-width
-followers with three health each; ball bounces and intercepted hazards spend health.
-The survivor follows the center, and another catch replaces both companions. Force Field blocks the next three
-hazard catches; catching it again resets its charges to three. Multi-ball adds two copies of a ball; only losing
+Wide Paddle, Slow Ball, Sticky Paddle, Blaster, Extra Life, Multi-ball, Breaker,
+Shrink Paddle hazard, Speed-up Ball hazard, Force Field or Companion Paddle capsule.
+Companion Paddle creates two full-width followers with three health each; top-face
+ball bounces and intercepted hazards spend health. The survivor follows the center,
+and another catch replaces both companions. Force Field blocks the next three
+hazard catches; catching it again resets its charges to three. Multi-ball adds two
+copies of a ball; only losing
 the last ball costs a life. Breaker lasts ten seconds and refreshes every current
 ball’s independent timer. Resistant bricks (`r`) stop ordinary balls but break
 for 50 points when hit by a Breaker ball, which continues through them. They
@@ -101,3 +103,7 @@ See GLOSSARY.md for provisional tuning values.
 Sticky Paddle catches balls for up to ten seconds. Press Space, left click, or
 gamepad A to release; expiry also releases automatically. The original catch point
 sets the angle, and sideways paddle movement adds momentum at release.
+
+Blaster lasts ten seconds. Press the launch/power action to fire upward, at most once
+every 0.3 seconds. The same press also releases Sticky catches when both are active.
+Bolts use a plain placeholder rectangle pending Chris’s art.

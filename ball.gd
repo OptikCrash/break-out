@@ -1,5 +1,6 @@
 extends CharacterBody2D
 
+const BrickDamage = preload("res://brick_damage.gd")
 const BallRules = preload("res://ball_rules.gd")
 
 @export var speed := 550.0
@@ -74,10 +75,7 @@ func _hit_surface(hit: Node, normal: Vector2) -> void:
 		velocity = velocity.bounce(normal)
 
 func _break_brick(brick: Node) -> bool:
-	if brick.take_hit(breaker_active):
-		brick_broken.emit(brick.definition.points)
-		return true
-	return false
+	return BrickDamage.hit(brick, breaker_active, brick_broken.emit)
 
 func _rest_on_paddle() -> void:
 	# Half the paddle's height (8) plus the ball's radius (16): resting on top, no gap.

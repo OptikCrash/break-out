@@ -10,6 +10,8 @@ const COMPANION_SCENE = preload("res://companion_paddle.tscn")
 var companion_generation := 0
 var companions: Array[Node2D] = []
 
+
+const BOLT_SCENE = preload("res://blaster_bolt.tscn")
 const BALL_SCENE = preload("res://ball.tscn")
 
 const TITLE_SCENE := "res://TitleScreen.tscn"
@@ -170,6 +172,13 @@ func _count_completion_bricks() -> void:
 
 func _physics_process(delta: float) -> void:
 	effects.advance(delta)
+	if not reset_ready and not level_complete and Input.is_action_just_pressed("power_action"):
+		if effects.fire_blaster():
+			var bolt = BOLT_SCENE.instantiate()
+			bolt.position = $PlayArea.to_local(paddle.global_position)
+			bolt.speed = effects.active[&"blaster"].definition.bolt_speed
+			bolt.brick_broken.connect(_on_ball_brick_broken)
+			$PlayArea.add_child(bolt)
 	_update_ball_effects()
 	paddle.set_width_multiplier(effects.width_multiplier())
 	hud.update_effects(effects.active, force_field_charges)
@@ -216,6 +225,10 @@ func _clear_effects_and_capsules() -> void:
 	companion_generation += 1
 	_clear_companions()
 	effects.active.clear()
+	effects.shot_time_left = 0.0
+	for bolt in get_tree().get_nodes_in_group("blaster_bolt"):
+		if is_ancestor_of(bolt):
+			bolt.queue_free()
 	force_field_charges = 0
 	for active_ball in get_balls():
 		active_ball.breaker_active = false
