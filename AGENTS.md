@@ -40,6 +40,14 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   is applied before that step. If the key that leaves a screen is also a gameplay action
   (Space is `ui_accept` and `launch`), `await get_tree().physics_frame` before swapping, or the
   new scene will act on the same press. `tests/title_screen_test.gd` covers this.
+- Pausing: `get_tree().paused` belongs to the SceneTree, so it stays on across
+  `reload_current_scene()` / `change_scene_to_file()`. Unpause before you swap scenes. Paused nodes
+  get no input either, so the key that unpauses must be read by a node with
+  `process_mode = Always` (`PauseScreen.tscn`), not by `main.gd`. A hidden CanvasLayer still
+  receives `_unhandled_input`, so check `visible` first.
+- `Button` emits `pressed` on release, so the press has already stopped being "just pressed" and
+  a Space press on a menu button can't also launch the ball. The `physics_frame` wait in `title.gd`
+  is only needed because it acts on the raw press.
 - A full-screen Control that reads clicks in `_unhandled_input` needs `mouse_filter = Ignore`
   on itself and on any ColorRect/container over it, or the GUI eats the click first.
 

@@ -1,67 +1,83 @@
-Closes #23
+Closes #24
 
-Adds a title screen (`TitleScreen.tscn` + `title.gd`) and makes it `run/main_scene`, so F5 and
-web builds open on it. Space, Enter, gamepad A (all through Godot's built-in `ui_accept` action)
-or a left click start the game. Nothing in `main.tscn`, the HUD or restart (R) changed.
+Adds a pause menu. While the ball is in play, Escape or gamepad Start (the new `pause` input
+action) freezes the game and shows **Resume**, **Restart** and **Back to Title**. Each one works
+with a mouse click, with Tab/arrow keys + Enter/Space, or with the gamepad d-pad + A. Resume has
+focus when the menu opens. Escape, Start or gamepad B (`ui_cancel`) close it again.
 
-## The Godot idea: `change_scene_to_file`
+## The Godot idea: `SceneTree.paused` and `process_mode`
 
-A `SceneTree` has one **current scene**. `get_tree().change_scene_to_file("res://main.tscn")`
-frees the title screen and loads `main.tscn` in its place. The swap waits until the end of the
-frame, so the code that asked for it finishes running first. This is the same approach
-`main.gd` already uses for restart (`reload_current_scene()`, which loads a new copy of the
-current scene). Pause and game-over will follow the same pattern, with "Back to Title" being
-`get_tree().change_scene_to_file("res://TitleScreen.tscn")`.
+`get_tree().paused = true` stops `_process`, `_physics_process` and input for every node whose
+`process_mode` is **Inherit/Pausable**, which is the default. The ball and paddle stop moving
+without any change to their scripts. A node set to **Always** keeps running, and so do its
+children that use Inherit.
+`PauseScreen.tscn` is a `CanvasLayer` with `process_mode = Always` set on its own root, so its
+buttons and its Escape handler keep working while everything else is frozen.
 
-**Alternative considered: an autoloaded scene manager.** An autoload is a node Godot keeps
-alive across scene changes. It would be the place for fade transitions, loading screens or
-state that must outlive a scene. This project has none of those yet, and a manager would add a
-global plus an extra layer around a single engine call. Plain `change_scene_to_file` is easy to
-read and easy to swap out later. If fades or shared state are added, we can wrap the same call
-in an autoload without changing the scenes.
+This also decides where the pause key is read:
+- `main.gd` opens the menu. Its `_unhandled_input` only acts when `can_pause()` is true:
+  `ball.launched and not reset_ready`. That rules out the ball resting on the paddle (before
+  launch, or after losing a life) and the game-over/win message.
+- `pause_screen.gd` closes it. Once paused, `main.gd` gets no input, so it couldn't unpause even
+  if it tried.
 
-## A subtlety: one Space press, two meanings
+`paused` belongs to the tree, not the scene, so it would carry over into the next scene.
+Restart and Back to Title therefore unpause first, then call the same `reload_current_scene()` /
+`change_scene_to_file("res://TitleScreen.tscn")` the game already uses.
 
-Space is both `ui_accept` (start) and `launch`. The new headless test showed that swapping
-scenes as soon as Space was pressed made the ball launch the moment the game appeared. Godot
-treats a press as "just pressed" during the **next physics step**, and the deferred scene swap
-runs before that step, so the new ball sees the same press. `title.gd` waits for
-`get_tree().physics_frame` before swapping. That lets the step pass while the title screen is
-still the current scene, and the ball starts resting on the paddle as before. Handling it here
-keeps the fix in presentation code; the alternative was making `ball.gd` ignore launch input on
-its first frame, which would change gameplay code for a menu problem.
+**Alternatives considered**
+- *Toggle with `Input.is_action_just_pressed("pause")` in `main.gd`'s `_process`.* While paused
+  `_process` doesn't run, so it could open the menu but never close it. Making `Main` Always
+  would un-freeze its restart check and everything else under it.
+- *Put the toggle in an autoload.* An autoload could handle pausing anywhere, but pausing is
+  only allowed in one scene, and the rule for it (`can_pause()`) uses gameplay state that
+  `main.gd` already has.
+- *Build the menu into `HUD.tscn`.* The HUD is just labels, and keeping the menu separate means
+  it gets its own `process_mode` and its own test. The menu is on layer 10, above the HUD
+  (layer 1).
 
-## Layout and input details
+## Space on a menu button doesn't launch the ball
 
-- The root `Control`, the black `Background` ColorRect and a `CenterContainer` all use Full Rect
-  anchors, so the text stays centred at 1920x1080 and when the window is resized (stretch mode
-  is `canvas_items`). There are no pixel offsets.
-- Clicks are read in `_unhandled_input`. Every node has `mouse_filter = Ignore` so the GUI does
-  not consume the click before it reaches the script.
-- A `starting` flag stops a Space press and a click in the same frame from asking for the scene
-  change twice.
-- No art: default font at larger sizes, white on black like the play area, and the controls
-  hint in light grey (still high contrast).
+Space is both `ui_accept` (it activates the focused button) and `launch`. The title screen
+needed a `physics_frame` wait for this (#23). I added the same wait here and then found the
+test passed without it: `Button` emits `pressed` when the key is **released**, and by then the
+press no longer counts as "just pressed", so the new ball never launches. I removed the wait to
+keep the code plain. The test still presses Space on Restart and checks the new ball stays on
+the paddle, so it will catch a regression. I added a note to AGENTS.md.
+
+## Layout and look
+
+- The `Dim` overlay (black at 75% alpha) and a `CenterContainer` use Full Rect anchors, so the
+  menu stays centred at 1920x1080 and after a resize. There are no pixel offsets.
+- It uses the same default font and size scale as the title screen: a 96 px "PAUSED" heading,
+  48 px buttons at least 480 px wide (big click/focus targets), and a light-grey hint line.
+  There is no new art. The buttons use Godot's default theme, which includes a visible focus
+  outline for keyboard and gamepad players.
 
 ## Tests
 
-`tests/title_screen_test.gd` (headless, no addon) checks:
-- `run/main_scene` is the title screen;
-- the text block is centred and every label fits on screen at 1920x1080 and 1280x720;
-- Space, Enter and a left click each load `main.tscn`, and the ball is not launched afterwards.
-  The test failed before the `physics_frame` wait was added.
-- holding Space through the scene change does not launch the ball, and after letting go, the next
-  Space press does launch it. This proves the wait only skips the press that started the game
-  and doesn't block the launch input.
+`tests/pause_screen_test.gd` (headless SceneTree, no addon) checks:
+- `pause` is bound to Escape and to joypad Start;
+- a bare `PauseScreen.tscn` has its script and `process_mode = Always` on its own root, and
+  starts hidden;
+- Escape does nothing before launch or under the game-over message;
+- during play, Escape pauses, shows the menu and focuses Resume. Ball and paddle don't move
+  while paused (even with D held), and R does nothing;
+- the menu is centred and every item fits on screen at 1920x1080 and 1280x720;
+- Resume works by Escape, Enter and click, and the ball moves again afterwards;
+- Restart works by arrow down + Enter, arrow down + Space and click, and loads a fresh
+  `main.tscn` with the ball not launched;
+- Back to Title works by arrow down x2 + Enter and by click;
+- every exit leaves the tree unpaused.
 
-Validation: headless editor import gave no errors, and all six `tests/*_test.gd` passed when run
-one by one with `godot --headless --path . --script ...` and checked for `ERROR:` output.
-`scripts/run-tests.sh` and `scripts/test-runner.sh` were not run directly in this environment
-because shell scripts needed permission I didn't have; CI runs both. There is no display here, so
-nobody has yet looked at the screen in a real window, and gamepad A is untested (it comes from
-Godot's default `ui_accept` mapping).
+I checked that the test catches real breakage: removing `process_mode = Always` makes every
+resume check fail.
 
-README now says F5 (or F6 on `TitleScreen.tscn`) starts at the title screen. AGENTS.md gains a
-short "Scene flow" section on this pattern and the one-press-two-actions trap.
+Validation: headless editor import gave no errors. All seven `tests/*_test.gd` exited 0 with no
+`ERROR:` output when run one by one with `godot --headless --path . --script ...`. I couldn't run
+`scripts/run-tests.sh` and `scripts/test-runner.sh` directly because this environment needs
+permission for shell scripts; CI runs both. There is no display here, so nobody has looked at
+the menu in a real window yet, and a physical gamepad hasn't been tried. Start and A come from
+the Input Map and were only tested as simulated events.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

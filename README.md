@@ -6,6 +6,8 @@ The Godot project is at the repository root. Open `project.godot` in Godot
 the title screen; press Space or Enter, or click, to start the game. F6 on
 `main.tscn` still skips straight to gameplay.
 Move with A/D or the arrow keys, launch with Space, and restart with R.
+While the ball is in play, Escape (or gamepad Start) pauses the game and opens a
+menu with Resume, Restart and Back to Title.
 
 ## Export for the web
 
