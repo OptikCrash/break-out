@@ -12,6 +12,8 @@ func _input(_event: InputEvent) -> void:
 	pass
 
 func _physics_process(delta: float) -> void:
+	if not is_instance_valid(main_paddle):
+		return
 	var target := main_paddle.global_position + offset
 	global_position.x = Rules.companion_follow_x(global_position.x, target.x, follow_speed, delta)
 	global_position.y = target.y

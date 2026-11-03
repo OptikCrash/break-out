@@ -8,6 +8,11 @@ func _initialize() -> void:
 	_run.call_deferred()
 
 func _run() -> void:
+	var unassigned = preload("res://companion_paddle.tscn").instantiate()
+	root.add_child(unassigned)
+	unassigned._physics_process(0.1)
+	_check(unassigned.position == Vector2.ZERO, "Unassigned companion waits safely for its main paddle")
+	unassigned.free()
 	_check(EFFECT.companion_count == 2 and EFFECT.companion_health == 3, "Pin count and health")
 	_check(EFFECT.companion_offset == Vector2(160, -96) and EFFECT.companion_follow_speed == 600.0, "Pin spacing and follow speed")
 	for health in range(4):
@@ -43,6 +48,20 @@ func _run() -> void:
 	game._catch_capsule(preload("res://effects/sticky_paddle.tres"))
 	await physics_frame
 	await process_frame
+	# Underside and side contacts must leave the surface, even during Sticky.
+	ball.launched = true
+	ball.global_position = left.global_position + Vector2(0, 30)
+	ball.velocity = Vector2(0, -550)
+	ball._physics_process(0.03)
+	_check(ball.velocity.is_equal_approx(Vector2(0, 550)) and not ball.caught, "Underside reflects downward at unchanged speed")
+	ball._physics_process(0.01)
+	_check(left.health == 3 and ball.velocity.y > 0, "Two underside steps preserve health and leave the companion")
+	ball.global_position = left.global_position + Vector2(-90, 0)
+	ball.velocity = Vector2(550, 0)
+	ball._physics_process(0.03)
+	_check(ball.velocity.is_equal_approx(Vector2(-550, 0)) and not ball.caught, "Side reflects outward at unchanged speed")
+	ball._physics_process(0.01)
+	_check(left.health == 3 and ball.velocity.x < 0, "Two side steps preserve health and leave the companion")
 	for remaining in [2, 1, 0]:
 		ball.global_position = left.global_position + Vector2(32, -30)
 		ball.launched = true

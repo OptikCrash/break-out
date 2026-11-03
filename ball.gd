@@ -40,6 +40,11 @@ func _physics_process(delta: float) -> void:
 
 	if collision:
 		var hit := collision.get_collider()
+		# Floating paddles can be hit from below: reflect away instead of
+		# steering upward into the same surface again on the next step.
+		if hit.is_in_group("companion") and collision.get_normal().y >= 0.0:
+			_hit_surface(hit, collision.get_normal())
+			return
 
 		if hit.is_in_group("paddle"):
 			var ball_x: float = collision.get_position().x

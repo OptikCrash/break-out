@@ -199,3 +199,6 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   physics server has synchronized the transform.
 - Companion replacement defers body creation out of capsule physics queries. Its
   generation counter invalidates pending replacements on life loss/level end.
+- Floating companions can be hit underneath or on a side. Reflect those contacts
+  using the collision normal; the upward paddle-angle rule would send an underside
+  hit straight back into the surface and drain health across consecutive frames.
