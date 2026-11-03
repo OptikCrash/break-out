@@ -6,8 +6,16 @@ const BallRules = preload("res://ball_rules.gd")
 @export var paddle: Node2D
 signal brick_broken(points: int)
 var launched := false
+# No pickup enables this yet; each ball owns its independent duration.
+var breaker_time_left := 0.0
+var breaker_active: bool:
+	get:
+		return breaker_time_left > 0.0
+	set(value):
+		breaker_time_left = BallRules.BREAKER_DURATION if value else 0.0
 
 func _physics_process(delta: float) -> void:
+	breaker_time_left = BallRules.tick_breaker(breaker_time_left, delta)
 	if not launched:
 		_rest_on_paddle()
 		if  Input.is_action_just_pressed("launch"):

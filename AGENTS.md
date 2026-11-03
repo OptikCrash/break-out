@@ -109,3 +109,12 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   level's destructible count cannot include the previous layout.
 - Level validation rejects grids without `#` or `x` (including all-hole grids),
   before replacing a layout; every level needs a destructible brick to trigger completion.
+
+## Ball lifecycle
+
+- `main.get_balls()` returns live balls owned by that gameplay scene. Future ball
+  creation should use `main.add_ball()` to wire scoring and paddle references.
+  `main.ball` is only a convenience getter for the first live ball.
+- Remove Death Zone balls from the `ball` group before `queue_free()` so repeated
+  callbacks and multiple losses in one frame cannot count a dying ball as alive.
+  The last loss creates a fresh resting ball only if lives remain.
