@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://bec754stvpw4h" path="res://HUD.tscn" id="2_7mycd"]
 [ext_resource type="Script" uid="uid://be4ivgqyb7ggs" path="res://bricks.gd" id="3_h2yge"]
 [ext_resource type="PackedScene" uid="uid://c4p8u2sq6nbxe" path="res://PauseScreen.tscn" id="4_pause"]
+[ext_resource type="Script" uid="uid://crqrfoymqhjmp" path="res://screen_shake.gd" id="5_shake"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wx6e8"]
 size = Vector2(1152, 40)
@@ -23,9 +24,15 @@ size = Vector2(32, 960)
 script = ExtResource("1_1bvp3")
 
 [node name="MainBG" type="ColorRect" parent="." unique_id=2145359407]
-offset_right = 1920.0
-offset_bottom = 1080.0
+offset_left = -32.0
+offset_top = -32.0
+offset_right = 1952.0
+offset_bottom = 1112.0
 color = Color(0, 0, 0, 1)
+
+[node name="ScreenShake" type="Camera2D" parent="." unique_id=1907351468]
+anchor_mode = 0
+script = ExtResource("5_shake")
 
 [node name="PlayArea" type="Node2D" parent="." unique_id=428199049]
 position = Vector2(384, 60)

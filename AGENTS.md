@@ -96,6 +96,19 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   joypad buttons. Keep explicit A/B bindings in `project.godot` alongside their
   keyboard events; d-pad focus alone does not prove a gamepad can activate a menu.
 
+## Game feel
+
+- Screen shake moves `main.tscn`'s `ScreenShake` Camera2D `offset` only (top-left anchor, so at rest
+  it is the identity view). Never shake by moving `PlayArea`: that moves every collision shape.
+  The HUD is a CanvasLayer and stays still. `MainBG` reaches 32 px past the viewport so a shake
+  never shows the clear colour; keep shake strengths below that.
+- Brick bursts hang off `brick.destroyed(at)` (forwarded as `bricks.brick_destroyed`), not
+  `brick_broken`, so they need no score data. Add them to `PlayArea`, never `Bricks`:
+  completion recounts read `definition` on every `Bricks` child.
+- A destroyed brick emits both `broken(points, at)` (point popups) and `destroyed(at)` (bursts);
+  `Bricks` relays each one. Score still comes from the ball's `brick_broken`. Hook new
+  presentation onto one of these signals rather than adding another emit.
+
 ## Level data
 
 - `Level.grid` uses equal-width rows and `.` for holes; spaces are invalid. The parser

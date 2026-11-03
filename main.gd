@@ -16,6 +16,12 @@ var companions: Array[Node2D] = []
 const BOLT_SCENE = preload("res://blaster_bolt.tscn")
 const BALL_SCENE = preload("res://ball.tscn")
 const OrbVisual = preload("res://placeholder_satellite_orbs.gd")
+const BRICK_BURST_SCENE = preload("res://placeholder_brick_burst.tscn")
+
+# Shake sizes in pixels and seconds. MainBG extends 32 px past the viewport so
+# the strongest shake never shows the clear colour at the edges.
+const HAZARD_SHAKE := Vector2(8.0, 0.25)
+const LIFE_LOST_SHAKE := Vector2(16.0, 0.4)
 
 const TITLE_SCENE := "res://TitleScreen.tscn"
 
@@ -33,6 +39,7 @@ var ball: Node2D:
 @onready var bricks := $PlayArea/Bricks
 @onready var hud := $Hud
 @onready var pause_screen := $PauseScreen
+@onready var screen_shake := $ScreenShake
 var current_level_index := 0
 var level_complete := false
 var paddle_start: Vector2
@@ -58,6 +65,7 @@ func _ready() -> void:
 	capsule_rng.randomize()
 	bricks.capsule_dropped.connect(_spawn_capsule)
 	bricks.brick_broken.connect(_show_points)
+	bricks.brick_destroyed.connect(_spawn_brick_burst)
 	paddle_start = paddle.position
 	# A child of the paddle, so the orbit follows it without extra code.
 	orb_visual = OrbVisual.new()
@@ -119,6 +127,7 @@ func _on_death_zone_body_entered(body: Node2D) -> void:
 		return
 	_clear_effects_and_capsules()
 	lives -= 1
+	screen_shake.shake(LIFE_LOST_SHAKE.x, LIFE_LOST_SHAKE.y)
 	hud.update_lives(lives)
 	if lives == 0:
 		reset_ready = true
@@ -243,6 +252,14 @@ func _add_capsule(at: Vector2) -> void:
 	capsule.caught.connect(func(effect: Resource): _catch_capsule(effect, capsule.global_position))
 	$PlayArea.add_child(capsule)
 
+# Every destroyed brick, whichever ball or bolt hit it. The final brick of a
+# level gets its burst too, so there is no end-of-level check here.
+func _spawn_brick_burst(at: Vector2) -> void:
+	var burst := BRICK_BURST_SCENE.instantiate()
+	burst.add_to_group("brick_burst")
+	burst.position = $PlayArea.to_local(at)
+	$PlayArea.add_child(burst)
+
 func _catch_capsule(effect: Resource, at := Vector2.INF) -> void:
 	if reset_ready or level_complete:
 		return
@@ -253,6 +270,8 @@ func _catch_capsule(effect: Resource, at := Vector2.INF) -> void:
 	if negated:
 		hud.update_effects(effects.active, force_field_charges)
 		return
+	if effect.hazard:
+		screen_shake.shake(HAZARD_SHAKE.x, HAZARD_SHAKE.y)
 	if effect.companion_count > 0:
 		companion_generation += 1
 		_replace_companions.call_deferred(effect, companion_generation)
