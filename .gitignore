@@ -1,3 +1,6 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# Builder's PR body draft; it becomes the pull request description, not repo content.
+/PR_DESCRIPTION.md

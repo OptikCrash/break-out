@@ -14,6 +14,8 @@
 - PR descriptions explain the Godot concept and why the approach was chosen,
   including alternatives considered. For CI, editor import builds the resource
   cache before standalone headless tests; plain processes avoid an addon dependency.
+- Draft the PR body in `PR_DESCRIPTION.md` at the repo root. `.gitignore` lists
+  `/PR_DESCRIPTION.md`, so it stays a local file; don't force-add it.
 
 - Winning disables ball physics immediately after `reset()`. Reset must place the ball
   on the paddle synchronously; waiting for `_physics_process()` leaves it in flight.
@@ -40,6 +42,13 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   is applied before that step. If the key that leaves a screen is also a gameplay action
   (Space is `ui_accept` and `launch`), `await get_tree().physics_frame` before swapping, or the
   new scene will act on the same press. `tests/title_screen_test.gd` covers this.
+- Godot's built-in `ui_accept` has no gamepad button (only Enter, Keypad Enter, Space), so a
+  focused `Button` can't be pressed by a pad. `project.godot` overrides `ui_accept` to add
+  joypad A. An override replaces the built-in event list, so keep the three keys in it.
+  Arrows/D-pad already move focus through `ui_left`/`ui_right`/`ui_up`/`ui_down`.
+- `Button`s fire on release, for keyboard and gamepad as well as the mouse, so leaving a scene
+  from a button doesn't hand a fresh "just pressed" Space to the next scene. A press that
+  comes from `_unhandled_input`, like the title screen's, still needs the physics-frame wait.
 - A full-screen Control that reads clicks in `_unhandled_input` needs `mouse_filter = Ignore`
   on itself and on any ColorRect/container over it, or the GUI eats the click first.
 - Input actions (`Input.is_action_just_pressed("launch")`) are updated before the GUI sees an
