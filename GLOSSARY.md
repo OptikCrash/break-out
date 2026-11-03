@@ -20,7 +20,8 @@ sequence; clearing one loads the next.
 **Brick Type**:
 What a brick cell's character means: Normal (`#`, 1 hit), Reinforced (`x`, 2 hits), or
 Indestructible (`o`, never breaks, doesn't count toward a level's win condition), or
-Mystery (`?`, 1 hit, 0 points, drops a Capsule, counts toward completion).
+Mystery (`?`, 1 hit, 0 points, drops a Capsule, counts toward completion), or
+Resistant (`r`, Breaker-only, 1 hit, 50 points, excluded from completion).
 
 **Launch**:
 The player input (and the moment) that sends the ball moving for the first time, or after a life
@@ -63,7 +64,7 @@ power-up and hazard pool.
 
 **Resistant Brick**:
 A brick that a normal ball hit bounces off without effect; destroyed in one hit by a ball in the
-Breaker state. Worth 50 points when destroyed; does not count toward a level's win condition.
+Breaker state, which continues through the destroyed brick. Grid symbol: `r`. Worth 50 points when destroyed; does not count toward a level's win condition.
 
 **Capsule tuning (issue #50 provisional defaults)**:
 Fall speed is 240 pixels/second. Wide Paddle multiplies the base 128-pixel width by 1.5
@@ -76,6 +77,18 @@ its pending drop is discarded with the level's other loose capsules.
 These tuning and reset choices were unspecified in PLAN.md and the issue; they are
 explicit implementation defaults for review, rather than previously agreed design values.
 
+**Multi-ball tuning (issue #52 provisional defaults)**:
+Each catch adds two copies of the first launched ball (or the first resting ball if
+none is launched), leaving other balls unchanged. Copies retain speed, launched state
+and remaining Breaker time. In flight, their velocities rotate -20 and +20 degrees
+from the original, which keeps its trajectory. They start at the same position and
+ignore collisions with other balls, separating through their different velocities
+without offsetting a copy into a wall or brick. Resting copies wait on the paddle
+and use the ordinary launch rule. There is no timer or ball-count cap.
+Creation waits until physics queries finish; a lost source or completed level
+cancels its pending copies.
+Repeat-catch behavior, resting catches and spread were unspecified in PLAN.md and
+the issue; these are explicit implementation defaults for review.
 **Ball speed capsule tuning (issue #53 provisional defaults)**:
 Slow Ball (`slow_ball`) multiplies ball speed by 0.75; Speed-up Ball (`speed_up_ball`)
 multiplies it by 1.5. Both last 10 seconds, refresh independently without stacking,
@@ -101,3 +114,7 @@ There is no momentum history or smoothing; a stationary step clears the contribu
 Mouse travel can produce much larger one-step velocities than keyboard movement, but
 both use the same cap. The weighting, cap, 45° limit and one-step meaning of "recent"
 are implementation defaults for review.
+
+When Multi-ball copies a caught ball, the copies retain its catch offset and held speed,
+remaining caught until Power-up Action or expiry releases them. The design does not
+specify this interaction; preserving the catch is an implementation default for review.

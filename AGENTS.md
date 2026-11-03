@@ -143,6 +143,20 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - Capsule effects clear on a life loss, which means the last live ball reaching the
   Death Zone; removing an earlier ball must preserve the paddle timers and width.
 
+- Resistant (`r`) is destructible but has `counts_for_completion = false`. Recount
+  unqueued completion bricks on destruction rather than decrementing for every score signal.
+  Breaker pickup refreshes current balls only; shared HUD time and per-ball time clear on level end.
+- For manually stepped collision tests, call `set_physics_process(false)` after adding
+  the ball to the tree: script initialization enables its physics callback on entry.
+  Keep the test world enabled so its collision bodies remain in the physics space.
+
+- Breaker pass-through must depend on the ball state and Resistant definition, not
+  on `take_hit()` returning true: a queued brick can still collide again before
+  frame end, while its repeated hit correctly returns false to prevent duplicate score.
+- Multi-ball copies use `add_ball()` collision exceptions in both directions: the ball
+  scene mask includes layer 4, so overlapping copies otherwise collide with each other.
+- Capsule catches run inside physics queries: defer Multi-ball body creation and
+  recheck the source ball and end-of-level state before spawning copies.
 - Ball speed effects scale current velocity by the ratio of new/old multipliers;
   `ball.speed` stays the base launch speed. Use `main.add_ball()` so new balls inherit
   active speed effects before launch. Do not repeatedly multiply velocity each tick.
@@ -157,3 +171,12 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - Sticky momentum steers direction only: normalize after the momentum and angle clamps
   to retain held speed. Test repeated catches, then an ordinary post-expiry bounce,
   so transient momentum cannot become a permanent speed increase.
+- Deferred-spawn tests that freeze balls in `node_added` must also disable physics
+  on `ready`, after script initialization enables callbacks. Keep the node process
+  mode active so manual collision checks still have a physics body in the space.
+
+- Completion tests must load or destroy actual bricks rather than assign `bricks_left`: the
+  completion recount intentionally ignores that cached value after each destruction.
+
+- Multi-ball copies of a Sticky catch must copy `caught`, `catch_offset` and
+  `caught_speed`: copying only zero velocity creates launched balls that never move.

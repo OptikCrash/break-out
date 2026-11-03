@@ -54,7 +54,7 @@ func _ready() -> void:
 	hud.update_lives(lives)
 	hud.restart_pressed.connect(restart)
 	hud.back_to_title_pressed.connect(back_to_title)
-	_count_destructible_bricks()
+	_count_completion_bricks()
 
 func _process(_delta: float) -> void:
 	if reset_ready && Input.is_action_just_pressed("restart"):
@@ -102,7 +102,7 @@ func _on_death_zone_body_entered(body: Node2D) -> void:
 func _on_ball_brick_broken(points: int) -> void:
 	if reset_ready or level_complete:
 		return
-	bricks_left -= 1
+	_count_completion_bricks()
 	score += points
 	hud.update_score(score)
 	if bricks_left == 0:
@@ -143,7 +143,7 @@ func continue_level() -> void:
 	if not bricks.load_level(levels[current_level_index + 1]):
 		return
 	current_level_index += 1
-	_count_destructible_bricks()
+	_count_completion_bricks()
 	paddle.position = paddle_start
 	paddle.velocity = Vector2.ZERO
 	paddle.following_mouse = false
@@ -157,10 +157,10 @@ func continue_level() -> void:
 	for active_ball in get_balls():
 		active_ball.set_physics_process(true)
 
-func _count_destructible_bricks() -> void:
+func _count_completion_bricks() -> void:
 	bricks_left = 0
 	for brick in bricks.get_children():
-		if brick.definition.destructible:
+		if brick.definition.counts_for_completion and not brick.is_queued_for_deletion():
 			bricks_left += 1
 
 func _physics_process(delta: float) -> void:
@@ -185,7 +185,12 @@ func _add_capsule(at: Vector2) -> void:
 func _catch_capsule(effect: Resource) -> void:
 	if reset_ready or level_complete:
 		return
+	if effect.extra_balls > 0:
+		_split_ball(effect)
 	effects.apply(effect)
+	if effect.id == &"breaker":
+		for active_ball in get_balls():
+			active_ball.breaker_time_left = effect.duration
 	_update_ball_effects()
 	paddle.set_width_multiplier(effects.width_multiplier())
 	hud.update_effects(effects.active)
@@ -196,18 +201,26 @@ func _catch_capsule(effect: Resource) -> void:
 
 func _clear_effects_and_capsules() -> void:
 	effects.active.clear()
+	for active_ball in get_balls():
+		active_ball.breaker_active = false
 	_update_ball_effects()
 	hud.update_effects(effects.active)
 	paddle.set_width_multiplier(1.0)
 	for capsule in get_tree().get_nodes_in_group("capsule"):
 		capsule.queue_free()
 
-# Future Multi-ball creation uses this so every instance reports score to main.
+# Every instance must report score to main.
 func add_ball() -> Node2D:
 	var new_ball = BALL_SCENE.instantiate()
 	new_ball.paddle = paddle
 	_connect_ball(new_ball)
 	$PlayArea.add_child(new_ball)
+	# Copies share a spawn point, so ignore other balls while retaining walls,
+	# bricks and paddle collisions. Exceptions leave the scene layers intact.
+	for other in get_balls():
+		if other != new_ball:
+			new_ball.add_collision_exception_with(other)
+			other.add_collision_exception_with(new_ball)
 	new_ball.reset()
 	new_ball.set_speed_multiplier(effects.speed_multiplier())
 	new_ball.set_sticky_active(effects.active.has(&"sticky_paddle"))
@@ -227,6 +240,38 @@ func get_balls() -> Array[Node]:
 func _stop_balls() -> void:
 	for active_ball in get_balls():
 		active_ball.set_physics_process(false)
+
+func _split_ball(effect: Resource) -> void:
+	var balls := get_balls()
+	if balls.is_empty():
+		return
+	var source = balls[0]
+	for candidate in balls:
+		if candidate.launched:
+			source = candidate
+			break
+	# Capsule catches arrive during physics queries; add bodies after they finish.
+	_add_split_balls.call_deferred(source, effect)
+
+func _add_split_balls(source: Node2D, effect: Resource) -> void:
+	# A last-ball loss or level completion can occur before the deferred split.
+	if reset_ready or level_complete or not is_instance_valid(source):
+		return
+	if source.is_queued_for_deletion() or not get_balls().has(source):
+		return
+	# Balls do not collide with each other. A common origin avoids placing a
+	# copy inside a nearby wall or brick; the rotated velocities separate them.
+	for split_velocity in EffectRules.split_velocities(source.velocity, effect):
+		var copy = add_ball()
+		copy.position = source.position
+		copy.speed = source.speed
+		copy.launched = source.launched
+		copy.velocity = split_velocity
+		copy.breaker_time_left = source.breaker_time_left
+		# A caught source has zero velocity: copies must wait for release too.
+		copy.caught = source.caught
+		copy.catch_offset = source.catch_offset
+		copy.caught_speed = source.caught_speed
 
 func _update_ball_effects() -> void:
 	var multiplier: float = effects.speed_multiplier()

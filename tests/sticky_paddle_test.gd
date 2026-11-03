@@ -135,6 +135,20 @@ func _run() -> void:
 	await physics_frame
 	game.paddle._physics_process(1.0 / 60.0)
 	_check(is_zero_approx(game.paddle.recent_velocity_x), "Stationary step clears stale momentum")
+	# Multi-ball must not turn a caught source into motionless launched copies.
+	ball.launched = true
+	ball.velocity = Vector2(0, -550)
+	ball.catch_on_paddle(0.5)
+	game._catch_capsule(preload("res://effects/multi_ball.tres"))
+	await process_frame
+	_check(game.get_balls().size() == 3, "Caught source splits into three balls")
+	game.paddle.recent_velocity_x = 0.0
+	for copy in game.get_balls():
+		copy.set_physics_process(false)
+		_check(copy.caught and copy.catch_offset == 0.5 and is_equal_approx(copy.caught_speed, 550.0), "Split copies retain catch offset and held speed")
+	game._physics_process(10.0)
+	for copy in game.get_balls():
+		_check(not copy.caught and copy.velocity.is_equal_approx(base), "Expiry releases all caught copies at held speed")
 	game.free()
 	quit(1 if failures else 0)
 

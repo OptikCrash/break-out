@@ -66,8 +66,12 @@ func check_layout() -> void:
 func check_win_shows_buttons() -> void:
 	var game := await start_game()
 	game.current_level_index = game.levels.size() - 1
-	game.bricks_left = 1
-	game._on_ball_brick_broken(10)
+	# Use a real final brick so completion exercises the live layout.
+	var final_level := Level.new()
+	final_level.grid = "#"
+	game.bricks.load_level(final_level)
+	game._count_completion_bricks()
+	game.ball._break_brick(game.bricks.get_child(0))
 	await process_frame
 	_check(game.get_node("Hud/EndButtons").visible, "Win must show the buttons")
 	_check(game.get_node("Hud/EndButtons/Restart").has_focus(), "Win must focus Restart")

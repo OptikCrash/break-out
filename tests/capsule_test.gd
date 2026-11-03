@@ -56,7 +56,7 @@ func _run() -> void:
 		_check(not is_instance_valid(capsule), "Falling capsule physically touches paddle and frees")
 		_check(game.score == score_before + Rules.catch_points(effect), "Catch awards 25 for power-up and zero for hazard")
 		_check(game.lives == lives_before + effect.extra_lives, "Extra Life adds exactly one life")
-	_check(game.effects.active.size() == 5, "Timed effects run concurrently; Extra Life is instant")
+	_check(game.effects.active.size() == 6, "Six timed effects run concurrently; Extra Life and Multi-ball are instant")
 	_check(game.paddle.half_width == 72.0, "Combined width affects bounce extent")
 	_check(game.paddle.get_node("CollisionShape2D").scale.x == 1.125, "Collision width follows effects")
 	_check(game.paddle.get_node("Sprite2D").scale.x == 1.125, "Existing art follows collision width")
@@ -74,7 +74,8 @@ func _run() -> void:
 	await process_frame
 	_check(not is_instance_valid(capsule), "Death Zone physically removes missed capsule")
 	_check(game.score == score_before and game.lives == lives_before, "Miss has no score or life penalty")
-	game._on_death_zone_body_entered(game.ball)
+	for active_ball in game.get_balls():
+		game._on_death_zone_body_entered(active_ball)
 	_check(game.effects.active.is_empty() and game.paddle.half_width == 64.0, "Life loss restores base width and clears timers")
 	game.ball._break_brick(game.bricks.get_child(0))
 	_check(game.reset_ready, "Remaining normal brick completes level")
