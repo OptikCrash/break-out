@@ -7,7 +7,7 @@ The bounded rectangle where the ball, paddle, and bricks live, walled on three s
 from the full 1920×1080 window, which also holds the HUD.
 
 **Death Zone**:
-The invisible area below the Play Area's bottom wall; the ball entering it costs a life.
+The invisible area below the Play Area's bottom wall; balls entering it are removed; only the last ball costs a life.
 
 **Brick Grid**:
 The rows-and-columns layout of bricks loaded from a Level's ASCII grid (one row per line, one

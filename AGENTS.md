@@ -54,6 +54,9 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   focused `Button` can't be pressed by a pad. `project.godot` overrides `ui_accept` to add
   joypad A. An override replaces the built-in event list, so keep the three keys in it.
   Arrows/D-pad already move focus through `ui_left`/`ui_right`/`ui_up`/`ui_down`.
+- `power_action` mirrors `launch` (Space, pad A, left click), so one press triggers both. Rebind
+  them together (`tests/power_action_test.gd` checks they match), and a power-up reading
+  `power_action` must not also act while the ball is waiting to `launch` on the same press.
 - Gamepad bindings use `device: -1` (any pad). Godot names buttons by position (Xbox layout):
   `JOY_BUTTON_A` is the bottom face button, Cross on PlayStation. A stick direction is an
   `InputEventJoypadMotion` with `axis_value` -1 or 1; the action's `deadzone` (0.2) filters
@@ -123,3 +126,15 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   step can move it before the assertion. Disconnect the test callback afterwards.
 - Capsule drops use the brick collision shape's global center, so layout/shape offsets
   do not need a second hard-coded center in the drop logic.
+
+## Ball lifecycle
+
+- `main.get_balls()` returns live balls owned by that gameplay scene. Future ball
+  creation should use `main.add_ball()` to wire scoring and paddle references.
+  `main.ball` is only a convenience getter for the first live ball.
+- Remove Death Zone balls from the `ball` group before `queue_free()` so repeated
+  callbacks and multiple losses in one frame cannot count a dying ball as alive.
+  The last loss creates a fresh resting ball only if lives remain.
+
+- Capsule effects clear on a life loss, which means the last live ball reaching the
+  Death Zone; removing an earlier ball must preserve the paddle timers and width.

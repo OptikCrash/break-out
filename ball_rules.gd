@@ -1,5 +1,11 @@
 extends RefCounted
 
+const BREAKER_DURATION := 10.0
+
+static func tick_breaker(time_left: float, delta: float) -> float:
+	return maxf(0.0, time_left - delta)
+
+
 static func launch_direction() -> Vector2:
 	var lean := randf_range(-0.3, 0.3)
 	# The random range includes zero; even that sample must avoid a vertical loop.
