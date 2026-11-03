@@ -4,5 +4,10 @@
 
 [resource]
 script = ExtResource("1_level")
-grid = "#o#
-.x."
+grid = ".o....#xxx#....o.
+.o..#xxxxxxx#..o.
+.o.##xxxxxxx##.o.
+.o.xxxxxxxxxxx.o.
+.o.##xxxxxxx##.o.
+.o..#xxxxxxx#..o.
+.o....#xxx#....o."

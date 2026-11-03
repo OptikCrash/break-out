@@ -23,8 +23,9 @@ The ordered `levels` array on `main.gd` selects the sequence. The gameplay scene
 stays alive while only the brick layout changes, preserving score and lives
 without an autoload. Each level grid must contain at least one Normal (`#`) or
 Reinforced (`x`) brick; all-hole and all-Indestructible grids are rejected because
-they cannot trigger completion. Levels 2 and 3 are temporary progression fixtures;
-their designed layouts and difficulty ramp are deferred to issue #39.
+they cannot trigger completion. Level 2 is a diamond of Normal bricks around a Reinforced core. Level 3 adds
+Indestructible side rails around a denser Reinforced formation. Both keep open
+approaches from below; the rails never sit beneath destructible bricks.
 
 ## Export for the web
 
