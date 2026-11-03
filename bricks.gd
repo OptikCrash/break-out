@@ -14,6 +14,6 @@ func _ready() -> void:
 		return
 	for cell in level.brick_cells():
 		var brick := protoBrick.instantiate()
-		# All occupied cells use today's normal brick until brick types are added.
+		brick.configure(level.brick_symbol_at(cell))
 		brick.position = grid_start + Vector2(cell) * brick_size
 		add_child(brick)

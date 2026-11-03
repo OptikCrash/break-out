@@ -93,5 +93,8 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 
 - `Level.grid` uses equal-width rows and `.` for holes; spaces are invalid. The parser
   accepts LF/CRLF and one final newline. It validates the whole grid before returning
-  cells, so malformed data cannot spawn a partial layout. `x`/`o` currently spawn
-  normal bricks; their distinct behavior belongs to the brick-types issue.
+  cells, so malformed data cannot spawn a partial layout. `#`/`x`/`o` map to the stable Normal/Reinforced/Indestructible definitions in
+  `bricks/`. Definition resources are shared: keep remaining hit points on each
+  brick instance, never mutate the definition when a brick is hit.
+- `brick_broken(points)` emits only on destruction; the brick queues deletion before
+  the signal, guarding repeated final hits within the same frame.

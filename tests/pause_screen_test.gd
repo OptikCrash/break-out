@@ -148,7 +148,7 @@ func check_gating() -> void:
 	game = await _start_game()
 	await _launch(game)
 	game.bricks_left = 1
-	game._on_ball_brick_broken()
+	game._on_ball_brick_broken(10)
 	await _tap(_joy(JOY_BUTTON_START))
 	_check(not paused and not game.pause_screen.visible,
 		"Pause must not open over the win buttons")

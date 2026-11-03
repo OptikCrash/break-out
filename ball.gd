@@ -4,7 +4,7 @@ const BallRules = preload("res://ball_rules.gd")
 
 @export var speed := 550.0
 @export var paddle: Node2D
-signal brick_broken
+signal brick_broken(points: int)
 var launched := false
 
 func _physics_process(delta: float) -> void:
@@ -37,11 +37,8 @@ func _physics_process(delta: float) -> void:
 				_break_brick(hit)
 
 func _break_brick(brick: Node) -> void:
-	# queue_free() leaves the collider alive until the frame ends.
-	if brick.is_queued_for_deletion():
-		return
-	brick.queue_free()
-	brick_broken.emit()
+	if brick.take_hit():
+		brick_broken.emit(brick.definition.points)
 
 func _rest_on_paddle() -> void:
 	# Half the paddle's height (8) plus the ball's radius (16): resting on top, no gap.

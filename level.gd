@@ -17,6 +17,10 @@ func validation_error() -> String:
 				return "Invalid level character '%s' at row %d, column %d." % [lines[row][col], row + 1, col + 1]
 	return ""
 
+func brick_symbol_at(cell: Vector2i) -> String:
+	var lines := grid.replace("\r\n", "\n").trim_suffix("\n").split("\n")
+	return lines[cell.y][cell.x]
+
 # Coordinates are cells, independent of the play area's pixel layout.
 func brick_cells() -> Array[Vector2i]:
 	var cells: Array[Vector2i] = []
