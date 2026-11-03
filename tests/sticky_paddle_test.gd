@@ -17,6 +17,8 @@ func _run() -> void:
 	_check(Rules.sticky_release(0.5, 550.0, 400.0).is_equal_approx((base + Vector2(100, 0)).normalized() * 550.0), "Transfer exactly 25 percent before normalization")
 	_check(Rules.sticky_release(0.5, 550.0, -1000.0).is_equal_approx((base - Vector2(250, 0)).normalized() * 550.0), "Leftward momentum is signed")
 	_check(Rules.sticky_release(0.5, 550.0, 10000.0).is_equal_approx(Vector2(1, -1).normalized() * 550.0), "Momentum is capped at held speed")
+	_check(Rules.sticky_release(-0.5, 550.0, -10000.0).is_equal_approx(Vector2(-1, -1).normalized() * 550.0), "Leftward momentum uses the same cap and angle limit")
+	_check(Rules.sticky_release(0.5, 0.0, 1000.0) == Vector2.ZERO, "Zero held speed cannot gain speed from paddle momentum")
 	for offset in [-1.0, 1.0]:
 		for momentum in [-100000.0, 100000.0]:
 			var edge := Rules.sticky_release(offset, 550.0, momentum)
@@ -59,10 +61,17 @@ func _run() -> void:
 	game.paddle.recent_velocity_x = 1000.0
 	ball.release_catch()
 	_check(ball.velocity.is_equal_approx(Vector2(1, -1).normalized() * 550.0), "Moving paddle changes trajectory while preserving speed")
-	for iteration in range(20):
-		ball.catch_on_paddle(0.5)
-		ball.release_catch()
-		_check(is_equal_approx(ball.velocity.length(), 550.0), "Repeated moving catches cannot stack speed")
+	# Include both speed capsules and their overlap: steering must preserve each
+	# effective speed, even when the paddle reverses between catches.
+	for multiplier in [1.0, 0.75, 1.5, 1.125]:
+		ball.set_speed_multiplier(multiplier)
+		for iteration in range(20):
+			game.paddle.recent_velocity_x = 10000.0 if iteration % 2 == 0 else -10000.0
+			ball.catch_on_paddle(0.5)
+			ball.release_catch()
+			_check(is_equal_approx(ball.velocity.length(), 550.0 * multiplier), "Repeated moving catches preserve active speed multiplier")
+	ball.set_speed_multiplier(1.0)
+	game.paddle.recent_velocity_x = 1000.0
 	var released_speed: float = ball.velocity.length()
 	ball.catch_on_paddle(0.5)
 	game._catch_capsule(preload("res://effects/slow_ball.tres"))
