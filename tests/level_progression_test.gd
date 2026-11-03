@@ -70,8 +70,12 @@ func _test_custom_sequence() -> void:
 	last.grid = "ox"
 	var game = preload("res://main.tscn").instantiate()
 	game.levels.assign([first, last])
+	# main owns the first level, so Bricks must not build a default layout first.
+	var built := [0]
+	game.get_node("PlayArea/Bricks").child_entered_tree.connect(func(_brick): built[0] += 1)
 	root.add_child(game)
-	_check(game.bricks.level == first and game.bricks_left == 1, "Custom first level replaces default layout and excludes Indestructible bricks")
+	_check(built[0] == 2, "First layout is built once, from main.levels[0]")
+	_check(game.bricks.level == first and game.bricks_left == 1, "Custom first level loads and excludes Indestructible bricks")
 	game.ball._break_brick(game.bricks.get_child(0))
 	_check(game.level_complete and game.bricks_left == 0, "Surviving Indestructible brick does not block completion")
 	# A collision callback can arrive after the last brick in the same frame.

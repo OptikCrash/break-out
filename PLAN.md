@@ -70,7 +70,12 @@ beyond what's listed here (power-up-dependent brick types are explicitly M4's, b
 - **Level format:** a custom `Level` Resource (`level.gd`), authored as `.tres` files under
   `levels/`. Each level has an ASCII-art multi-line string grid, one row per line, one character
   per brick cell: `.` empty, `#` Normal, `x` Reinforced, `o` Indestructible. `bricks.gd` reads a
-  `Level` resource instead of generating a hard-coded rectangle.
+  `Level` resource instead of generating a hard-coded rectangle. Every level must contain at
+  least one destructible brick (`#` or `x`): a grid of only holes and/or Indestructible bricks
+  could never be cleared, so `level.gd` rejects it as invalid.
+- **Level ownership:** `main.gd`'s ordered `levels` array is the only place that names levels,
+  including the first one. `bricks.gd` has no default level; it builds whatever `main` passes to
+  `load_level()`.
 - **Brick types** (exactly three for M3):
   - **Normal** — 1 hit, 10 points, today's look.
   - **Reinforced** — 2 hits, visibly changes after the first hit, 20 points.
