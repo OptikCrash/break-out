@@ -14,6 +14,7 @@ func _initialize() -> void:
 		[&"breaker", false, 10.0, 1.0, 0, 25],
 		[&"sticky_paddle", false, 10.0, 1.0, 0, 25],
 		[&"satellite_shield", false, 0.0, 1.0, 0, 25],
+		[&"force_field", false, 0.0, 1.0, 0, 25],
 	]
 	_check(Rules.DEFINITIONS.size() == expected.size(), "Pin pool size")
 	var ids := []
@@ -110,6 +111,23 @@ func _initialize() -> void:
 	invalid.ball_speed_multiplier = 0.75
 	invalid.duration = 0.0
 	_check(not invalid.validation_error().is_empty(), "Reject permanent speed effects")
+	var field = preload("res://effects/force_field.tres")
+	_check(field.hazard_charges == 3, "Pin three Force Field charges")
+	rules.apply(field)
+	_check(not rules.active.has(field.id), "Charges never enter timed state")
+	for charges in range(4):
+		_check(Rules.negates_hazard(shrink, charges) == (charges > 0), "Only positive charges negate hazards")
+		_check(Rules.charges_after_catch(shrink, charges) == maxi(0, charges - 1), "Hazard spends exactly one charge")
+		_check(not Rules.negates_hazard(wide, charges), "Power-ups pass through")
+		_check(Rules.charges_after_catch(wide, charges) == charges, "Power-ups preserve charges")
+		_check(Rules.charges_after_catch(field, charges) == 3, "Field refreshes to three")
+	for property in ["hazard_charges", "duration", "hazard"]:
+		invalid = field.duplicate()
+		invalid.set(property, {"hazard_charges": 2, "duration": 10.0, "hazard": true}[property])
+		_check(not invalid.validation_error().is_empty(), "Reject invalid charge definition")
+	invalid = field.duplicate()
+	invalid.hazard_charges = -1
+	_check(not invalid.validation_error().is_empty(), "Reject negative charges")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 50
 	var reference := RandomNumberGenerator.new()
@@ -119,7 +137,7 @@ func _initialize() -> void:
 		var effect = Rules.random_effect(rng)
 		_check(effect == Rules.DEFINITIONS[reference.randi_range(0, Rules.DEFINITIONS.size() - 1)], "Uniform draw uses one equal-weight index")
 		seen[effect.id] = true
-	_check(seen.size() == 9, "All registered effects are reachable")
+	_check(seen.size() == 10, "All registered effects are reachable")
 	_check(Rules.CAPSULE_SPEED == 240.0, "Pin fall speed")
 	quit(1 if failures else 0)
 

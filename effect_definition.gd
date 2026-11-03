@@ -7,6 +7,7 @@ extends Resource
 @export var paddle_width_multiplier := 1.0
 @export var ball_speed_multiplier := 1.0
 @export var extra_lives := 0
+@export var hazard_charges := 0
 @export var extra_balls := 0
 @export var split_angle_degrees := 0.0
 # Satellite Shield is charge-based: orbs wait at the paddle instead of a timer.
@@ -25,4 +26,8 @@ func validation_error() -> String:
 		return "Multi-ball needs two extra balls, a spread and no timer."
 	if orbs < 0 or (orbs > 0 and duration != 0.0):
 		return "Orb count must be nonnegative, and orbs are charges with no timer."
+	if hazard_charges < 0:
+		return "Hazard charges must be nonnegative."
+	if hazard_charges > 0 and (hazard_charges != 3 or duration != 0.0 or hazard):
+		return "Force Field needs three charges, no timer and must be a power-up."
 	return ""

@@ -13,6 +13,7 @@ func _initialize() -> void:
 func _run() -> void:
 	_check_rules()
 	await _check_launches()
+	_check_shield_overlap()
 	_check_life_rule()
 	_check_level_end()
 	quit(1 if failures else 0)
@@ -94,6 +95,21 @@ func _check_launches() -> void:
 	game._catch_capsule(Shield)
 	_check(game.launch_orb() == null and game.satellite_orbs == 3, "Resting ball blocks the orb launch")
 	node_added.disconnect(_freeze_ball)
+	game.free()
+
+func _check_shield_overlap() -> void:
+	var game = preload("res://main.tscn").instantiate()
+	game.process_mode = Node.PROCESS_MODE_DISABLED
+	root.add_child(game)
+	game._catch_capsule(preload("res://effects/force_field.tres"))
+	game._catch_capsule(Shield)
+	_check(game.force_field_charges == 3 and game.satellite_orbs == 3, "Satellite pickup preserves Force Field charges")
+	_check(game.score == 50, "Both shield pickups award 25 points")
+	game._catch_capsule(preload("res://effects/shrink_paddle.tres"))
+	_check(game.force_field_charges == 2 and game.satellite_orbs == 3, "Blocked hazard spends only Force Field charge")
+	_check(game.effects.active.is_empty() and game.score == 50, "Blocked hazard has no timer or score")
+	game._clear_effects_and_capsules()
+	_check(game.force_field_charges == 0 and game.satellite_orbs == 0, "Lifecycle clearing resets both shields")
 	game.free()
 
 func _check_life_rule() -> void:

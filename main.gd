@@ -4,6 +4,7 @@ const EffectRules = preload("res://effect_rules.gd")
 const BallRules = preload("res://ball_rules.gd")
 const Capsule = preload("res://capsule.tscn")
 var effects = EffectRules.new()
+var force_field_charges := 0
 var capsule_rng := RandomNumberGenerator.new()
 
 const BALL_SCENE = preload("res://ball.tscn")
@@ -181,7 +182,7 @@ func _physics_process(delta: float) -> void:
 	effects.advance(delta)
 	_update_ball_effects()
 	paddle.set_width_multiplier(effects.width_multiplier())
-	hud.update_effects(effects.active)
+	hud.update_effects(effects.active, force_field_charges)
 	orb_visual.orbit_size.x = paddle.half_width + 28.0
 	# Read in the physics step, like ball.gd, so both see the same "just pressed".
 	# No arbitration: one press can also release a Sticky catch.
@@ -224,6 +225,11 @@ func _add_capsule(at: Vector2) -> void:
 func _catch_capsule(effect: Resource) -> void:
 	if reset_ready or level_complete:
 		return
+	var negated := EffectRules.negates_hazard(effect, force_field_charges)
+	force_field_charges = EffectRules.charges_after_catch(effect, force_field_charges)
+	if negated:
+		hud.update_effects(effects.active, force_field_charges)
+		return
 	if effect.extra_balls > 0:
 		_split_ball(effect)
 	effects.apply(effect)
@@ -233,7 +239,7 @@ func _catch_capsule(effect: Resource) -> void:
 			active_ball.breaker_time_left = effect.duration
 	_update_ball_effects()
 	paddle.set_width_multiplier(effects.width_multiplier())
-	hud.update_effects(effects.active)
+	hud.update_effects(effects.active, force_field_charges)
 	score += EffectRules.catch_points(effect)
 	lives += effect.extra_lives
 	hud.update_score(score)
@@ -242,10 +248,11 @@ func _catch_capsule(effect: Resource) -> void:
 func _clear_effects_and_capsules() -> void:
 	effects.active.clear()
 	satellite_orbs = 0
+	force_field_charges = 0
 	for active_ball in get_balls():
 		active_ball.breaker_active = false
 	_update_ball_effects()
-	hud.update_effects(effects.active)
+	hud.update_effects(effects.active, force_field_charges)
 	paddle.set_width_multiplier(1.0)
 	for capsule in get_tree().get_nodes_in_group("capsule"):
 		capsule.queue_free()

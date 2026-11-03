@@ -33,7 +33,9 @@ paddle hit uses this same rule, keeping the ball's current speed.
 **Power-up Action** (`power_action`):
 The shared input action for whatever a currently-active power-up lets the player trigger
 (releasing a Sticky Paddle catch, firing the Blaster, launching the Satellite Shield's balls).
-Bound to the same key as `launch`/accept; only one such power-up is ever active at a time.
+Bound to the same key as `launch`/accept. Multiple power-ups may act on the same press:
+Sticky release, a Blaster shot and a Satellite launch do not arbitrate between each other.
+A resting ball uses the shared press to launch before Satellite orbs can launch.
 
 **Multi-ball Life Rule**:
 With more than one ball in play, a ball reaching the Death Zone is just removed; a life is lost
@@ -124,3 +126,22 @@ The spread can extend the 45° Sticky limit to 25° above horizontal on this rel
 Splitting an already split caught copy adds its pending rotation to the new spread.
 The design does not specify this interaction; preserving the catch and applying the
 usual split spread are implementation defaults for review.
+
+**Force Field (issue #65)**:
+`force_field` is a power-up worth 25 catch points. Catching it sets three charges,
+replacing any remaining charges. Each subsequent hazard catch consumes one charge
+and applies no effect or points; power-ups apply and score normally without spending
+a charge. The third blocked hazard removes the field; the fourth applies normally.
+Charges have no timer. The HUD shows remaining charges in the active-effects panel.
+Life loss (last live ball) and level completion clear charges, following other capsule
+effects. The design does not specify charge clearing; this is an implementation default
+for review.
+
+**Satellite Shield (issue #66)**:
+`satellite_shield` awards 25 catch points and resets the waiting orb count to three.
+Orbs are visual placeholders without physics until launched, one per `power_action`
+press. Each launch creates an ordinary ball with a fresh 10-second Breaker timer;
+orbiting time does not spend it. Launched balls follow the Multi-ball Life Rule.
+Waiting orbs clear on last-ball life loss and level completion, matching other effects.
+This clearing behavior is an implementation default; the issue resolves PLAN.md’s
+one-at-a-time versus simultaneous launch choice in favor of one per press.
