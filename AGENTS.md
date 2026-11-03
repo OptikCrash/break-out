@@ -161,9 +161,28 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   `ball.speed` stays the base launch speed. Use `main.add_ball()` so new balls inherit
   active speed effects before launch. Do not repeatedly multiply velocity each tick.
 
+- Sticky catches remain `launched` (so pause still works), with a separate `caught`
+  flag. They visually center but retain the contact offset and held speed; scale
+  that held speed alongside velocity when speed effects change. Read the paddle's
+  actual last-step travel velocity, not its requested velocity (mouse input and
+  wall stops differ). Input-release tests must run real physics steps so Godot's
+  `is_action_just_pressed()` observes the press in the right clock.
+
+- Sticky momentum steers direction only: normalize after the momentum and angle clamps
+  to retain held speed. Test repeated catches, then an ordinary post-expiry bounce,
+  so transient momentum cannot become a permanent speed increase.
 - Deferred-spawn tests that freeze balls in `node_added` must also disable physics
   on `ready`, after script initialization enables callbacks. Keep the node process
   mode active so manual collision checks still have a physics body in the space.
+  This also applies to capsules: freezing only in `node_added` can let their first
+  physics step move them before an exact spawn-position assertion.
 
 - Completion tests must load or destroy actual bricks rather than assign `bricks_left`: the
   completion recount intentionally ignores that cached value after each destruction.
+
+- Multi-ball copies of a Sticky catch must copy `caught`, `catch_offset` and
+  `caught_speed`: copying only zero velocity creates launched balls that never move.
+
+- Caught Multi-ball copies also carry a one-use `release_rotation` from the authored
+  split angle. Consume it on release and clear it on reset; later Sticky catches
+  must not inherit an earlier split’s spread.

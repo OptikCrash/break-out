@@ -97,3 +97,30 @@ including balls added or launched during the effect. Expiry or lifecycle clearin
 only the effect multiplier, preserving direction and each ball's underlying speed.
 The factors and overlap calculation were unspecified in the design; these are explicit
 implementation defaults for review. Catch scores remain +25 and +0 respectively.
+
+**Sticky Paddle tuning (issue #54)**:
+Sticky Paddle (`sticky_paddle`) lasts 10 seconds, refreshes on pickup, and awards
+25 points. A caught ball stops and follows the paddle center, retaining its original
+normalized catch offset for release. This reconciles the centered placement in PLAN.md
+with the issue's catch-point-relative release rule. `power_action` or timer expiry
+releases every caught ball using the normal bounce direction at that stored offset
+(including the random lean at center), at its held speed including active speed effects.
+Add 25% of the paddle's actual horizontal velocity from its latest completed physics
+step to the release's horizontal velocity, capped to ±the held speed. Clamp the resulting
+horizontal component to ±the upward vertical component (at least 45° above horizontal),
+then normalize back to the held speed. Momentum changes angle only: repeated catches
+cannot accumulate speed, and active Slow/Speed-up multipliers still scale held speed.
+There is no momentum history or smoothing; a stationary step clears the contribution.
+Mouse travel can produce much larger one-step velocities than keyboard movement, but
+both use the same cap. The weighting, cap, 45° limit and one-step meaning of "recent"
+are implementation defaults for review.
+
+When Multi-ball copies a caught ball, the copies retain its catch offset and held speed,
+remaining caught until Power-up Action or expiry releases them. Copies apply the authored
+Multi-ball spread (−20° and +20°) after the Sticky direction and momentum calculation,
+with unchanged held speed; the source keeps its original release angle. This one-use
+rotation clears on release or reset, so later catches use ordinary Sticky rules.
+The spread can extend the 45° Sticky limit to 25° above horizontal on this release.
+Splitting an already split caught copy adds its pending rotation to the new spread.
+The design does not specify this interaction; preserving the catch and applying the
+usual split spread are implementation defaults for review.

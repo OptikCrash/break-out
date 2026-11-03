@@ -3,6 +3,7 @@ extends CharacterBody2D
 @export var speed : = 1000.0
 
 var half_width := 64.0
+var recent_velocity_x := 0.0
 
 func set_width_multiplier(multiplier: float) -> void:
 	half_width = 64.0 * multiplier
@@ -39,3 +40,5 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0, speed)
 
 	move_and_slide()
+	# Actual travel includes wall stops and mouse motion, unlike requested velocity.
+	recent_velocity_x = get_position_delta().x / delta

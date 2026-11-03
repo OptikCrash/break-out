@@ -94,7 +94,7 @@ func _run() -> void:
 		_check(copy.speed_multiplier == 1.125, "Copies inherit overlapping speed effects")
 		_check(is_equal_approx(copy.velocity.length(), Vector2(100, -500).length() * 1.125), "Copies preserve scaled source speed")
 	game.effects.advance(10.0)
-	game._update_ball_speeds()
+	game._update_ball_effects()
 	for copy in [split_balls[7], split_balls[8]]:
 		_check(copy.speed_multiplier == 1.0, "Copy multiplier expires")
 		_check(is_equal_approx(copy.velocity.length(), Vector2(100, -500).length()), "Expiry restores underlying copy speed exactly once")

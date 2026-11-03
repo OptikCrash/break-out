@@ -81,7 +81,7 @@ See `PLAN.md` for scope and milestones.
 ## Capsules
 
 Custom levels can use `?` for a one-hit, zero-point Mystery Brick. It drops a random
-Wide Paddle, Slow Ball, Extra Life, Multi-ball, Breaker, Shrink Paddle hazard, or
+Wide Paddle, Slow Ball, Sticky Paddle, Extra Life, Multi-ball, Breaker, Shrink Paddle hazard, or
 Speed-up Ball hazard capsule. Multi-ball adds two copies of a ball; only losing
 the last ball costs a life. Breaker lasts ten seconds and refreshes every current
 ball’s independent timer. Resistant bricks (`r`) stop ordinary balls but break
@@ -94,3 +94,7 @@ seconds and can overlap; catching the same effect refreshes its timer. The HUD l
 active timers. Life loss and level completion clear effects and loose capsules.
 Capsules use plain placeholder shapes and text pending Chris's art.
 See GLOSSARY.md for provisional tuning values.
+
+Sticky Paddle catches balls for up to ten seconds. Press Space, left click, or
+gamepad A to release; expiry also releases automatically. The original catch point
+sets the angle, and sideways paddle movement adds momentum at release.

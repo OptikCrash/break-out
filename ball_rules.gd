@@ -20,3 +20,13 @@ static func paddle_direction(x_dir: float) -> Vector2:
 	if x_dir == 0.0:
 		return launch_direction()
 	return Vector2(x_dir, -1.0).normalized()
+
+# Momentum steers the release; normalization prevents repeated catches adding speed.
+static func sticky_release(offset: float, held_speed: float, paddle_velocity: float) -> Vector2:
+	var direction := paddle_direction(offset)
+	if held_speed <= 0.0:
+		return Vector2.ZERO
+	direction.x += clampf(paddle_velocity * 0.25 / held_speed, -1.0, 1.0)
+	# At least 45 degrees above horizontal, even at an edge with mouse momentum.
+	direction.x = clampf(direction.x, direction.y, -direction.y)
+	return direction.normalized() * held_speed
