@@ -153,3 +153,7 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   actual last-step travel velocity, not its requested velocity (mouse input and
   wall stops differ). Input-release tests must run real physics steps so Godot's
   `is_action_just_pressed()` observes the press in the right clock.
+
+- Sticky momentum steers direction only: normalize after the momentum and angle clamps
+  to retain held speed. Test repeated catches, then an ordinary post-expiry bounce,
+  so transient momentum cannot become a permanent speed increase.

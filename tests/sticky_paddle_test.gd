@@ -13,9 +13,15 @@ func _run() -> void:
 	seed(54)
 	_check(Rules.sticky_release(0.0, 550.0, 0.0).is_equal_approx(expected), "Stationary center release reuses bounce randomness")
 	var base := Rules.paddle_direction(0.5) * 550.0
-	_check(Rules.sticky_release(0.5, 550.0, 1000.0).is_equal_approx(base + Vector2(250, 0)), "Transfer exactly 25 percent of paddle velocity")
-	_check(Rules.sticky_release(0.5, 550.0, -1000.0).is_equal_approx(base - Vector2(250, 0)), "Leftward momentum is signed")
-	_check(Rules.sticky_release(0.5, 550.0, 10000.0).is_equal_approx(base + Vector2(550, 0)), "Momentum is capped at held speed")
+	_check(Rules.sticky_release(0.5, 550.0, 1000.0).is_equal_approx(Vector2(1, -1).normalized() * 550.0), "Rightward momentum reaches the 45 degree limit")
+	_check(Rules.sticky_release(0.5, 550.0, 400.0).is_equal_approx((base + Vector2(100, 0)).normalized() * 550.0), "Transfer exactly 25 percent before normalization")
+	_check(Rules.sticky_release(0.5, 550.0, -1000.0).is_equal_approx((base - Vector2(250, 0)).normalized() * 550.0), "Leftward momentum is signed")
+	_check(Rules.sticky_release(0.5, 550.0, 10000.0).is_equal_approx(Vector2(1, -1).normalized() * 550.0), "Momentum is capped at held speed")
+	for offset in [-1.0, 1.0]:
+		for momentum in [-100000.0, 100000.0]:
+			var edge := Rules.sticky_release(offset, 550.0, momentum)
+			_check(absf(edge.x) <= -edge.y + 0.001, "Edge release stays at least 45 degrees above horizontal")
+			_check(is_equal_approx(edge.length(), 550.0), "Edge clamp preserves held speed")
 	var game = preload("res://main.tscn").instantiate()
 	root.add_child(game)
 	game.set_physics_process(false)
@@ -52,7 +58,11 @@ func _run() -> void:
 	ball.catch_on_paddle(0.5)
 	game.paddle.recent_velocity_x = 1000.0
 	ball.release_catch()
-	_check(ball.velocity.is_equal_approx(base + Vector2(250, 0)), "Moving paddle changes release trajectory and speed")
+	_check(ball.velocity.is_equal_approx(Vector2(1, -1).normalized() * 550.0), "Moving paddle changes trajectory while preserving speed")
+	for iteration in range(20):
+		ball.catch_on_paddle(0.5)
+		ball.release_catch()
+		_check(is_equal_approx(ball.velocity.length(), 550.0), "Repeated moving catches cannot stack speed")
 	var released_speed: float = ball.velocity.length()
 	ball.catch_on_paddle(0.5)
 	game._catch_capsule(preload("res://effects/slow_ball.tres"))
@@ -68,6 +78,16 @@ func _run() -> void:
 	_check(ball.velocity.is_equal_approx(expected), "Expiry uses same offset and momentum formula")
 	_check(not ball.caught and not ball.sticky_active and ball.velocity.y < 0, "Expiry releases immediately")
 
+	# A real normal bounce after expiry must retain only the active speed multiplier.
+	ball.set_speed_multiplier(1.5)
+	ball.global_position = game.paddle.global_position + Vector2(32, -30)
+	ball.velocity = Vector2(0, ball.velocity.length())
+	await physics_frame
+	ball._physics_process(0.03)
+	_check(not ball.caught and ball.velocity.y < 0, "Expired sticky returns to normal paddle bounce")
+	_check(is_equal_approx(ball.velocity.length(), ball.speed * ball.speed_multiplier), "Normal bounce after expiry has no residual sticky speed")
+	ball.set_speed_multiplier(1.0)
+
 	# New balls inherit sticky; losing another ball preserves a held one.
 	game._catch_capsule(Sticky)
 	var second = game.add_ball()
@@ -76,6 +96,22 @@ func _run() -> void:
 	ball.catch_on_paddle(0.5)
 	game._on_death_zone_body_entered(second)
 	_check(ball.caught and ball.sticky_active, "Earlier ball loss preserves sticky catch")
+	# One physical binding must release an actually caught ball, without relaunching.
+	_check(ball.caught, "Shared press begins with a caught ball")
+	game.paddle.recent_velocity_x = 0.0
+	await physics_frame
+	var press := InputEventKey.new()
+	press.physical_keycode = KEY_SPACE
+	press.pressed = true
+	Input.parse_input_event(press)
+	ball.set_physics_process(true)
+	await physics_frame
+	await physics_frame
+	ball.set_physics_process(false)
+	press.pressed = false
+	Input.parse_input_event(press)
+	_check(not ball.caught and ball.velocity.is_equal_approx(base), "Shared Space press releases at catch offset instead of fresh launch")
+	await physics_frame
 	# Fresh launch uses launch only, even with sticky enabled.
 	game._catch_capsule(Sticky)
 	ball.reset()

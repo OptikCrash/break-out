@@ -93,7 +93,11 @@ with the issue's catch-point-relative release rule. `power_action` or timer expi
 releases every caught ball using the normal bounce direction at that stored offset
 (including the random lean at center), at its held speed including active speed effects.
 Add 25% of the paddle's actual horizontal velocity from its latest completed physics
-step to the release's horizontal velocity, capped to ±the held speed. Vertical velocity
-is unchanged, so sideways movement changes both angle and total speed. There is no
-momentum history or smoothing; a stationary step clears the contribution. The weighting,
-cap and one-step meaning of "recent" are implementation defaults for review.
+step to the release's horizontal velocity, capped to ±the held speed. Clamp the resulting
+horizontal component to ±the upward vertical component (at least 45° above horizontal),
+then normalize back to the held speed. Momentum changes angle only: repeated catches
+cannot accumulate speed, and active Slow/Speed-up multipliers still scale held speed.
+There is no momentum history or smoothing; a stationary step clears the contribution.
+Mouse travel can produce much larger one-step velocities than keyboard movement, but
+both use the same cap. The weighting, cap, 45° limit and one-step meaning of "recent"
+are implementation defaults for review.
