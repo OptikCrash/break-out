@@ -10,7 +10,7 @@ func run() -> void:
 	root.size = Vector2i(1920, 1080)
 	var game = preload("res://main.tscn").instantiate()
 	var first := Level.new()
-	first.grid = "#xo"
+	first.grid = "#xor"
 	var last := Level.new()
 	last.grid = "#"
 	game.levels.assign([first, last])
@@ -59,6 +59,17 @@ func run() -> void:
 	ball._hit_surface(indestructible, Vector2.DOWN)
 	_expect([&"wall_bounce"], "Indestructible brick reflects with wall bounce")
 	_check(ball.velocity.is_equal_approx(Vector2(0, 550)), "Indestructible hit reflects velocity")
+	var resistant = game.bricks.get_child(3)
+	ball.velocity = Vector2(0, -550)
+	ball._hit_surface(resistant, Vector2.DOWN)
+	_expect([&"wall_bounce"], "Ordinary Resistant hit reflects with wall bounce")
+	_check(ball.velocity.is_equal_approx(Vector2(0, 550)), "Ordinary Resistant hit reflects velocity")
+	ball.breaker_active = true
+	ball.velocity = Vector2(0, -550)
+	ball._hit_surface(resistant, Vector2.DOWN)
+	_expect([&"brick_break"], "Breaker destroys Resistant with only brick break")
+	_check(ball.velocity.is_equal_approx(Vector2(0, -550)), "Breaker passes through Resistant without reflecting")
+	ball.breaker_active = false
 	ball._hit_surface(reinforced, Vector2.DOWN)
 	ball._break_brick(reinforced)
 	_expect([&"brick_break"], "Destruction sounds once, including same-frame repeated hit")
