@@ -10,7 +10,7 @@ func check_layout() -> void:
 	# CanvasLayer controls follow the viewport, including after a resize.
 	for viewport_size in [Vector2i(1920, 1080), Vector2i(1280, 720)]:
 		root.size = viewport_size
-		for message in ["", "Game Over!\nPress R to restart", "You Win!\nPress R to restart"]:
+		for message in ["", "Game Over!", "You Win!"]:
 			label.text = message
 			await process_frame
 			var viewport_rect = root.get_visible_rect()

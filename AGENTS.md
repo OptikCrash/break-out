@@ -14,6 +14,8 @@
 - PR descriptions explain the Godot concept and why the approach was chosen,
   including alternatives considered. For CI, editor import builds the resource
   cache before standalone headless tests; plain processes avoid an addon dependency.
+- Draft the PR body in `PR_DESCRIPTION.md` at the repo root. `.gitignore` lists
+  `/PR_DESCRIPTION.md`, so it stays a local file; don't force-add it.
 
 - Winning disables ball physics immediately after `reset()`. Reset must place the ball
   on the paddle synchronously; waiting for `_physics_process()` leaves it in flight.
@@ -48,8 +50,23 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - `Button` emits `pressed` on release, so the press has already stopped being "just pressed" and
   a Space press on a menu button can't also launch the ball. The `physics_frame` wait in `title.gd`
   is only needed because it acts on the raw press.
+- Godot's built-in `ui_accept` has no gamepad button (only Enter, Keypad Enter, Space), so a
+  focused `Button` can't be pressed by a pad. `project.godot` overrides `ui_accept` to add
+  joypad A. An override replaces the built-in event list, so keep the three keys in it.
+  Arrows/D-pad already move focus through `ui_left`/`ui_right`/`ui_up`/`ui_down`.
+- `Button`s fire on release, for keyboard and gamepad as well as the mouse, so leaving a scene
+  from a button doesn't hand a fresh "just pressed" Space to the next scene. A press that
+  comes from `_unhandled_input`, like the title screen's, still needs the physics-frame wait.
 - A full-screen Control that reads clicks in `_unhandled_input` needs `mouse_filter = Ignore`
   on itself and on any ColorRect/container over it, or the GUI eats the click first.
+- Input actions (`Input.is_action_just_pressed("launch")`) are updated before the GUI sees an
+  event, so a mouse button bound to an action works even over ColorRects. Raw mouse motion is
+  not: `paddle.gd` reads it in `_input` because the play field's ColorRects would mark it handled.
+- "Most recent input wins" has to be decided from events (`event.is_action_pressed()`, which
+  skips echoes), not from polled held state (`Input.get_axis()`), or a held key overrides
+  every newer mouse move.
+- Headless runs start with a 64x64 root window, and `canvas_items` stretch scales event positions
+  to match. Tests that send mouse positions set `root.size = Vector2i(1920, 1080)` first.
 
 ## UI layout
 

@@ -108,12 +108,18 @@ func check_gating() -> void:
 	await _tap(_key(KEY_ESCAPE))
 	_check(not paused, "Pause must not open before the ball is launched")
 	await _launch(game)
-	game.reset_ready = true
-	game.ball.set_physics_process(false)
-	game.hud.update_message("Game Over!\nPress R to restart")
+	game.lives = 1
+	game._on_death_zone_body_entered(game.ball)
 	await _tap(_key(KEY_ESCAPE))
 	_check(not paused and not game.pause_screen.visible,
-		"Pause must not open over the game-over/win message")
+		"Pause must not open over the game-over buttons")
+	game = await _start_game()
+	await _launch(game)
+	game.bricks_left = 1
+	game._on_ball_brick_broken()
+	await _tap(_joy(JOY_BUTTON_START))
+	_check(not paused and not game.pause_screen.visible,
+		"Pause must not open over the win buttons")
 
 func check_pause_freezes_play() -> void:
 	var game := await _start_game()
@@ -132,6 +138,13 @@ func check_pause_freezes_play() -> void:
 	_check(game.ball.position == ball_position, "Ball must not move while paused")
 	_check(paddle.position == paddle_position, "Paddle must not move while paused")
 	Input.parse_input_event(_release(_key(KEY_D)))
+	var motion := InputEventMouseMotion.new()
+	motion.position = Vector2(1500, 900)
+	Input.parse_input_event(motion)
+	for i in 3:
+		await physics_frame
+	_check(paddle.position == paddle_position, "Mouse motion must not move the paused paddle")
+	_check(not paddle.following_mouse, "Paused paddle must not receive mouse input")
 	await _tap(_key(KEY_R))
 	_check(current_scene == game, "R must not restart while paused")
 	paused = false

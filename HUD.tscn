@@ -28,3 +28,31 @@ grow_horizontal = 2
 grow_vertical = 2
 horizontal_alignment = 1
 vertical_alignment = 1
+theme_override_font_sizes/font_size = 64
+
+[node name="EndButtons" type="HBoxContainer" parent="." unique_id=1580362417]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = 96.0
+offset_right = 300.0
+offset_bottom = 176.0
+grow_horizontal = 2
+theme_override_constants/separation = 40
+alignment = 1
+
+[node name="Restart" type="Button" parent="EndButtons" unique_id=637104958]
+custom_minimum_size = Vector2(280, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Restart (R)"
+
+[node name="BackToTitle" type="Button" parent="EndButtons" unique_id=1943825106]
+custom_minimum_size = Vector2(280, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Back to Title"

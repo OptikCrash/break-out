@@ -1,5 +1,7 @@
 extends Node2D
 
+const TITLE_SCENE := "res://TitleScreen.tscn"
+
 @export var lives = 3
 @onready var ball := $PlayArea/Ball
 @onready var bricks := $PlayArea/Bricks
@@ -13,11 +15,13 @@ func _ready() -> void:
 	hud.update_message("")
 	hud.update_score(score)
 	hud.update_lives(lives)
+	hud.restart_pressed.connect(restart)
+	hud.back_to_title_pressed.connect(back_to_title)
 	bricks_left = bricks.get_child_count()
 
 func _process(_delta: float) -> void:
 	if reset_ready && Input.is_action_just_pressed("restart"):
-		get_tree().reload_current_scene()
+		restart()
 
 # Main stops getting input while the tree is paused, so closing the menu again
 # is handled by pause_screen.gd, which keeps running.
@@ -37,7 +41,8 @@ func _on_death_zone_body_entered(_body: Node2D) -> void:
 	if lives == 0:
 		reset_ready = true
 		ball.set_physics_process(false)
-		hud.update_message("Game Over!\nPress R to restart")
+		hud.update_message("Game Over!")
+		hud.show_end_buttons()
 	else:
 		print("Lives left: ", lives)
 		ball.reset()
@@ -50,4 +55,19 @@ func _on_ball_brick_broken() -> void:
 		ball.reset()
 		reset_ready = true
 		ball.set_physics_process(false)
-		hud.update_message("You Win!\nPress R to restart")
+		hud.update_message("You Win!")
+		hud.show_end_buttons()
+
+# R and the Restart button both land here. Clearing reset_ready means a second
+# request in the same frame (R plus a click) can't ask for another scene change.
+func restart() -> void:
+	if not reset_ready:
+		return
+	reset_ready = false
+	get_tree().reload_current_scene()
+
+func back_to_title() -> void:
+	if not reset_ready:
+		return
+	reset_ready = false
+	get_tree().change_scene_to_file(TITLE_SCENE)
