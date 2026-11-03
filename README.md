@@ -81,8 +81,9 @@ See `PLAN.md` for scope and milestones.
 ## Capsules
 
 Custom levels can use `?` for a one-hit, zero-point Mystery Brick. It drops a random
-Wide Paddle, Shrink Paddle hazard, or Extra Life capsule. Catch power-ups for 25 points;
-hazards give no points, and missed capsules have no penalty. Wide and Shrink last ten
+Wide Paddle, Shrink Paddle hazard, Extra Life, or Multi-ball capsule. Catch power-ups for 25 points;
+Multi-ball adds two copies of a ball; only losing the last ball costs a life.
+Hazards give no points, and missed capsules have no penalty. Wide and Shrink last ten
 seconds and can overlap; catching the same effect refreshes its timer. The HUD lists
 active timers. Life loss and level completion clear effects and loose capsules.
 Capsules use plain placeholder shapes and text pending Chris's art.

@@ -138,3 +138,8 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 
 - Capsule effects clear on a life loss, which means the last live ball reaching the
   Death Zone; removing an earlier ball must preserve the paddle timers and width.
+
+- Multi-ball copies use `add_ball()` collision exceptions in both directions: the ball
+  scene mask includes layer 4, so overlapping copies otherwise collide with each other.
+- Capsule catches run inside physics queries: defer Multi-ball body creation and
+  recheck the source ball and end-of-level state before spawning copies.
