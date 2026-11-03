@@ -6,6 +6,7 @@ const BallRules = preload("res://ball_rules.gd")
 @export var speed := 550.0
 @export var paddle: Node2D
 signal brick_broken(points: int)
+signal sound_requested(cue: StringName)
 var launched := false
 var speed_multiplier := 1.0
 var sticky_active := false
@@ -48,6 +49,7 @@ func _physics_process(delta: float) -> void:
 			return
 
 		if hit.is_in_group("paddle"):
+			sound_requested.emit(&"paddle_bounce")
 			hit.play_feedback()
 			var ball_x: float = collision.get_position().x
 			# global_position: measured from the screen, like the collision point above.
@@ -73,6 +75,8 @@ func _hit_surface(hit: Node, normal: Vector2) -> void:
 		passes_through = breaker_active and hit.definition.requires_breaker
 		_break_brick(hit)
 	if not passes_through:
+		if not hit.is_in_group("brick"):
+			sound_requested.emit(&"paddle_bounce" if hit.is_in_group("paddle") else &"wall_bounce")
 		velocity = velocity.bounce(normal)
 
 func _break_brick(brick: Node) -> bool:

@@ -112,3 +112,21 @@ Satellite Shield resets three waiting orbs, drawn as placeholder circles orbitin
 paddle. Each Power-up Action press launches one as an ordinary ball with a fresh
 ten-second Breaker timer. The same press can fire Blaster and release Sticky catches.
 A resting ball takes the shared press to launch before Satellite orbs can launch.
+
+## Placeholder sound
+
+`main.gd` owns a `SoundEvents` child (`sound_events.gd`). Its `play_cue()` method
+accepts the nine named gameplay cues in `CUES`; its `volume` multiplier ranges
+from 0 (mute) to 1, defaulting to 0.5. Changing it also updates playing voices.
+There is no settings screen or saved audio setting yet.
+
+These short sine tones are procedurally synthesized placeholders, explicitly
+approved for M6 as an audio-only exception to the team's no-art rule. They use
+no recorded or sourced samples. Replace the dispatcher's cached streams with
+Chris's audio when available; gameplay callers can keep the same cue names.
+A fixed twelve-player pool bounds overlap; a full pool replaces the next voice.
+Final-life loss plays both life-lost and game-over cues, and a final level plays
+win in place of level-complete. Blocked hazards still use the hazard-catch cue.
+Audio balance, cue distinction and browser playback need a listening playthrough;
+headless tests check routing and PCM generation, not perceived sound. The Dummy
+audio driver skips playback while retaining observable cue requests.

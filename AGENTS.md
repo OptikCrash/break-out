@@ -230,3 +230,10 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - Brick `broken(points, at)` is a presentation signal emitted after queuing deletion,
   forwarded by Bricks. The ball/bolt score signals still own scoring and completion.
   Capture capsule positions when caught, not when spawned: capsules move while falling.
+
+- Sound calls go through main's `sounds.play_cue()`; balls emit `sound_requested`
+  and `add_ball()` wires it. Use Bricks' presentation signal for break audio so
+  bolts and balls share it without duplicating score/completion handling.
+- The sound dispatcher skips playback with Godot's Dummy audio driver (headless),
+  while still generating streams and emitting cue requests for tests. Scheduling
+  WAV playback without an output driver can leave mixer references at test exit.
