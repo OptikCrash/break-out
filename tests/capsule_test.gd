@@ -17,10 +17,18 @@ func _run() -> void:
 	game.ball.set_physics_process(false)
 	game.paddle.set_physics_process(false)
 	var mystery = game.bricks.get_child(0)
-	var drop_at: Vector2 = mystery.global_position + Vector2(32, 16)
+	# Move the shape to prove drops use its center rather than a duplicated offset.
+	mystery.get_node("CollisionShape2D").position += Vector2(3, 2)
+	var drop_at: Vector2 = mystery.get_node("CollisionShape2D").global_position
+	# Freeze new drops at tree entry, before any physics step can move them.
+	var freeze_drop := func(node: Node):
+		if node.is_in_group("capsule"):
+			node.set_physics_process(false)
+	node_added.connect(freeze_drop)
 	game.ball._break_brick(mystery)
 	game.ball._break_brick(mystery)
 	await process_frame
+	node_added.disconnect(freeze_drop)
 	var drops := get_nodes_in_group("capsule")
 	_check(drops.size() == 1, "Duplicate final hit drops only one capsule")
 	var capsule = drops[0]
@@ -70,6 +78,33 @@ func _run() -> void:
 	_check(game.effects.active.is_empty() and game.paddle.half_width == 64.0, "Life loss restores base width and clears timers")
 	game.ball._break_brick(game.bricks.get_child(0))
 	_check(game.reset_ready, "Remaining normal brick completes level")
+	game.free()
+	# Exercise ball.gd's actual collision path at the same relative hit position.
+	game = preload("res://main.tscn").instantiate()
+	root.add_child(game)
+	game.set_physics_process(false)
+	game.ball.set_physics_process(false)
+	game.paddle.set_physics_process(false)
+	for multiplier in [1.0, 1.5, 0.75]:
+		game.paddle.set_width_multiplier(multiplier)
+		game.ball.position = game.paddle.position + Vector2(game.paddle.half_width * 0.75, -30)
+		game.ball.launched = true
+		game.ball.velocity = Vector2(0, 550)
+		await physics_frame
+		game.ball._physics_process(1.0 / 60.0)
+		var expected := Vector2(0.75, -1).normalized() * 550.0
+		_check(game.ball.velocity.is_equal_approx(expected), "Bounce uses current half-width and preserves 550 speed")
+	# Widen while touching the right wall, then let move_and_slide recover.
+	var right_wall = game.get_node("PlayArea/Walls/Right")
+	var wall_inner_x: float = right_wall.position.x - right_wall.shape.size.x / 2.0
+	game.paddle.set_width_multiplier(1.0)
+	game.paddle.position.x = wall_inner_x - game.paddle.half_width
+	await physics_frame
+	game.paddle.set_width_multiplier(1.5)
+	for frame in 5:
+		await physics_frame
+		game.paddle._physics_process(1.0 / 60.0)
+	_check(game.paddle.position.x + game.paddle.half_width <= wall_inner_x + 0.1, "Widening at wall recovers without overlap")
 	game.free()
 	# A Mystery Brick may also be the last target: its deferred drop must not leak.
 	game = preload("res://main.tscn").instantiate()

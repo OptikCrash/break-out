@@ -25,7 +25,7 @@ func take_hit() -> bool:
 	if hit_points == 0:
 		queue_free()
 		if definition.drops_capsule:
-			capsule_dropped.emit(global_position + Vector2(32, 16))
+			capsule_dropped.emit($CollisionShape2D.global_position)
 		return true
 	_update_color()
 	return false

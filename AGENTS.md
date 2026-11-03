@@ -118,3 +118,8 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   brick can finish a level before that deferred call runs.
 - Paddle width changes scale its shape node and existing sprite, leaving the shared shape
   resource untouched. Ball bounce offsets divide by the current paddle half-width.
+- To assert a deferred capsule's exact spawn position, disable its physics from the
+  SceneTree `node_added` signal before awaiting `process_frame`; otherwise a physics
+  step can move it before the assertion. Disconnect the test callback afterwards.
+- Capsule drops use the brick collision shape's global center, so layout/shape offsets
+  do not need a second hard-coded center in the drop logic.
