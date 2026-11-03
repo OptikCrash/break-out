@@ -31,7 +31,9 @@ func _run() -> void:
 	game.paddle.set_physics_process(false)
 	await _press()
 	_check(get_nodes_in_group("blaster_bolt").is_empty(), "Inactive input spawns nothing")
+	game._catch_capsule(preload("res://effects/force_field.tres"))
 	game._catch_capsule(Blaster)
+	_check(game.force_field_charges == 3, "Blaster pickup preserves Force Field charges")
 	game._catch_capsule(preload("res://effects/sticky_paddle.tres"))
 	game.ball.launched = true
 	game.ball.velocity = Vector2(0, -550)
@@ -41,6 +43,7 @@ func _run() -> void:
 	game.ball.set_physics_process(false)
 	var bolts := get_nodes_in_group("blaster_bolt")
 	_check(bolts.size() == 1 and not game.ball.caught, "Same press fires and releases Sticky")
+	_check(game.force_field_charges == 3, "Firing preserves Force Field charges")
 	await _press()
 	_check(get_nodes_in_group("blaster_bolt").size() == 1, "Early second press does not fire")
 	# Route a real bolt collision through main's existing score/completion callback.
@@ -53,6 +56,7 @@ func _run() -> void:
 	fired._physics_process(0.1)
 	_check(target.is_queued_for_deletion() and game.score == before + 10, "Bolt reports brick score through main")
 	game._clear_effects_and_capsules()
+	_check(game.force_field_charges == 0, "Lifecycle clears Force Field alongside Blaster")
 	await process_frame
 	_check(get_nodes_in_group("blaster_bolt").is_empty() and game.effects.shot_time_left == 0.0, "Lifecycle clears bolts and cooldown")
 	game.free()

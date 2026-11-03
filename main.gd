@@ -3,6 +3,7 @@ extends Node2D
 const EffectRules = preload("res://effect_rules.gd")
 const Capsule = preload("res://capsule.tscn")
 var effects = EffectRules.new()
+var force_field_charges := 0
 var capsule_rng := RandomNumberGenerator.new()
 
 const BOLT_SCENE = preload("res://blaster_bolt.tscn")
@@ -175,7 +176,7 @@ func _physics_process(delta: float) -> void:
 			$PlayArea.add_child(bolt)
 	_update_ball_effects()
 	paddle.set_width_multiplier(effects.width_multiplier())
-	hud.update_effects(effects.active)
+	hud.update_effects(effects.active, force_field_charges)
 
 # Physics-query callbacks cannot safely add a monitoring Area2D directly.
 func _spawn_capsule(at: Vector2) -> void:
@@ -193,6 +194,11 @@ func _add_capsule(at: Vector2) -> void:
 func _catch_capsule(effect: Resource) -> void:
 	if reset_ready or level_complete:
 		return
+	var negated := EffectRules.negates_hazard(effect, force_field_charges)
+	force_field_charges = EffectRules.charges_after_catch(effect, force_field_charges)
+	if negated:
+		hud.update_effects(effects.active, force_field_charges)
+		return
 	if effect.extra_balls > 0:
 		_split_ball(effect)
 	effects.apply(effect)
@@ -201,7 +207,7 @@ func _catch_capsule(effect: Resource) -> void:
 			active_ball.breaker_time_left = effect.duration
 	_update_ball_effects()
 	paddle.set_width_multiplier(effects.width_multiplier())
-	hud.update_effects(effects.active)
+	hud.update_effects(effects.active, force_field_charges)
 	score += EffectRules.catch_points(effect)
 	lives += effect.extra_lives
 	hud.update_score(score)
@@ -213,10 +219,11 @@ func _clear_effects_and_capsules() -> void:
 	for bolt in get_tree().get_nodes_in_group("blaster_bolt"):
 		if is_ancestor_of(bolt):
 			bolt.queue_free()
+	force_field_charges = 0
 	for active_ball in get_balls():
 		active_ball.breaker_active = false
 	_update_ball_effects()
-	hud.update_effects(effects.active)
+	hud.update_effects(effects.active, force_field_charges)
 	paddle.set_width_multiplier(1.0)
 	for capsule in get_tree().get_nodes_in_group("capsule"):
 		capsule.queue_free()

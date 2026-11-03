@@ -9,6 +9,7 @@ extends Resource
 @export var shot_cooldown := 0.0
 @export var bolt_speed := 0.0
 @export var extra_lives := 0
+@export var hazard_charges := 0
 @export var extra_balls := 0
 @export var split_angle_degrees := 0.0
 
@@ -27,4 +28,8 @@ func validation_error() -> String:
 		return "Weapon tuning must be nonnegative."
 	if id == &"blaster" and (duration <= 0.0 or shot_cooldown <= 0.0 or bolt_speed <= 0.0):
 		return "Blaster needs a duration, cooldown and bolt speed."
+	if hazard_charges < 0:
+		return "Hazard charges must be nonnegative."
+	if hazard_charges > 0 and (hazard_charges != 3 or duration != 0.0 or hazard):
+		return "Force Field needs three charges, no timer and must be a power-up."
 	return ""

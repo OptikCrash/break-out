@@ -137,3 +137,12 @@ ignore balls, paddle and walls, and disappear on any brick contact or above the
 Play Area. They use the same damage as a Breaker ball: Resistant breaks in one hit,
 Reinforced still needs two hits, and Indestructible survives. No ammo count.
 Life loss and level completion clear bolts and cooldown along with the effect.
+**Force Field (issue #65)**:
+`force_field` is a power-up worth 25 catch points. Catching it sets three charges,
+replacing any remaining charges. Each subsequent hazard catch consumes one charge
+and applies no effect or points; power-ups apply and score normally without spending
+a charge. The third blocked hazard removes the field; the fourth applies normally.
+Charges have no timer. The HUD shows remaining charges in the active-effects panel.
+Life loss (last live ball) and level completion clear charges, following other capsule
+effects. The design does not specify charge clearing; this is an implementation default
+for review.

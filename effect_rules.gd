@@ -11,6 +11,7 @@ const DEFINITIONS = [
 	preload("res://effects/breaker.tres"),
 	preload("res://effects/sticky_paddle.tres"),
 	preload("res://effects/blaster.tres"),
+	preload("res://effects/force_field.tres"),
 ]
 const CAPSULE_SPEED := 240.0
 var shot_time_left := 0.0
@@ -21,6 +22,15 @@ static func random_effect(rng: RandomNumberGenerator) -> Resource:
 
 static func catch_points(effect: Resource) -> int:
 	return 0 if effect.hazard else 25
+
+# Charge state is separate from active timed effects. Power-ups never spend it.
+static func negates_hazard(effect: Resource, charges: int) -> bool:
+	return effect.hazard and charges > 0
+
+static func charges_after_catch(effect: Resource, charges: int) -> int:
+	if negates_hazard(effect, charges):
+		return charges - 1
+	return effect.hazard_charges if effect.hazard_charges > 0 else charges
 
 static func split_velocities(velocity: Vector2, effect: Resource) -> Array[Vector2]:
 	var angle := deg_to_rad(float(effect.split_angle_degrees))
