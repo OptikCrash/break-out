@@ -77,9 +77,25 @@ offset_bottom = 176.0
 theme_override_font_sizes/font_size = 32
 text = "Continue"
 
-[node name="ActiveEffects" type="Label" parent="."]
-offset_left = 1180.0
+[node name="ActiveEffects" type="VBoxContainer" parent="."]
+visible = false
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -368.0
 offset_top = 120.0
-offset_right = 1520.0
-offset_bottom = 260.0
+offset_right = -16.0
+offset_bottom = 120.0
+grow_horizontal = 0
 mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="ActiveEffects"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Active Effects"
+
+[node name="Rows" type="VBoxContainer" parent="ActiveEffects"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
