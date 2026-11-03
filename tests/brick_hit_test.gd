@@ -38,7 +38,8 @@ func _run() -> void:
 	_check(ball.position == ball.paddle.position + Vector2(0, -24), "Win immediately returns the ball to paddle rest")
 	_check(game.reset_ready, "Final brick enables restart")
 	_check(not ball.launched and not ball.is_physics_processing(), "Win resets and stops the ball")
-	_check(game.get_node("Hud/MessageLabel").text == "You Win!\nPress R to restart", "Final brick displays the win message")
+	_check(game.get_node("Hud/MessageLabel").text == "You Win!", "Final brick displays the win message")
+	_check(game.get_node("Hud/EndButtons").visible, "Final brick shows the Restart and Back to Title buttons")
 
 	game.free()
 	quit(1 if failures else 0)
