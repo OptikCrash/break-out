@@ -7,6 +7,10 @@ const BallRules = preload("res://ball_rules.gd")
 signal brick_broken(points: int)
 var launched := false
 var speed_multiplier := 1.0
+var sticky_active := false
+var caught := false
+var catch_offset := 0.0
+var caught_speed := 0.0
 # No pickup enables this yet; each ball owns its independent duration.
 var breaker_time_left := 0.0
 var breaker_active: bool:
@@ -17,6 +21,11 @@ var breaker_active: bool:
 
 func _physics_process(delta: float) -> void:
 	breaker_time_left = BallRules.tick_breaker(breaker_time_left, delta)
+	if caught:
+		_rest_on_paddle()
+		if Input.is_action_just_pressed("power_action"):
+			release_catch()
+		return
 	if not launched:
 		_rest_on_paddle()
 		if  Input.is_action_just_pressed("launch"):
@@ -39,7 +48,10 @@ func _physics_process(delta: float) -> void:
 
 			var x_dir: float = (ball_x - paddle_x) / hit.half_width
 
-			velocity = BallRules.paddle_direction(x_dir) * current_speed
+			if sticky_active:
+				catch_on_paddle(x_dir)
+			else:
+				velocity = BallRules.paddle_direction(x_dir) * current_speed
 		else:
 			velocity = velocity.bounce(collision.get_normal())
 			if hit.is_in_group("brick"):
@@ -55,10 +67,34 @@ func _rest_on_paddle() -> void:
 
 func reset() -> void:
 	launched = false
+	caught = false
+	velocity = Vector2.ZERO
 	# Winning stops physics, so placement cannot wait for the next physics tick.
 	_rest_on_paddle()
 
 func set_speed_multiplier(multiplier: float) -> void:
 	# Scale the current velocity, preserving direction and any underlying speed changes.
+	caught_speed *= multiplier / speed_multiplier
 	velocity *= multiplier / speed_multiplier
 	speed_multiplier = multiplier
+
+func catch_on_paddle(offset: float) -> void:
+	# Center visually, but preserve the contact point for the release angle.
+	catch_offset = offset
+	caught_speed = velocity.length()
+	caught = true
+	velocity = Vector2.ZERO
+	_rest_on_paddle()
+
+func release_catch() -> void:
+	if not caught:
+		return
+	caught = false
+	launched = true
+	_rest_on_paddle()
+	velocity = BallRules.sticky_release(catch_offset, caught_speed, paddle.recent_velocity_x)
+
+func set_sticky_active(active: bool) -> void:
+	sticky_active = active
+	if not active:
+		release_catch()

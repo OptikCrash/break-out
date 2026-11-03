@@ -81,9 +81,13 @@ See `PLAN.md` for scope and milestones.
 ## Capsules
 
 Custom levels can use `?` for a one-hit, zero-point Mystery Brick. It drops a random
-Wide Paddle, Slow Ball, Extra Life, Shrink Paddle hazard, or Speed-up Ball hazard capsule. Catch power-ups for 25 points;
+Wide Paddle, Slow Ball, Sticky Paddle, Extra Life, Shrink Paddle hazard, or Speed-up Ball hazard capsule. Catch power-ups for 25 points;
 hazards give no points, and missed capsules have no penalty. Width and speed effects last ten
 seconds and can overlap; catching the same effect refreshes its timer. The HUD lists
 active timers. Life loss and level completion clear effects and loose capsules.
 Capsules use plain placeholder shapes and text pending Chris's art.
 See GLOSSARY.md for provisional tuning values.
+
+Sticky Paddle catches balls for up to ten seconds. Press Space, left click, or
+gamepad A to release; expiry also releases automatically. The original catch point
+sets the angle, and sideways paddle movement adds momentum at release.

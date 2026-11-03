@@ -84,3 +84,16 @@ including balls added or launched during the effect. Expiry or lifecycle clearin
 only the effect multiplier, preserving direction and each ball's underlying speed.
 The factors and overlap calculation were unspecified in the design; these are explicit
 implementation defaults for review. Catch scores remain +25 and +0 respectively.
+
+**Sticky Paddle tuning (issue #54)**:
+Sticky Paddle (`sticky_paddle`) lasts 10 seconds, refreshes on pickup, and awards
+25 points. A caught ball stops and follows the paddle center, retaining its original
+normalized catch offset for release. This reconciles the centered placement in PLAN.md
+with the issue's catch-point-relative release rule. `power_action` or timer expiry
+releases every caught ball using the normal bounce direction at that stored offset
+(including the random lean at center), at its held speed including active speed effects.
+Add 25% of the paddle's actual horizontal velocity from its latest completed physics
+step to the release's horizontal velocity, capped to ±the held speed. Vertical velocity
+is unchanged, so sideways movement changes both angle and total speed. There is no
+momentum history or smoothing; a stationary step clears the contribution. The weighting,
+cap and one-step meaning of "recent" are implementation defaults for review.

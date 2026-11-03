@@ -146,3 +146,10 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - Ball speed effects scale current velocity by the ratio of new/old multipliers;
   `ball.speed` stays the base launch speed. Use `main.add_ball()` so new balls inherit
   active speed effects before launch. Do not repeatedly multiply velocity each tick.
+
+- Sticky catches remain `launched` (so pause still works), with a separate `caught`
+  flag. They visually center but retain the contact offset and held speed; scale
+  that held speed alongside velocity when speed effects change. Read the paddle's
+  actual last-step travel velocity, not its requested velocity (mouse input and
+  wall stops differ). Input-release tests must run real physics steps so Godot's
+  `is_action_just_pressed()` observes the press in the right clock.

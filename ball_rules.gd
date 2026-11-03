@@ -20,3 +20,9 @@ static func paddle_direction(x_dir: float) -> Vector2:
 	if x_dir == 0.0:
 		return launch_direction()
 	return Vector2(x_dir, -1.0).normalized()
+
+# Add bounded paddle momentum without changing the existing bounce rule.
+static func sticky_release(offset: float, held_speed: float, paddle_velocity: float) -> Vector2:
+	var result := paddle_direction(offset) * held_speed
+	result.x += clampf(paddle_velocity * 0.25, -held_speed, held_speed)
+	return result
