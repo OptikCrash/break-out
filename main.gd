@@ -1,5 +1,7 @@
 extends Node2D
 
+const BALL_SCENE = preload("res://ball.tscn")
+
 const TITLE_SCENE := "res://TitleScreen.tscn"
 
 @export var levels: Array[Level] = [
@@ -9,7 +11,10 @@ const TITLE_SCENE := "res://TitleScreen.tscn"
 ]
 @export var lives = 3
 @onready var paddle := $PlayArea/Paddle
-@onready var ball := $PlayArea/Ball
+# Convenience for callers needing the first ball; lifecycle uses the whole group.
+var ball: Node2D:
+	get:
+		return get_balls()[0] if not get_balls().is_empty() else null
 @onready var bricks := $PlayArea/Bricks
 @onready var hud := $Hud
 @onready var pause_screen := $PauseScreen
@@ -22,15 +27,17 @@ var reset_ready := false
 
 func _ready() -> void:
 	paddle_start = paddle.position
+	for active_ball in get_balls():
+		_connect_ball(active_ball)
 	if levels.is_empty():
 		push_error("Level sequence must contain at least one Level.")
-		ball.set_physics_process(false)
+		_stop_balls()
 		return
 	for index in levels.size():
 		var error := "Level resource is missing." if levels[index] == null else levels[index].validation_error()
 		if not error.is_empty():
 			push_error("Level sequence position %d: %s" % [index + 1, error])
-			ball.set_physics_process(false)
+			_stop_balls()
 			return
 	bricks.load_level(levels[0])
 	hud.update_level(1)
@@ -56,21 +63,33 @@ func _unhandled_input(event: InputEvent) -> void:
 # Only while the ball is in play: not resting on the paddle, and not under the
 # game-over or win message.
 func can_pause() -> bool:
-	return ball.launched and not reset_ready and not level_complete
-
-func _on_death_zone_body_entered(_body: Node2D) -> void:
 	if reset_ready or level_complete:
+		return false
+	for active_ball in get_balls():
+		if active_ball.launched:
+			return true
+	return false
+
+func _on_death_zone_body_entered(body: Node2D) -> void:
+	if reset_ready or level_complete:
+		return
+	if not body.is_in_group("ball") or body.is_queued_for_deletion():
+		return
+	# Remove membership now: queue_free() only deletes at the end of the frame.
+	body.remove_from_group("ball")
+	body.set_physics_process(false)
+	body.queue_free()
+	if not get_balls().is_empty():
 		return
 	lives -= 1
 	hud.update_lives(lives)
 	if lives == 0:
 		reset_ready = true
-		ball.set_physics_process(false)
 		hud.update_message("Game Over!")
 		hud.show_end_buttons()
 	else:
 		print("Lives left: ", lives)
-		ball.reset()
+		add_ball()
 
 func _on_ball_brick_broken(points: int) -> void:
 	if reset_ready or level_complete:
@@ -79,8 +98,9 @@ func _on_ball_brick_broken(points: int) -> void:
 	score += points
 	hud.update_score(score)
 	if bricks_left == 0:
-		ball.reset()
-		ball.set_physics_process(false)
+		for active_ball in get_balls():
+			active_ball.reset()
+		_stop_balls()
 		if current_level_index + 1 < levels.size():
 			level_complete = true
 			paddle.set_physics_process(false)
@@ -118,16 +138,42 @@ func continue_level() -> void:
 	paddle.position = paddle_start
 	paddle.velocity = Vector2.ZERO
 	paddle.following_mouse = false
-	ball.reset()
+	for active_ball in get_balls():
+		active_ball.reset()
 	hud.update_level(current_level_index + 1)
 	hud.hide_continue_button()
 	hud.update_message("")
 	level_complete = false
 	paddle.set_physics_process(true)
-	ball.set_physics_process(true)
+	for active_ball in get_balls():
+		active_ball.set_physics_process(true)
 
 func _count_destructible_bricks() -> void:
 	bricks_left = 0
 	for brick in bricks.get_children():
 		if brick.definition.destructible:
 			bricks_left += 1
+
+# Future Multi-ball creation uses this so every instance reports score to main.
+func add_ball() -> Node2D:
+	var new_ball = BALL_SCENE.instantiate()
+	new_ball.paddle = paddle
+	_connect_ball(new_ball)
+	$PlayArea.add_child(new_ball)
+	new_ball.reset()
+	return new_ball
+
+func _connect_ball(active_ball: Node2D) -> void:
+	if not active_ball.brick_broken.is_connected(_on_ball_brick_broken):
+		active_ball.brick_broken.connect(_on_ball_brick_broken)
+
+func get_balls() -> Array[Node]:
+	var active: Array[Node] = []
+	for candidate in get_tree().get_nodes_in_group("ball"):
+		if is_ancestor_of(candidate) and not candidate.is_queued_for_deletion():
+			active.append(candidate)
+	return active
+
+func _stop_balls() -> void:
+	for active_ball in get_balls():
+		active_ball.set_physics_process(false)
