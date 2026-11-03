@@ -169,10 +169,44 @@ charge-based (not timed) lifecycle. Not broken into issues until M4 ships and Ch
   paddle. Catching Companion Paddle again while only one remains resets the whole power-up back
   to 2 fresh companions, rather than just restoring the second one.
 
-### M6: Speed-up and game feel
+### M6: Paddle Boost and game feel
 
-Ball speed-up over time or on milestones, juice (screen shake, particles, tweened feedback), and
-sound.
+Designed in a grilling session with Chris on 2026-11-03; see `GLOSSARY.md`'s Paddle Boost entry
+for the vocabulary. Renamed from "Speed-up and game feel": the per-level speed ramp originally
+scoped here is parked (see below) in favor of a new per-hit mechanic.
+
+Acceptance criteria:
+- **Paddle Boost**: hitting the ball while the paddle is moving (`paddle.gd`'s `recent_velocity_x`)
+  adds to a single boost accumulator (speed above the ball's base speed — 550 today, per
+  `ball.gd`), scaled from the paddle's velocity. Every boosting hit **adds to the accumulator**
+  (clamped to a cap) **and resets its decay clock to full duration**, so repeated hits stack the
+  boost and keep extending how long it takes to fade. With no further hits, the accumulator decays
+  linearly to 0 over a fixed duration. The ball's actual speed is always base speed plus whatever
+  boost remains — it never drops below base while in flight. Boost only changes speed magnitude,
+  never the bounce angle (that stays governed by paddle-contact position, unchanged).
+  Boost must compose with the existing Slow Ball/Speed-up Ball multiplier effects
+  (`set_speed_multiplier()`) without double-counting — e.g. boost is additive on top of
+  `base speed × multiplier`, not itself multiplied. Cap and decay-duration numbers are
+  implementation defaults for review.
+- **Juice**:
+  - Screen shake on a hazard hitting the paddle and on a life lost.
+  - A particle burst on every brick break (all types, including Resistant).
+  - Tweened squash/scale feedback on paddle bounces and on capsule catches.
+  - Floating/scrolling point popups: on every brick break (its point value, including Mystery
+    Brick's 0) and on every capsule catch (the point delta — a literal "+0" for hazards, not a
+    name).
+- **Sound**: add the audio plumbing (AudioStreamPlayer nodes, a central sound-event dispatcher,
+  volume) plus placeholder cues for paddle bounce, wall bounce, brick break, power-up catch,
+  hazard catch, life lost, level complete, game over, and win. Since Chris has no sound files yet,
+  placeholder cues may be **procedurally synthesized** (simple generated tones, not sourced or
+  recorded samples) — a one-off, documented exception to "the team never creates art," audio-only,
+  swapped for Chris's real files whenever he makes them. Falls back to silence/no-op per cue if
+  synthesis turns out impractical.
+
+**Parked**: a permanent per-level-count speed-up (e.g. every 5 levels) was discussed but deferred
+until the total level count is settled — useful to extend a short level set by cycling back at
+higher speed, unnecessary if there end up being plenty of levels. Revisit alongside level-content
+planning, not as part of M6.
 
 ### M7: Local high scores
 
