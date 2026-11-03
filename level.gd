@@ -15,6 +15,9 @@ func validation_error() -> String:
 		for col in width:
 			if not lines[row][col] in ".#xo":
 				return "Invalid level character '%s' at row %d, column %d." % [lines[row][col], row + 1, col + 1]
+	# A playable layout needs a brick that can trigger level completion.
+	if not "#" in grid and not "x" in grid:
+		return "Level grid must contain at least one destructible brick (# or x)."
 	return ""
 
 func brick_symbol_at(cell: Vector2i) -> String:

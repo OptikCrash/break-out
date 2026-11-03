@@ -41,9 +41,7 @@ func _ready() -> void:
 	hud.update_lives(lives)
 	hud.restart_pressed.connect(restart)
 	hud.back_to_title_pressed.connect(back_to_title)
-	for brick in bricks.get_children():
-		if brick.definition.destructible:
-			bricks_left += 1
+	_count_destructible_bricks()
 
 func _process(_delta: float) -> void:
 	if reset_ready && Input.is_action_just_pressed("restart"):
@@ -114,10 +112,7 @@ func continue_level() -> void:
 	if not bricks.load_level(levels[current_level_index + 1]):
 		return
 	current_level_index += 1
-	bricks_left = 0
-	for brick in bricks.get_children():
-		if brick.definition.destructible:
-			bricks_left += 1
+	_count_destructible_bricks()
 	paddle.position = paddle_start
 	paddle.velocity = Vector2.ZERO
 	paddle.following_mouse = false
@@ -128,3 +123,9 @@ func continue_level() -> void:
 	level_complete = false
 	paddle.set_physics_process(true)
 	ball.set_physics_process(true)
+
+func _count_destructible_bricks() -> void:
+	bricks_left = 0
+	for brick in bricks.get_children():
+		if brick.definition.destructible:
+			bricks_left += 1

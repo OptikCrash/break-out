@@ -39,6 +39,12 @@ func _run() -> void:
 	for invalid in ["", "##\n#", "# ", "#?", "##\n\n##"]:
 		sample.grid = invalid
 		_check(not sample.validation_error().is_empty(), "Malformed grid must report a clear error: " + invalid)
+	for unplayable in ["ooo", "...", ".o\no."]:
+		sample.grid = unplayable
+		_check(sample.validation_error() == "Level grid must contain at least one destructible brick (# or x).", "Unclearable layouts must report why they cannot be loaded")
+	for playable in ["o#", "ox"]:
+		sample.grid = playable
+		_check(sample.validation_error().is_empty(), "Either destructible brick type makes a layout playable")
 	quit(1 if failures else 0)
 
 func _check(condition: bool, message: String) -> void:
