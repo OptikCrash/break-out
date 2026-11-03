@@ -5,6 +5,7 @@ const Capsule = preload("res://capsule.tscn")
 var effects = EffectRules.new()
 var capsule_rng := RandomNumberGenerator.new()
 
+const BOLT_SCENE = preload("res://blaster_bolt.tscn")
 const BALL_SCENE = preload("res://ball.tscn")
 
 const TITLE_SCENE := "res://TitleScreen.tscn"
@@ -165,6 +166,13 @@ func _count_completion_bricks() -> void:
 
 func _physics_process(delta: float) -> void:
 	effects.advance(delta)
+	if not reset_ready and not level_complete and Input.is_action_just_pressed("power_action"):
+		if effects.fire_blaster():
+			var bolt = BOLT_SCENE.instantiate()
+			bolt.position = $PlayArea.to_local(paddle.global_position)
+			bolt.speed = effects.active[&"blaster"].definition.bolt_speed
+			bolt.brick_broken.connect(_on_ball_brick_broken)
+			$PlayArea.add_child(bolt)
 	_update_ball_effects()
 	paddle.set_width_multiplier(effects.width_multiplier())
 	hud.update_effects(effects.active)
@@ -201,6 +209,10 @@ func _catch_capsule(effect: Resource) -> void:
 
 func _clear_effects_and_capsules() -> void:
 	effects.active.clear()
+	effects.shot_time_left = 0.0
+	for bolt in get_tree().get_nodes_in_group("blaster_bolt"):
+		if is_ancestor_of(bolt):
+			bolt.queue_free()
 	for active_ball in get_balls():
 		active_ball.breaker_active = false
 	_update_ball_effects()

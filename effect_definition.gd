@@ -6,6 +6,8 @@ extends Resource
 @export var duration := 0.0
 @export var paddle_width_multiplier := 1.0
 @export var ball_speed_multiplier := 1.0
+@export var shot_cooldown := 0.0
+@export var bolt_speed := 0.0
 @export var extra_lives := 0
 @export var extra_balls := 0
 @export var split_angle_degrees := 0.0
@@ -21,4 +23,8 @@ func validation_error() -> String:
 		return "Ball count must be nonnegative and spread in [0, 90) degrees."
 	if extra_balls > 0 and (extra_balls != 2 or split_angle_degrees == 0.0 or duration != 0.0):
 		return "Multi-ball needs two extra balls, a spread and no timer."
+	if shot_cooldown < 0.0 or bolt_speed < 0.0:
+		return "Weapon tuning must be nonnegative."
+	if id == &"blaster" and (duration <= 0.0 or shot_cooldown <= 0.0 or bolt_speed <= 0.0):
+		return "Blaster needs a duration, cooldown and bolt speed."
 	return ""
