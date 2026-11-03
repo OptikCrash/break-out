@@ -17,7 +17,9 @@ func _ready() -> void:
 	hud.update_lives(lives)
 	hud.restart_pressed.connect(restart)
 	hud.back_to_title_pressed.connect(back_to_title)
-	bricks_left = bricks.get_child_count()
+	for brick in bricks.get_children():
+		if brick.definition.destructible:
+			bricks_left += 1
 
 func _process(_delta: float) -> void:
 	if reset_ready && Input.is_action_just_pressed("restart"):
@@ -47,9 +49,9 @@ func _on_death_zone_body_entered(_body: Node2D) -> void:
 		print("Lives left: ", lives)
 		ball.reset()
 
-func _on_ball_brick_broken() -> void:
+func _on_ball_brick_broken(points: int) -> void:
 	bricks_left -= 1
-	score += 10
+	score += points
 	hud.update_score(score)
 	if bricks_left == 0:
 		ball.reset()

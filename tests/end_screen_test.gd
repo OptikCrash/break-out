@@ -66,7 +66,7 @@ func check_layout() -> void:
 func check_win_shows_buttons() -> void:
 	var game := await start_game()
 	game.bricks_left = 1
-	game._on_ball_brick_broken()
+	game._on_ball_brick_broken(10)
 	await process_frame
 	_check(game.get_node("Hud/EndButtons").visible, "Win must show the buttons")
 	_check(game.get_node("Hud/EndButtons/Restart").has_focus(), "Win must focus Restart")

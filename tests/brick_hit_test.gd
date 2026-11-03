@@ -15,7 +15,7 @@ func _run() -> void:
 	game.process_mode = Node.PROCESS_MODE_DISABLED
 	root.add_child(game)
 	var ball = game.get_node("PlayArea/Ball")
-	ball.brick_broken.connect(func(): broken_signals += 1)
+	ball.brick_broken.connect(func(_points): broken_signals += 1)
 	var first_brick = bricks.get_child(0)
 	var last_brick = bricks.get_child(1)
 	_check(game.score == 0 and game.bricks_left == 2, "Start with two unbroken bricks and zero points")
