@@ -5,6 +5,7 @@ const DEFINITIONS = [
 	preload("res://effects/wide_paddle.tres"),
 	preload("res://effects/shrink_paddle.tres"),
 	preload("res://effects/extra_life.tres"),
+	preload("res://effects/breaker.tres"),
 ]
 const CAPSULE_SPEED := 240.0
 var active: Dictionary = {}

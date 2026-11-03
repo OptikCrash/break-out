@@ -9,3 +9,4 @@ grid_symbol = "o"
 hit_points = 0
 points = 0
 destructible = false
+counts_for_completion = false

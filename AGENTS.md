@@ -138,3 +138,7 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 
 - Capsule effects clear on a life loss, which means the last live ball reaching the
   Death Zone; removing an earlier ball must preserve the paddle timers and width.
+
+- Resistant (`r`) is destructible but has `counts_for_completion = false`. Recount
+  unqueued completion bricks on destruction rather than decrementing for every score signal.
+  Breaker pickup refreshes current balls only; shared HUD time and per-ball time clear on level end.

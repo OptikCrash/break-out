@@ -8,6 +8,7 @@ func _initialize() -> void:
 		[&"wide_paddle", false, 10.0, 1.5, 0, 25],
 		[&"shrink_paddle", true, 10.0, 0.75, 0, 0],
 		[&"extra_life", false, 0.0, 1.0, 1, 25],
+		[&"breaker", false, 10.0, 1.0, 0, 25],
 	]
 	var ids := []
 	for i in Rules.DEFINITIONS.size():
@@ -60,9 +61,9 @@ func _initialize() -> void:
 	var seen := {}
 	for i in 300:
 		var effect = Rules.random_effect(rng)
-		_check(effect == Rules.DEFINITIONS[reference.randi_range(0, 2)], "Uniform draw uses one equal-weight index")
+		_check(effect == Rules.DEFINITIONS[reference.randi_range(0, 3)], "Uniform draw uses one equal-weight index")
 		seen[effect.id] = true
-	_check(seen.size() == 3, "All registered effects are reachable")
+	_check(seen.size() == 4, "All registered effects are reachable")
 	_check(Rules.CAPSULE_SPEED == 240.0, "Pin fall speed")
 	quit(1 if failures else 0)
 

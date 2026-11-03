@@ -56,7 +56,7 @@ func _run() -> void:
 		_check(not is_instance_valid(capsule), "Falling capsule physically touches paddle and frees")
 		_check(game.score == score_before + Rules.catch_points(effect), "Catch awards 25 for power-up and zero for hazard")
 		_check(game.lives == lives_before + effect.extra_lives, "Extra Life adds exactly one life")
-	_check(game.effects.active.size() == 2, "Wide and Shrink run concurrently; Extra Life is instant")
+	_check(game.effects.active.size() == 3, "Wide, Shrink and Breaker run concurrently; Extra Life is instant")
 	_check(game.paddle.half_width == 72.0, "Combined width affects bounce extent")
 	_check(game.paddle.get_node("CollisionShape2D").scale.x == 1.125, "Collision width follows effects")
 	_check(game.paddle.get_node("Sprite2D").scale.x == 1.125, "Existing art follows collision width")

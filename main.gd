@@ -102,7 +102,7 @@ func _on_death_zone_body_entered(body: Node2D) -> void:
 func _on_ball_brick_broken(points: int) -> void:
 	if reset_ready or level_complete:
 		return
-	bricks_left -= 1
+	_count_destructible_bricks()
 	score += points
 	hud.update_score(score)
 	if bricks_left == 0:
@@ -160,7 +160,7 @@ func continue_level() -> void:
 func _count_destructible_bricks() -> void:
 	bricks_left = 0
 	for brick in bricks.get_children():
-		if brick.definition.destructible:
+		if brick.definition.counts_for_completion and not brick.is_queued_for_deletion():
 			bricks_left += 1
 
 func _physics_process(delta: float) -> void:
@@ -185,6 +185,9 @@ func _catch_capsule(effect: Resource) -> void:
 	if reset_ready or level_complete:
 		return
 	effects.apply(effect)
+	if effect.id == &"breaker":
+		for active_ball in get_balls():
+			active_ball.breaker_time_left = effect.duration
 	paddle.set_width_multiplier(effects.width_multiplier())
 	hud.update_effects(effects.active)
 	score += EffectRules.catch_points(effect)
@@ -194,6 +197,8 @@ func _catch_capsule(effect: Resource) -> void:
 
 func _clear_effects_and_capsules() -> void:
 	effects.active.clear()
+	for active_ball in get_balls():
+		active_ball.breaker_active = false
 	hud.update_effects(effects.active)
 	paddle.set_width_multiplier(1.0)
 	for capsule in get_tree().get_nodes_in_group("capsule"):
