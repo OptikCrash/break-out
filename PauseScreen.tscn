@@ -1,0 +1,62 @@
+[gd_scene format=3 uid="uid://c4p8u2sq6nbxe"]
+
+[ext_resource type="Script" uid="uid://bsotg28nht86b" path="res://pause_screen.gd" id="1_pause"]
+
+[node name="PauseScreen" type="CanvasLayer" unique_id=1592640187]
+process_mode = 3
+layer = 10
+script = ExtResource("1_pause")
+
+[node name="Dim" type="ColorRect" parent="." unique_id=873015462]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.75)
+
+[node name="Center" type="CenterContainer" parent="." unique_id=1204857391]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Menu" type="VBoxContainer" parent="Center" unique_id=461938270]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 24
+
+[node name="Title" type="Label" parent="Center/Menu" unique_id=1718263540]
+layout_mode = 2
+theme_override_font_sizes/font_size = 96
+text = "PAUSED"
+horizontal_alignment = 1
+
+[node name="Resume" type="Button" parent="Center/Menu" unique_id=290174635]
+custom_minimum_size = Vector2(480, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "Resume"
+
+[node name="Restart" type="Button" parent="Center/Menu" unique_id=1835502716]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "Restart"
+
+[node name="BackToTitle" type="Button" parent="Center/Menu" unique_id=647281903]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "Back to Title"
+
+[node name="Hint" type="Label" parent="Center/Menu" unique_id=1093746258]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 32
+text = "Esc / Start: Resume   ·   Arrows + Enter, or Click"
+horizontal_alignment = 1
+
+[connection signal="pressed" from="Center/Menu/Resume" to="." method="_on_resume_pressed"]
+[connection signal="pressed" from="Center/Menu/Restart" to="." method="_on_restart_pressed"]
+[connection signal="pressed" from="Center/Menu/BackToTitle" to="." method="_on_back_to_title_pressed"]
