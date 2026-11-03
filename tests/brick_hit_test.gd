@@ -9,8 +9,8 @@ func _initialize() -> void:
 func _run() -> void:
 	var game = preload("res://main.tscn").instantiate()
 	var bricks = game.get_node("PlayArea/Bricks")
-	bricks.columns = 2
-	bricks.rows = 1
+	bricks.level = Level.new()
+	bricks.level.grid = "##"
 	# Exercise the hit rule synchronously, without input or physics timing.
 	game.process_mode = Node.PROCESS_MODE_DISABLED
 	root.add_child(game)

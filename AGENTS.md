@@ -88,3 +88,10 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - In Godot 4.7.2, the built-in `ui_accept` and `ui_cancel` bindings here have no
   joypad buttons. Keep explicit A/B bindings in `project.godot` alongside their
   keyboard events; d-pad focus alone does not prove a gamepad can activate a menu.
+
+## Level data
+
+- `Level.grid` uses equal-width rows and `.` for holes; spaces are invalid. The parser
+  accepts LF/CRLF and one final newline. It validates the whole grid before returning
+  cells, so malformed data cannot spawn a partial layout. `x`/`o` currently spawn
+  normal bricks; their distinct behavior belongs to the brick-types issue.
