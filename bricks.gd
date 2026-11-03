@@ -9,11 +9,24 @@ const protoBrick := preload("res://brick.tscn")
 @export var grid_start := Vector2(32, 128)
 
 func _ready() -> void:
-	if level == null:
+	load_level(level)
+
+# Validate before replacing the current layout; detach queued nodes immediately.
+func load_level(next_level: Level) -> bool:
+	if next_level == null:
 		push_error("Bricks requires a Level resource.")
-		return
+		return false
+	var error := next_level.validation_error()
+	if not error.is_empty():
+		push_error(error)
+		return false
+	for brick in get_children():
+		remove_child(brick)
+		brick.queue_free()
+	level = next_level
 	for cell in level.brick_cells():
 		var brick := protoBrick.instantiate()
 		brick.configure(level.brick_symbol_at(cell))
 		brick.position = grid_start + Vector2(cell) * brick_size
 		add_child(brick)
+	return true

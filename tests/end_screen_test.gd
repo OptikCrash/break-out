@@ -65,6 +65,7 @@ func check_layout() -> void:
 
 func check_win_shows_buttons() -> void:
 	var game := await start_game()
+	game.current_level_index = game.levels.size() - 1
 	game.bricks_left = 1
 	game._on_ball_brick_broken(10)
 	await process_frame

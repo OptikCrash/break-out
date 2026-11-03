@@ -12,6 +12,20 @@ to move between buttons and A to press one.
 While the ball is in play, Escape (or gamepad Start) pauses the game and opens a
 menu with Resume, Restart and Back to Title. Start or B (Circle) also resumes.
 
+## Level progression
+
+Clearing all destructible bricks shows "Level X Complete!". Choose Continue
+with the mouse, keyboard or gamepad to load the next level with score and lives
+intact. The paddle and ball return to their starting positions; launch again
+when ready. Clearing the final level shows "You Win!".
+
+The ordered `levels` array on `main.gd` selects the sequence. The gameplay scene
+stays alive while only the brick layout changes, preserving score and lives
+without an autoload. Each level grid must contain at least one Normal (`#`) or
+Reinforced (`x`) brick; all-hole and all-Indestructible grids are rejected because
+they cannot trigger completion. Levels 2 and 3 are temporary progression fixtures;
+their designed layouts and difficulty ramp are deferred to issue #39.
+
 ## Export for the web
 
 1. Open the project in Godot **4.7.2**. Under **Editor → Manage Export
