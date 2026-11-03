@@ -14,6 +14,8 @@
 - PR descriptions explain the Godot concept and why the approach was chosen,
   including alternatives considered. For CI, editor import builds the resource
   cache before standalone headless tests; plain processes avoid an addon dependency.
+- Draft the PR body in `PR_DESCRIPTION.md` at the repo root. `.gitignore` lists
+  `/PR_DESCRIPTION.md`, so it stays a local file; don't force-add it.
 
 - Winning disables ball physics immediately after `reset()`. Reset must place the ball
   on the paddle synchronously; waiting for `_physics_process()` leaves it in flight.
