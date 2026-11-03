@@ -2,8 +2,10 @@ extends StaticBody2D
 
 const BrickRules = preload("res://brick_rules.gd")
 
+signal broken(points: int, at: Vector2)
+
 signal capsule_dropped(at: Vector2)
-# Presentation only (particles); score still travels through brick_broken.
+# Presentation only (particles); score still travels through the ball's brick_broken.
 signal destroyed(at: Vector2)
 
 var definition: Resource = preload("res://bricks/normal.tres")
@@ -26,6 +28,7 @@ func take_hit(breaker := false) -> bool:
 	hit_points = BrickRules.remaining_hit_points(hit_points, definition.destructible)
 	if hit_points == 0:
 		queue_free()
+		broken.emit(definition.points, $CollisionShape2D.global_position)
 		destroyed.emit($CollisionShape2D.global_position)
 		if definition.drops_capsule:
 			capsule_dropped.emit($CollisionShape2D.global_position)

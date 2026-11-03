@@ -3,6 +3,7 @@ extends Node2D
 const EffectRules = preload("res://effect_rules.gd")
 const BallRules = preload("res://ball_rules.gd")
 const Capsule = preload("res://capsule.tscn")
+const FloatingPoints = preload("res://floating_points.tscn")
 var effects = EffectRules.new()
 var force_field_charges := 0
 var capsule_rng := RandomNumberGenerator.new()
@@ -54,9 +55,16 @@ var satellite_orbs := 0:
 			orb_visual.count = value
 var orb_visual: Node2D
 
+func _show_points(points: int, at: Vector2, signed := false) -> void:
+	var popup := FloatingPoints.instantiate()
+	popup.get_node("Label").text = ("%+d" if signed else "%d") % points
+	add_child(popup)
+	popup.global_position = at
+
 func _ready() -> void:
 	capsule_rng.randomize()
 	bricks.capsule_dropped.connect(_spawn_capsule)
+	bricks.brick_broken.connect(_show_points)
 	bricks.brick_destroyed.connect(_spawn_brick_burst)
 	paddle_start = paddle.position
 	# A child of the paddle, so the orbit follows it without extra code.
@@ -241,7 +249,7 @@ func _add_capsule(at: Vector2) -> void:
 	var capsule := Capsule.instantiate()
 	capsule.effect = EffectRules.random_effect(capsule_rng)
 	capsule.position = $PlayArea.to_local(at)
-	capsule.caught.connect(_catch_capsule)
+	capsule.caught.connect(func(effect: Resource): _catch_capsule(effect, capsule.global_position))
 	$PlayArea.add_child(capsule)
 
 # Every destroyed brick, whichever ball or bolt hit it. The final brick of a
@@ -252,9 +260,11 @@ func _spawn_brick_burst(at: Vector2) -> void:
 	burst.position = $PlayArea.to_local(at)
 	$PlayArea.add_child(burst)
 
-func _catch_capsule(effect: Resource) -> void:
+func _catch_capsule(effect: Resource, at := Vector2.INF) -> void:
 	if reset_ready or level_complete:
 		return
+	paddle.play_feedback()
+	_show_points(EffectRules.catch_points(effect), paddle.global_position if at == Vector2.INF else at, true)
 	var negated := EffectRules.negates_hazard(effect, force_field_charges)
 	force_field_charges = EffectRules.charges_after_catch(effect, force_field_charges)
 	if negated:
