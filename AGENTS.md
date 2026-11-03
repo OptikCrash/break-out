@@ -84,6 +84,10 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   Full Rect preset) instead of typing in new pixel offsets.
 - Controls directly under a `CanvasLayer` (such as `Hud`) are anchored to the viewport, not
   to a parent Control.
+- The Play Area covers x 384-1536, so new HUD panels go in the side gutters (the
+  Active Effects panel is anchored top-right) rather than over the bricks.
+  `hud.update_effects()` runs every physics frame: update existing rows instead of
+  rebuilding them.
 - `project.godot` uses `window/stretch/mode="canvas_items"`, so the logical viewport stays
   1920x1080 when the window is resized and the canvas is scaled. In headless checks, compare
   against `get_viewport().get_visible_rect()`, not the window size.
@@ -149,3 +153,17 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - Breaker pass-through must depend on the ball state and Resistant definition, not
   on `take_hit()` returning true: a queued brick can still collide again before
   frame end, while its repeated hit correctly returns false to prevent duplicate score.
+- Multi-ball copies use `add_ball()` collision exceptions in both directions: the ball
+  scene mask includes layer 4, so overlapping copies otherwise collide with each other.
+- Capsule catches run inside physics queries: defer Multi-ball body creation and
+  recheck the source ball and end-of-level state before spawning copies.
+- Ball speed effects scale current velocity by the ratio of new/old multipliers;
+  `ball.speed` stays the base launch speed. Use `main.add_ball()` so new balls inherit
+  active speed effects before launch. Do not repeatedly multiply velocity each tick.
+
+- Deferred-spawn tests that freeze balls in `node_added` must also disable physics
+  on `ready`, after script initialization enables callbacks. Keep the node process
+  mode active so manual collision checks still have a physics body in the space.
+
+- Completion tests must load or destroy actual bricks rather than assign `bricks_left`: the
+  completion recount intentionally ignores that cached value after each destruction.

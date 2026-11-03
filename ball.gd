@@ -6,6 +6,7 @@ const BallRules = preload("res://ball_rules.gd")
 @export var paddle: Node2D
 signal brick_broken(points: int)
 var launched := false
+var speed_multiplier := 1.0
 # Each ball owns its independent duration.
 var breaker_time_left := 0.0
 var breaker_active: bool:
@@ -21,7 +22,7 @@ func _physics_process(delta: float) -> void:
 		if  Input.is_action_just_pressed("launch"):
 			launched = true;
 			# Mostly straight up, with a small random lean left or right.
-			velocity = BallRules.launch_direction() * speed
+			velocity = BallRules.launch_direction() * speed * speed_multiplier
 		return
 		
 	var collision := move_and_collide(velocity * delta)
@@ -65,3 +66,8 @@ func reset() -> void:
 	launched = false
 	# Winning stops physics, so placement cannot wait for the next physics tick.
 	_rest_on_paddle()
+
+func set_speed_multiplier(multiplier: float) -> void:
+	# Scale the current velocity, preserving direction and any underlying speed changes.
+	velocity *= multiplier / speed_multiplier
+	speed_multiplier = multiplier

@@ -36,8 +36,50 @@ func hide_continue_button() -> void:
 	$Continue.release_focus()
 	$Continue.hide()
 
+# Placeholder colours until Chris draws effect icons. The row text also says
+# "Hazard" so the colour is never the only way to tell the two apart.
+const POWER_UP_COLOR := Color(0.3, 0.85, 0.4)
+const HAZARD_COLOR := Color(0.95, 0.35, 0.3)
+
+# `active` is effect_rules.gd's dictionary: effect ID -> {definition, remaining}.
+# main.gd calls this every physics frame, so rows are kept by effect ID and only
+# created or removed when an effect starts or ends, not rebuilt each frame.
 func update_effects(active: Dictionary) -> void:
-	var lines := PackedStringArray()
-	for entry in active.values():
-		lines.append("%s: %.1fs" % [entry.definition.display_name, entry.remaining])
-	$ActiveEffects.text = "\n".join(lines)
+	var rows := $ActiveEffects/Rows
+	for row in rows.get_children():
+		if not active.has(StringName(row.name)):
+			# remove_child first so the row is gone now, not at the end of the frame.
+			rows.remove_child(row)
+			row.queue_free()
+	for id in active:
+		var entry: Dictionary = active[id]
+		var row := rows.get_node_or_null(NodePath(String(id)))
+		if row == null:
+			row = _make_effect_row(id, entry.definition)
+			rows.add_child(row)
+		# Whole seconds, rounded up, so the number doesn't flicker every frame
+		# and never shows 0 while the effect is still running.
+		row.get_node("Name").text = "%s  %ds" % [_effect_label(entry.definition), ceili(entry.remaining)]
+	$ActiveEffects.visible = not active.is_empty()
+
+func _effect_label(effect: Resource) -> String:
+	return ("Hazard: " if effect.hazard else "") + effect.display_name
+
+func _make_effect_row(id: StringName, effect: Resource) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.name = String(id)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_theme_constant_override("separation", 12)
+	var swatch := ColorRect.new()
+	swatch.name = "placeholder_swatch"
+	swatch.custom_minimum_size = Vector2(24, 24)
+	swatch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	swatch.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	swatch.color = HAZARD_COLOR if effect.hazard else POWER_UP_COLOR
+	row.add_child(swatch)
+	var label := Label.new()
+	label.name = "Name"
+	label.add_theme_font_size_override("font_size", 24)
+	label.add_theme_color_override("font_color", HAZARD_COLOR if effect.hazard else Color.WHITE)
+	row.add_child(label)
+	return row

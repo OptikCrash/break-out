@@ -76,3 +76,24 @@ both fall and effect time. A final Mystery Brick still completes the level immed
 its pending drop is discarded with the level's other loose capsules.
 These tuning and reset choices were unspecified in PLAN.md and the issue; they are
 explicit implementation defaults for review, rather than previously agreed design values.
+
+**Multi-ball tuning (issue #52 provisional defaults)**:
+Each catch adds two copies of the first launched ball (or the first resting ball if
+none is launched), leaving other balls unchanged. Copies retain speed, launched state
+and remaining Breaker time. In flight, their velocities rotate -20 and +20 degrees
+from the original, which keeps its trajectory. They start at the same position and
+ignore collisions with other balls, separating through their different velocities
+without offsetting a copy into a wall or brick. Resting copies wait on the paddle
+and use the ordinary launch rule. There is no timer or ball-count cap.
+Creation waits until physics queries finish; a lost source or completed level
+cancels its pending copies.
+Repeat-catch behavior, resting catches and spread were unspecified in PLAN.md and
+the issue; these are explicit implementation defaults for review.
+**Ball speed capsule tuning (issue #53 provisional defaults)**:
+Slow Ball (`slow_ball`) multiplies ball speed by 0.75; Speed-up Ball (`speed_up_ball`)
+multiplies it by 1.5. Both last 10 seconds, refresh independently without stacking,
+and multiply together to 1.125 times the underlying speed. They affect all live balls,
+including balls added or launched during the effect. Expiry or lifecycle clearing removes
+only the effect multiplier, preserving direction and each ball's underlying speed.
+The factors and overlap calculation were unspecified in the design; these are explicit
+implementation defaults for review. Catch scores remain +25 and +0 respectively.

@@ -22,5 +22,23 @@ func check_layout() -> void:
 				push_error("MessageLabel text must be centered on both axes")
 				quit(1)
 				return
+		# The longest names in the pool, so a row can't spill past the panel.
+		hud.update_effects({
+			&"wide_paddle": {"definition": preload("res://effects/wide_paddle.tres"), "remaining": 10.0},
+			&"shrink_paddle": {"definition": preload("res://effects/shrink_paddle.tres"), "remaining": 10.0},
+		})
+		await process_frame
+		var panel: Control = hud.get_node("ActiveEffects")
+		var panel_rect := panel.get_global_rect()
+		if not root.get_visible_rect().encloses(panel_rect):
+			push_error("ActiveEffects must stay inside the viewport at %s" % viewport_size)
+			quit(1)
+			return
+		for label_name in ["Score", "Lives", "Level"]:
+			if panel_rect.intersects(hud.get_node(label_name).get_global_rect()):
+				push_error("ActiveEffects must not overlap the %s label" % label_name)
+				quit(1)
+				return
+		hud.update_effects({})
 	hud.free()
 	quit(0)
