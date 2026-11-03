@@ -156,6 +156,6 @@ or level completion; pending creation is canceled too. Spacing, speed, fixed bas
 Sticky interaction, gradual re-centering and lifecycle clearing are implementation
 defaults where the design was unspecified. Always resetting on any re-catch generalizes
 PLAN.md's one-survivor reset rule, as requested by issue #67; it remains provisional.
-Companions may overhang the Play Area walls at their authored offsets; their targets
-are not clamped. This is a provisional placement default, keeping the follow rule
-independent of wall collisions.
+Companion centers are clamped between the inner wall edges plus/minus their 64-pixel
+half-width, including on spawn, so their whole bounce surface stays inside the play area.
+This placement rule is a provisional default following issue #67 review feedback.

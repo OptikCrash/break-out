@@ -15,6 +15,9 @@ func _run() -> void:
 	unassigned.free()
 	_check(EFFECT.companion_count == 2 and EFFECT.companion_health == 3, "Pin count and health")
 	_check(EFFECT.companion_offset == Vector2(160, -96) and EFFECT.companion_follow_speed == 600.0, "Pin spacing and follow speed")
+	_check(Rules.companion_clamp_x(200, Vector2(416, 1504), 64) == 480.0, "Left wall includes half-width")
+	_check(Rules.companion_clamp_x(1700, Vector2(416, 1504), 64) == 1440.0, "Right wall includes half-width")
+	_check(Rules.companion_clamp_x(960, Vector2(416, 1504), 64) == 960.0, "Interior center unchanged")
 	for health in range(4):
 		_check(Rules.companion_health_after_hit(health) == maxi(0, health - 1), "One damage with zero floor")
 	_check(Rules.companion_follow_x(0, 1000, 600, 0.1) == 60.0, "Lag advances sixty pixels in a tenth second")
@@ -45,6 +48,22 @@ func _run() -> void:
 	_check(left.global_position.x == game.paddle.global_position.x - 200.0, "Actual follow lags forty pixels")
 	left._physics_process(0.1)
 	_check(left.global_position.x == game.paddle.global_position.x - 160.0, "Actual follow catches up")
+	var paddle_start: Vector2 = game.paddle.position
+	for edge in [96.0, 1056.0]:
+		game.paddle.position.x = edge
+		game._catch_capsule(EFFECT)
+		await process_frame
+		for follower in game.companions:
+			follower.set_physics_process(false)
+			_check(follower.global_position.x >= 480.0 and follower.global_position.x <= 1440.0, "Spawn stays inside inner walls")
+			follower._physics_process(1.0)
+			_check(follower.global_position.x >= 480.0 and follower.global_position.x <= 1440.0, "Follow stays inside inner walls")
+	game.paddle.position = paddle_start
+	game._catch_capsule(EFFECT)
+	await process_frame
+	for follower in game.companions:
+		follower.set_physics_process(false)
+	left = game.companions[0]
 	game._catch_capsule(preload("res://effects/sticky_paddle.tres"))
 	await physics_frame
 	await process_frame
@@ -82,6 +101,8 @@ func _run() -> void:
 	pickup.queue_free()
 	game._catch_capsule(preload("res://effects/force_field.tres"))
 	var score_before: int = game.score
+	await physics_frame
+	await process_frame
 	# Real Area2D/body overlap verifies the capsule mask reaches companions.
 	var hazard = preload("res://capsule.tscn").instantiate()
 	hazard.effect = preload("res://effects/shrink_paddle.tres")

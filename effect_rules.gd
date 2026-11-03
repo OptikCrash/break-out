@@ -62,3 +62,6 @@ static func companion_health_after_hit(health: int) -> int:
 
 static func companion_follow_x(current: float, target: float, speed: float, delta: float) -> float:
 	return move_toward(current, target, speed * delta)
+
+static func companion_clamp_x(center: float, bounds: Vector2, half_width: float) -> float:
+	return clampf(center, bounds.x + half_width, bounds.y - half_width)

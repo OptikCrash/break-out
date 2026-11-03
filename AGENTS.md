@@ -202,3 +202,7 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - Floating companions can be hit underneath or on a side. Reflect those contacts
   using the collision normal; the upward paddle-angle rule would send an underside
   hit straight back into the surface and drain health across consecutive frames.
+
+- Companion wall bounds come from the inner edges of the wall collision shapes.
+  Clamp centers by their half-width on spawn as well as while following; target-only
+  clamping leaves an initially out-of-bounds companion outside until it catches up.

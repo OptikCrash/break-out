@@ -315,9 +315,15 @@ func _replace_companions(effect: Resource, generation: int) -> void:
 		companion.main_paddle = paddle
 		companion.health = effect.companion_health
 		companion.follow_speed = effect.companion_follow_speed
+		var left_wall = $PlayArea/Walls/Left
+		var right_wall = $PlayArea/Walls/Right
+		companion.horizontal_bounds = Vector2(
+			left_wall.global_position.x + left_wall.shape.size.x / 2.0,
+			right_wall.global_position.x - right_wall.shape.size.x / 2.0)
 		companion.offset = Vector2(effect.companion_offset.x * (-1 if index == 0 else 1), effect.companion_offset.y)
 		$PlayArea.add_child(companion)
 		companion.global_position = paddle.global_position + companion.offset
+		companion._physics_process(0.0)
 		companions.append(companion)
 		companion.destroyed.connect(_on_companion_destroyed)
 
