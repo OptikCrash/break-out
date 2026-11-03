@@ -27,3 +27,39 @@ is lost. Always mostly vertical with a small random lean; avoid "serve" for this
 The direction is normalized from `(lean, -1)`, with lean sampled from -0.3 to 0.3.
 An exact zero sample uses 0.3 so it cannot travel perfectly vertically. A dead-center
 paddle hit uses this same rule, keeping the ball's current speed.
+
+**Power-up Action** (`power_action`):
+The shared input action for whatever a currently-active power-up lets the player trigger
+(releasing a Sticky Paddle catch, firing the Blaster, launching the Satellite Shield's balls).
+Bound to the same key as `launch`/accept; only one such power-up is ever active at a time.
+
+**Multi-ball Life Rule**:
+With more than one ball in play, a ball reaching the Death Zone is just removed; a life is lost
+only when the last remaining ball goes out. Mirrors Indestructible not counting toward a level's
+win condition.
+
+**Capsule**:
+The falling pickup dropped by a broken Mystery Brick, carrying either a power-up or a hazard.
+Falls straight down at a fixed speed; applies its effect on touching the paddle; disappears with
+no penalty if it reaches the Death Zone untouched.
+
+**Power-up**:
+A beneficial Capsule effect. Catching one awards 25 points in addition to its effect.
+_Avoid_: Bonus, item.
+
+**Hazard**:
+A detrimental Capsule effect, using the same pickup mechanics as a Power-up. Catching one awards
+0 points.
+
+**Breaker** (ball state):
+A temporary state a ball can carry, with its own duration timer, letting it destroy a Resistant
+Brick in one hit instead of bouncing off it. A property of the ball, not a separate ball type —
+see [ADR-0001](docs/adr/0001-power-up-ball-state.md).
+
+**Mystery Brick**:
+A 1-hit brick, worth 0 points, that drops a Capsule drawn uniformly at random from the combined
+power-up and hazard pool.
+
+**Resistant Brick**:
+A brick that a normal ball hit bounces off without effect; destroyed in one hit by a ball in the
+Breaker state. Worth 50 points when destroyed; does not count toward a level's win condition.
