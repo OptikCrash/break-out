@@ -39,6 +39,7 @@ func _run() -> void:
 	var bricks = game.get_node("PlayArea/Bricks")
 	bricks.level = Level.new()
 	bricks.level.grid = "#xxo"
+	game.levels.assign([bricks.level])
 	game.process_mode = Node.PROCESS_MODE_DISABLED
 	root.add_child(game)
 	var ball = game.get_node("PlayArea/Ball")

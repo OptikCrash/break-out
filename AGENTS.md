@@ -98,3 +98,7 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   brick instance, never mutate the definition when a brick is hit.
 - `brick_broken(points)` emits only on destruction; the brick queues deletion before
   the signal, guarding repeated final hits within the same frame.
+- Level progression keeps `main.tscn` alive. Configure `main.levels` for a custom
+  sequence (typed arrays in dynamic test fixtures use `game.levels.assign([...])`).
+  `Bricks.load_level()` detaches old children before queuing deletion so the next
+  level's destructible count cannot include the previous layout.

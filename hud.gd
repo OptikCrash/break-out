@@ -1,10 +1,12 @@
 extends CanvasLayer
 
 # The HUD only reports which button was chosen; main.gd decides what that does.
+signal continue_pressed
 signal restart_pressed
 signal back_to_title_pressed
 
 func _ready() -> void:
+	$Continue.pressed.connect(continue_pressed.emit)
 	$EndButtons/Restart.pressed.connect(restart_pressed.emit)
 	$EndButtons/BackToTitle.pressed.connect(back_to_title_pressed.emit)
 
@@ -22,3 +24,14 @@ func show_end_buttons() -> void:
 	# Focus lets keyboard and gamepad use the buttons (arrows/D-pad to move,
 	# Enter/Space/A to press) without touching the mouse.
 	$EndButtons/Restart.grab_focus()
+
+func update_level(value: int) -> void:
+	$Level.text = "Level: " + str(value)
+
+func show_continue_button() -> void:
+	$Continue.show()
+	$Continue.grab_focus()
+
+func hide_continue_button() -> void:
+	$Continue.release_focus()
+	$Continue.hide()
