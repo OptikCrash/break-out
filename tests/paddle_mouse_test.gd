@@ -47,6 +47,30 @@ func run() -> void:
 	await _move_mouse(800.0)
 	_check(absf(paddle.global_position.x - 800.0) < 1.0, "Moving the mouse again must take back control")
 
+	# Most recent input wins even while a key is still held: hold D, then move
+	# the mouse before releasing it. The mouse must take over at once.
+	Input.parse_input_event(_key(KEY_D, true))
+	for i in 10:
+		await physics_frame
+	_check(paddle.global_position.x > 850.0, "A new key press must take control from the mouse")
+	await _move_mouse(700.0)
+	_check(absf(paddle.global_position.x - 700.0) < 1.0,
+		"Moving the mouse while a key is held must take control")
+	for i in 5:
+		await physics_frame
+	_check(absf(paddle.global_position.x - 700.0) < 1.0,
+		"A key that is merely still held must not take control back")
+	# A key-repeat echo is not a new press, so it must not take control back.
+	var echo := _key(KEY_D, true)
+	echo.echo = true
+	Input.parse_input_event(echo)
+	for i in 5:
+		await physics_frame
+	_check(absf(paddle.global_position.x - 700.0) < 1.0,
+		"A key-repeat echo must not take control back")
+	Input.parse_input_event(_key(KEY_D, false))
+	await _move_mouse(800.0)
+
 	# In a 1280x720 window the canvas is scaled down; the window's centre is
 	# still the middle of the 1920-wide game.
 	root.size = Vector2i(1280, 720)

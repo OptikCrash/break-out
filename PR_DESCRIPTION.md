@@ -18,13 +18,25 @@ launch code paths, and remapping controls in a settings menu wouldn't cover it.
 
 `paddle.gd` keeps one flag, `following_mouse`:
 - an `InputEventMouseMotion` sets it, and stores the mouse's x in world space;
-- holding a move key clears it, and the paddle runs the old keyboard code unchanged.
+- a new press of `move_left` / `move_right` clears it, and the paddle runs the old keyboard code
+  unchanged.
 
-So whichever device the player last touched is in control. A mouse resting on the desk sends no
-motion events, so it never pulls against the keyboard. Releasing the key leaves the paddle where
-it is, and it won't jump back to the mouse until the mouse moves again. **Rejected:** adding the
-two inputs together, or polling the mouse position every frame. Either way a still mouse would
-keep dragging the paddle back while a key is held, which is the jitter the issue warns about.
+Both changes happen in `_input`, from the input events themselves. Nothing checks which keys are
+held. `event.is_action_pressed()` ignores key-repeat echoes by default, so only a real key-down
+counts. So whichever device the player last touched is in control, and holding D then moving the
+mouse hands control to the mouse straight away.
+
+A mouse resting on the desk sends no motion events, so it never pulls against the keyboard.
+Releasing the key leaves the paddle where it is, and it won't jump back to the mouse until the
+mouse moves again.
+
+**Rejected:**
+- Clearing the flag in `_physics_process` whenever `Input.get_axis()` is non-zero (an earlier
+  version of this PR). That polls held state, so a held key took control back every tick and a
+  newer mouse move lost.
+- Adding the two inputs together, or polling the mouse position every frame. Either way a still
+  mouse would keep dragging the paddle back while a key is held, which is the jitter the issue
+  warns about.
 
 ### Godot ideas involved
 
@@ -54,6 +66,8 @@ New `tests/paddle_mouse_test.gd` (headless, no addon) loads `main.tscn` and chec
 - in a 1280x720 window, the window's centre still maps to the middle of the field;
 - a held D key moves the paddle away from a mouse that isn't moving, releasing D doesn't snap it
   back, and moving the mouse again takes control back;
+- moving the mouse while D is still held takes control at once, and neither the held key nor a
+  key-repeat echo takes it back;
 - a left click launches the ball.
 
 `tests/title_screen_test.gd` already checks that the click that starts the game from the title

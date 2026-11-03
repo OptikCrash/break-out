@@ -45,6 +45,9 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - Input actions (`Input.is_action_just_pressed("launch")`) are updated before the GUI sees an
   event, so a mouse button bound to an action works even over ColorRects. Raw mouse motion is
   not: `paddle.gd` reads it in `_input` because the play field's ColorRects would mark it handled.
+- "Most recent input wins" has to be decided from events (`event.is_action_pressed()`, which
+  skips echoes), not from polled held state (`Input.get_axis()`), or a held key overrides
+  every newer mouse move.
 - Headless runs start with a 64x64 root window, and `canvas_items` stretch scales event positions
   to match. Tests that send mouse positions set `root.size = Vector2i(1920, 1080)` first.
 
