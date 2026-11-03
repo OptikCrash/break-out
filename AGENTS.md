@@ -54,6 +54,9 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   focused `Button` can't be pressed by a pad. `project.godot` overrides `ui_accept` to add
   joypad A. An override replaces the built-in event list, so keep the three keys in it.
   Arrows/D-pad already move focus through `ui_left`/`ui_right`/`ui_up`/`ui_down`.
+- `power_action` mirrors `launch` (Space, pad A, left click), so one press triggers both. Rebind
+  them together (`tests/power_action_test.gd` checks they match), and a power-up reading
+  `power_action` must not also act while the ball is waiting to `launch` on the same press.
 - Gamepad bindings use `device: -1` (any pad). Godot names buttons by position (Xbox layout):
   `JOY_BUTTON_A` is the bottom face button, Cross on PlayStation. A stick direction is an
   `InputEventJoypadMotion` with `axis_value` -1 or 1; the action's `deadzone` (0.2) filters
