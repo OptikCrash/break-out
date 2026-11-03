@@ -230,3 +230,12 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - Paddle Boost collision tests must leave decay active and assert the observed total,
   clock and rate before changing state. Restoring saved values after a stationary
   hit masks an accidental timer restart; account for the collision step in expectations.
+
+## Presentation feedback
+
+- Paddle squash animates only the sprite. Compose its feedback scale with the current
+  width multiplier, because `main.gd` reapplies width every physics step; keep the
+  collider and `half_width` stable during feedback.
+- Brick `broken(points, at)` is a presentation signal emitted after queuing deletion,
+  forwarded by Bricks. The ball/bolt score signals still own scoring and completion.
+  Capture capsule positions when caught, not when spawned: capsules move while falling.

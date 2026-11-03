@@ -63,6 +63,7 @@ func _physics_process(delta: float) -> void:
 			return
 
 		if hit.is_in_group("paddle"):
+			hit.play_feedback()
 			var ball_x: float = collision.get_position().x
 			# global_position: measured from the screen, like the collision point above.
 			var paddle_x: float = hit.global_position.x

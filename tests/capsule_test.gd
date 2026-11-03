@@ -61,7 +61,7 @@ func _run() -> void:
 	_check(game.effects.active.size() == 7, "Seven timed effects run concurrently; Extra Life and Multi-ball are instant")
 	_check(game.paddle.half_width == 72.0, "Combined width affects bounce extent")
 	_check(game.paddle.get_node("CollisionShape2D").scale.x == 1.125, "Collision width follows effects")
-	_check(game.paddle.get_node("Sprite2D").scale.x == 1.125, "Existing art follows collision width")
+	_check(is_equal_approx(game.paddle.get_node("Sprite2D").scale.x, 1.125 * game.paddle.feedback_scale.x), "Existing art composes collision width with catch feedback")
 	var score_before: int = game.score
 	var lives_before: int = game.lives
 	capsule = Capsule.instantiate()
