@@ -14,6 +14,7 @@ func run() -> void:
 	await check_pause_freezes_play()
 	await check_layout()
 	await check_gamepad_and_tab()
+	await check_gamepad_back_to_title()
 	await check_key_repeat()
 	# Resume: Escape again, keyboard on the focused button, mouse click.
 	await check_resume(_key(KEY_ESCAPE))
@@ -61,6 +62,37 @@ func check_gamepad_and_tab() -> void:
 		await physics_frame
 	_check(not paused and current_scene.scene_file_path == TITLE,
 		"Gamepad A after Tab navigation must return to title and unpause")
+
+# Exercise every pause button without a keyboard, using both built-in focus inputs.
+func check_gamepad_back_to_title() -> void:
+	for use_stick in [false, true]:
+		var game := await _start_game()
+		await _tap(_joy(JOY_BUTTON_A))
+		await _tap(_joy(JOY_BUTTON_START))
+		_check(game.pause_screen.get_node("Center/Menu/Resume").has_focus(),
+			"Gamepad pause must initially focus Resume")
+		for i in 2:
+			if use_stick:
+				var motion := InputEventJoypadMotion.new()
+				motion.axis = JOY_AXIS_LEFT_Y
+				motion.axis_value = 1.0
+				Input.parse_input_event(motion)
+				await physics_frame
+				await process_frame
+				motion = motion.duplicate()
+				motion.axis_value = 0.0
+				Input.parse_input_event(motion)
+				await physics_frame
+				await process_frame
+			else:
+				await _tap(_joy(JOY_BUTTON_DPAD_DOWN))
+		_check(game.pause_screen.get_node("Center/Menu/BackToTitle").has_focus(),
+			"D-pad and stick must reach Back to Title")
+		await _tap(_joy(JOY_BUTTON_A))
+		for i in 4:
+			await physics_frame
+		_check(not paused and current_scene.scene_file_path == TITLE,
+			"Gamepad alone must return to title and unpause")
 
 func check_key_repeat() -> void:
 	var game := await _start_game()

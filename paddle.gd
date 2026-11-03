@@ -3,7 +3,7 @@ extends CharacterBody2D
 @export var speed : = 1000.0
 
 # Whichever input was used last is in charge: a mouse move hands control to
-# the mouse, a fresh move key press hands it back to the keyboard. Both are
+# the mouse, a fresh move action hands it back to the keyboard or gamepad. Both are
 # decided from input events, not from what is held down, so moving the mouse
 # while a key is still held gives the mouse control.
 var following_mouse := false

@@ -54,6 +54,11 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   focused `Button` can't be pressed by a pad. `project.godot` overrides `ui_accept` to add
   joypad A. An override replaces the built-in event list, so keep the three keys in it.
   Arrows/D-pad already move focus through `ui_left`/`ui_right`/`ui_up`/`ui_down`.
+- Gamepad bindings use `device: -1` (any pad). Godot names buttons by position (Xbox layout):
+  `JOY_BUTTON_A` is the bottom face button, Cross on PlayStation. A stick direction is an
+  `InputEventJoypadMotion` with `axis_value` -1 or 1; the action's `deadzone` (0.2) filters
+  drift, and `Input.get_axis()` returns the analog strength (rescaled past the deadzone), so a
+  partial tilt moves the paddle more slowly. In tests, release a stick by sending the same axis with `axis_value = 0.0`.
 - `Button`s fire on release, for keyboard and gamepad as well as the mouse, so leaving a scene
   from a button doesn't hand a fresh "just pressed" Space to the next scene. A press that
   comes from `_unhandled_input`, like the title screen's, still needs the physics-frame wait.
