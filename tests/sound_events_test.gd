@@ -70,7 +70,9 @@ func run() -> void:
 	_expect([&"brick_break"], "Breaker destroys Resistant with only brick break")
 	_check(ball.velocity.is_equal_approx(Vector2(0, -550)), "Breaker passes through Resistant without reflecting")
 	ball.breaker_active = false
+	ball.velocity = Vector2(0, -550)
 	ball._hit_surface(reinforced, Vector2.DOWN)
+	_check(ball.velocity.is_equal_approx(Vector2(0, 550)), "Destroying Reinforced hit still reflects without a wall bounce cue")
 	ball._break_brick(reinforced)
 	_expect([&"brick_break"], "Destruction sounds once, including same-frame repeated hit")
 	game._catch_capsule(preload("res://effects/wide_paddle.tres"))
