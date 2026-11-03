@@ -151,7 +151,7 @@ func check_gating() -> void:
 	var final_level := Level.new()
 	final_level.grid = "#"
 	game.bricks.load_level(final_level)
-	game._count_destructible_bricks()
+	game._count_completion_bricks()
 	game.ball._break_brick(game.bricks.get_child(0))
 	await _tap(_joy(JOY_BUTTON_START))
 	_check(not paused and not game.pause_screen.visible,

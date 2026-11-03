@@ -70,7 +70,7 @@ func check_win_shows_buttons() -> void:
 	var final_level := Level.new()
 	final_level.grid = "#"
 	game.bricks.load_level(final_level)
-	game._count_destructible_bricks()
+	game._count_completion_bricks()
 	game.ball._break_brick(game.bricks.get_child(0))
 	await process_frame
 	_check(game.get_node("Hud/EndButtons").visible, "Win must show the buttons")

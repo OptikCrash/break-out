@@ -145,3 +145,7 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - For manually stepped collision tests, call `set_physics_process(false)` after adding
   the ball to the tree: script initialization enables its physics callback on entry.
   Keep the test world enabled so its collision bodies remain in the physics space.
+
+- Breaker pass-through must depend on the ball state and Resistant definition, not
+  on `take_hit()` returning true: a queued brick can still collide again before
+  frame end, while its repeated hit correctly returns false to prevent duplicate score.

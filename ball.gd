@@ -45,7 +45,9 @@ func _physics_process(delta: float) -> void:
 func _hit_surface(hit: Node, normal: Vector2) -> void:
 	var passes_through := false
 	if hit.is_in_group("brick"):
-		passes_through = _break_brick(hit) and hit.definition.requires_breaker
+		# A queued brick can still collide in another physics step this frame.
+		passes_through = breaker_active and hit.definition.requires_breaker
+		_break_brick(hit)
 	if not passes_through:
 		velocity = velocity.bounce(normal)
 

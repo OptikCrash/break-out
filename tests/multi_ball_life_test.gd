@@ -47,7 +47,7 @@ func run() -> void:
 	var final_level := Level.new()
 	final_level.grid = "#"
 	game.bricks.load_level(final_level)
-	game._count_destructible_bricks()
+	game._count_completion_bricks()
 	second._break_brick(game.bricks.get_child(0))
 	_check(game.score == 35 and game.level_complete, "Added ball reports destruction and score")
 	_check(game.effects.active.is_empty() and game.paddle.half_width == 64.0, "Completion clears effects with multiple balls")

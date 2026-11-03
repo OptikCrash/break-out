@@ -84,7 +84,9 @@ Custom levels can use `?` for a one-hit, zero-point Mystery Brick. It drops a ra
 Wide Paddle, Shrink Paddle hazard, Extra Life, or Breaker capsule.
 Breaker lasts ten seconds and refreshes every current ball’s independent timer.
 Resistant bricks (`r`) stop ordinary balls but break for 50 points when hit by
-a Breaker ball, which continues through them. They never count toward completion. Catch power-ups for 25 points;
+a Breaker ball, which continues through them. They never count toward completion.
+
+Catch power-ups for 25 points;
 hazards give no points, and missed capsules have no penalty. Wide and Shrink last ten
 seconds and can overlap; catching the same effect refreshes its timer. The HUD lists
 active timers. Life loss and level completion clear effects and loose capsules.

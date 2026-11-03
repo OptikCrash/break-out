@@ -51,7 +51,8 @@ func _run() -> void:
 	ball.velocity = Vector2(0, -550)
 	ball._hit_surface(resistant, Vector2.DOWN)
 	_check(ball.velocity == Vector2(0, -550), "Breaker continues through destroyed Resistant")
-	ball._break_brick(resistant)
+	ball._hit_surface(resistant, Vector2.DOWN)
+	_check(ball.velocity == Vector2(0, -550), "Same-frame repeated hit stays pass-through")
 	_check(resistant.is_queued_for_deletion() and game.score == 100, "One hit awards exactly fifty once, including same-frame duplicate")
 	_check(game.bricks_left == 1 and not game.reset_ready, "Optional destruction cannot complete the level")
 	second._physics_process(10.0)
@@ -90,6 +91,9 @@ func _check_physics_collision() -> void:
 	ball._physics_process(0.1)
 	_check(brick.is_queued_for_deletion() and awards == [50], "Real Breaker collision destroys Resistant and emits fifty points")
 	_check(ball.velocity == Vector2(0, -550), "Real Breaker collision preserves forward velocity")
+	# Repeat before yielding: queue_free leaves the collider live until frame end.
+	ball._physics_process(0.1)
+	_check(ball.velocity == Vector2(0, -550) and awards == [50], "Second same-frame physics collision stays pass-through and awards once")
 	await process_frame
 	await process_frame
 	ball._physics_process(0.1)
