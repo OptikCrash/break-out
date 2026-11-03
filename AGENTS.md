@@ -190,3 +190,12 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - Force Field charges live separately on `main.gd`, never in the timed `active`
   dictionary. HUD charge entries are display-only; hazard gating happens before
   applying any capsule effects. Charges clear with the other capsule effects.
+
+- Companion scenes inherit `paddle.tscn` with their own root script and retain the
+  `paddle` group for shared ball/capsule detection. Only the main paddle collects
+  power-ups or catches Sticky balls; companions consume hazards locally.
+- After manually moving a physics body in a headless test, await a physics frame
+  and then a process frame before checking collisions at its new position, so the
+  physics server has synchronized the transform.
+- Companion replacement defers body creation out of capsule physics queries. Its
+  generation counter invalidates pending replacements on life loss/level end.

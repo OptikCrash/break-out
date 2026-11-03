@@ -134,3 +134,21 @@ Charges have no timer. The HUD shows remaining charges in the active-effects pan
 Life loss (last live ball) and level completion clear charges, following other capsule
 effects. The design does not specify charge clearing; this is an implementation default
 for review.
+
+**Companion Paddle (issue #67 provisional defaults)**:
+`companion_paddle` awards 25 catch points and always replaces the whole power-up with
+exactly two fresh companions, each with three hit points, even if both still survive.
+They start at horizontal offsets −160/+160 pixels and 96 pixels above the main paddle.
+Each follows its own horizontal target at 600 pixels/second without overshoot; vertical
+placement stays 96 pixels above the main paddle. When one dies the other's horizontal
+target becomes the main paddle center; it catches up at the same speed rather than
+teleporting. Offsets and follow speed are authored in the effect definition.
+Each retains the ordinary base 128×16 paddle surface and existing paddle sprite;
+Wide/Shrink and Sticky affect only the main paddle. Companion bounces use ordinary
+paddle angles and preserve ball speed. A bounce or intercepted hazard spends one health;
+power-up capsules pass untouched. Intercepted hazards give no score/effect and do not
+spend Force Field charges. Companions have no timer and clear on last-ball life loss
+or level completion; pending creation is canceled too. Spacing, speed, fixed base width,
+Sticky interaction, gradual re-centering and lifecycle clearing are implementation
+defaults where the design was unspecified. Always resetting on any re-catch generalizes
+PLAN.md's one-survivor reset rule, as requested by issue #67; it remains provisional.

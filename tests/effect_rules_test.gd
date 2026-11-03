@@ -14,6 +14,7 @@ func _initialize() -> void:
 		[&"breaker", false, 10.0, 1.0, 0, 25],
 		[&"sticky_paddle", false, 10.0, 1.0, 0, 25],
 		[&"force_field", false, 0.0, 1.0, 0, 25],
+		[&"companion_paddle", false, 0.0, 1.0, 0, 25],
 	]
 	_check(Rules.DEFINITIONS.size() == expected.size(), "Pin pool size")
 	var ids := []
@@ -136,7 +137,7 @@ func _initialize() -> void:
 		var effect = Rules.random_effect(rng)
 		_check(effect == Rules.DEFINITIONS[reference.randi_range(0, Rules.DEFINITIONS.size() - 1)], "Uniform draw uses one equal-weight index")
 		seen[effect.id] = true
-	_check(seen.size() == 9, "All registered effects are reachable")
+	_check(seen.size() == 10, "All registered effects are reachable")
 	_check(Rules.CAPSULE_SPEED == 240.0, "Pin fall speed")
 	quit(1 if failures else 0)
 

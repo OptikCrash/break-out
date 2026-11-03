@@ -50,10 +50,12 @@ func _physics_process(delta: float) -> void:
 
 			var x_dir: float = (ball_x - paddle_x) / hit.half_width
 
-			if sticky_active:
+			if sticky_active and not hit.is_in_group("companion"):
 				catch_on_paddle(x_dir)
 			else:
 				velocity = BallRules.paddle_direction(x_dir) * current_speed
+			if hit.is_in_group("companion"):
+				hit.take_hit()
 		else:
 			_hit_surface(hit, collision.get_normal())
 

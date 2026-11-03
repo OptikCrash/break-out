@@ -11,6 +11,7 @@ const DEFINITIONS = [
 	preload("res://effects/breaker.tres"),
 	preload("res://effects/sticky_paddle.tres"),
 	preload("res://effects/force_field.tres"),
+	preload("res://effects/companion_paddle.tres"),
 ]
 const CAPSULE_SPEED := 240.0
 var active: Dictionary = {}
@@ -55,3 +56,9 @@ func speed_multiplier() -> float:
 	for entry in active.values():
 		multiplier *= entry.definition.ball_speed_multiplier
 	return multiplier
+
+static func companion_health_after_hit(health: int) -> int:
+	return maxi(0, health - 1)
+
+static func companion_follow_x(current: float, target: float, speed: float, delta: float) -> float:
+	return move_toward(current, target, speed * delta)
