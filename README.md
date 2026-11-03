@@ -6,6 +6,9 @@ The Godot project is at the repository root. Open `project.godot` in Godot
 the title screen; press Space or Enter, or click, to start the game. F6 on
 `main.tscn` still skips straight to gameplay.
 Move with A/D or the arrow keys, launch with Space, and restart with R.
+With a gamepad, move with the left stick or D-pad, launch with A (Cross on
+PlayStation) and restart with Y (Triangle). Menus use the D-pad or left stick
+to move between buttons and A to press one.
 
 ## Export for the web
 
