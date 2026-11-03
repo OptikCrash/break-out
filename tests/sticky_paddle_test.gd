@@ -87,7 +87,8 @@ func _run() -> void:
 	_check(ball.velocity.is_equal_approx(expected), "Expiry uses same offset and momentum formula")
 	_check(not ball.caught and not ball.sticky_active and ball.velocity.y < 0, "Expiry releases immediately")
 
-	# A real normal bounce after expiry must retain only the active speed multiplier.
+	# A stationary normal bounce isolates Sticky from the independent Paddle Boost.
+	game.paddle.recent_velocity_x = 0.0
 	ball.set_speed_multiplier(1.5)
 	ball.global_position = game.paddle.global_position + Vector2(32, -30)
 	ball.velocity = Vector2(0, ball.velocity.length())

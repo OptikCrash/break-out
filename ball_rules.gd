@@ -1,6 +1,19 @@
 extends RefCounted
 
 const BREAKER_DURATION := 10.0
+const BOOST_VELOCITY_FACTOR := 0.25
+const BOOST_CAP := 550.0
+const BOOST_DURATION := 3.0
+
+static func boosted_total(current: float, paddle_velocity: float) -> float:
+	return minf(BOOST_CAP, current + absf(paddle_velocity) * BOOST_VELOCITY_FACTOR)
+
+static func tick_boost(current: float, rate: float, delta: float) -> float:
+	return maxf(0.0, current - rate * delta)
+
+static func changed_multiplier_speed(current: float, boost: float, old: float, new: float) -> float:
+	return maxf(0.0, current - boost) * new / old + boost
+
 
 static func tick_breaker(time_left: float, delta: float) -> float:
 	return maxf(0.0, time_left - delta)
