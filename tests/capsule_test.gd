@@ -20,10 +20,12 @@ func _run() -> void:
 	# Move the shape to prove drops use its center rather than a duplicated offset.
 	mystery.get_node("CollisionShape2D").position += Vector2(3, 2)
 	var drop_at: Vector2 = mystery.get_node("CollisionShape2D").global_position
-	# Freeze new drops at tree entry, before any physics step can move them.
+	# Script initialization can enable physics again after tree entry.
+	# Freeze on ready too, before any physics step can move the drop.
 	var freeze_drop := func(node: Node):
 		if node.is_in_group("capsule"):
 			node.set_physics_process(false)
+			node.ready.connect(func(): node.set_physics_process(false), CONNECT_ONE_SHOT)
 	node_added.connect(freeze_drop)
 	game.ball._break_brick(mystery)
 	game.ball._break_brick(mystery)

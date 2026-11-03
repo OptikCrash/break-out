@@ -174,6 +174,8 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - Deferred-spawn tests that freeze balls in `node_added` must also disable physics
   on `ready`, after script initialization enables callbacks. Keep the node process
   mode active so manual collision checks still have a physics body in the space.
+  This also applies to capsules: freezing only in `node_added` can let their first
+  physics step move them before an exact spawn-position assertion.
 
 - Completion tests must load or destroy actual bricks rather than assign `bricks_left`: the
   completion recount intentionally ignores that cached value after each destruction.
