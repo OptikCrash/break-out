@@ -10,6 +10,7 @@ const DEFINITIONS = [
 	preload("res://effects/multi_ball.tres"),
 	preload("res://effects/breaker.tres"),
 	preload("res://effects/sticky_paddle.tres"),
+	preload("res://effects/satellite_shield.tres"),
 	preload("res://effects/blaster.tres"),
 	preload("res://effects/force_field.tres"),
 ]
@@ -35,6 +36,15 @@ static func charges_after_catch(effect: Resource, charges: int) -> int:
 static func split_velocities(velocity: Vector2, effect: Resource) -> Array[Vector2]:
 	var angle := deg_to_rad(float(effect.split_angle_degrees))
 	return [velocity.rotated(-angle), velocity.rotated(angle)]
+
+# Re-catching Satellite Shield resets the orb count instead of adding to it.
+static func orbs_after_catch(current: int, effect: Resource) -> int:
+	return effect.orbs if effect.orbs > 0 else current
+
+# One orb per press, and never on the press that launches a resting ball:
+# launch and power_action share a key.
+static func can_launch_orb(orbs: int, ball_waiting_to_launch: bool) -> bool:
+	return orbs > 0 and not ball_waiting_to_launch
 
 func apply(effect: Resource) -> void:
 	if effect.duration > 0.0:

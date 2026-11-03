@@ -1,6 +1,7 @@
 extends Node2D
 
 const EffectRules = preload("res://effect_rules.gd")
+const BallRules = preload("res://ball_rules.gd")
 const Capsule = preload("res://capsule.tscn")
 var effects = EffectRules.new()
 var force_field_charges := 0
@@ -8,6 +9,7 @@ var capsule_rng := RandomNumberGenerator.new()
 
 const BOLT_SCENE = preload("res://blaster_bolt.tscn")
 const BALL_SCENE = preload("res://ball.tscn")
+const OrbVisual = preload("res://placeholder_satellite_orbs.gd")
 
 const TITLE_SCENE := "res://TitleScreen.tscn"
 
@@ -31,11 +33,23 @@ var paddle_start: Vector2
 var score = 0
 var bricks_left = 0
 var reset_ready := false
+# Satellite Shield is charge-based, so its count lives here rather than in the
+# timed effects dictionary. The orbs are drawn only; they become balls at launch.
+var satellite_orbs := 0:
+	set(value):
+		satellite_orbs = value
+		if orb_visual:
+			orb_visual.count = value
+var orb_visual: Node2D
 
 func _ready() -> void:
 	capsule_rng.randomize()
 	bricks.capsule_dropped.connect(_spawn_capsule)
 	paddle_start = paddle.position
+	# A child of the paddle, so the orbit follows it without extra code.
+	orb_visual = OrbVisual.new()
+	orb_visual.name = "PlaceholderSatelliteOrbs"
+	paddle.add_child(orb_visual)
 	for active_ball in get_balls():
 		_connect_ball(active_ball)
 	if levels.is_empty():
@@ -177,6 +191,31 @@ func _physics_process(delta: float) -> void:
 	_update_ball_effects()
 	paddle.set_width_multiplier(effects.width_multiplier())
 	hud.update_effects(effects.active, force_field_charges)
+	orb_visual.orbit_size.x = paddle.half_width + 28.0
+	# Read in the physics step, like ball.gd, so both see the same "just pressed".
+	# No arbitration: one press can also fire Blaster and release a Sticky catch.
+	if Input.is_action_just_pressed("power_action"):
+		launch_orb()
+
+# Turns one waiting orb into an ordinary ball. Its Breaker timer starts now
+# (ADR-0001), so time spent orbiting never counts against it.
+func launch_orb() -> Node2D:
+	if reset_ready or level_complete:
+		return null
+	if not EffectRules.can_launch_orb(satellite_orbs, _ball_waiting_to_launch()):
+		return null
+	satellite_orbs -= 1
+	var orb_ball = add_ball()
+	orb_ball.breaker_active = true
+	orb_ball.launched = true
+	orb_ball.velocity = BallRules.launch_direction() * orb_ball.speed * orb_ball.speed_multiplier
+	return orb_ball
+
+func _ball_waiting_to_launch() -> bool:
+	for active_ball in get_balls():
+		if not active_ball.launched:
+			return true
+	return false
 
 # Physics-query callbacks cannot safely add a monitoring Area2D directly.
 func _spawn_capsule(at: Vector2) -> void:
@@ -202,6 +241,7 @@ func _catch_capsule(effect: Resource) -> void:
 	if effect.extra_balls > 0:
 		_split_ball(effect)
 	effects.apply(effect)
+	satellite_orbs = EffectRules.orbs_after_catch(satellite_orbs, effect)
 	if effect.id == &"breaker":
 		for active_ball in get_balls():
 			active_ball.breaker_time_left = effect.duration
@@ -215,6 +255,7 @@ func _catch_capsule(effect: Resource) -> void:
 
 func _clear_effects_and_capsules() -> void:
 	effects.active.clear()
+	satellite_orbs = 0
 	effects.shot_time_left = 0.0
 	for bolt in get_tree().get_nodes_in_group("blaster_bolt"):
 		if is_ancestor_of(bolt):

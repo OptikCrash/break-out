@@ -82,7 +82,7 @@ See `PLAN.md` for scope and milestones.
 
 Custom levels can use `?` for a one-hit, zero-point Mystery Brick. It drops a random
 Wide Paddle, Slow Ball, Sticky Paddle, Blaster, Extra Life, Multi-ball, Breaker,
-Shrink Paddle hazard, Speed-up Ball hazard, or Force Field capsule. Force Field blocks
+Shrink Paddle hazard, Speed-up Ball hazard, Force Field, or Satellite Shield capsule. Force Field blocks
 the next three hazard catches; catching it again resets its charges to three.
 Multi-ball adds two copies of a ball; only losing
 the last ball costs a life. Breaker lasts ten seconds and refreshes every current
@@ -104,3 +104,8 @@ sets the angle, and sideways paddle movement adds momentum at release.
 Blaster lasts ten seconds. Press the launch/power action to fire upward, at most once
 every 0.3 seconds. The same press also releases Sticky catches when both are active.
 Bolts use a plain placeholder rectangle pending Chris’s art.
+
+Satellite Shield resets three waiting orbs, drawn as placeholder circles orbiting the
+paddle. Each Power-up Action press launches one as an ordinary ball with a fresh
+ten-second Breaker timer. The same press can fire Blaster and release Sticky catches.
+A resting ball takes the shared press to launch before Satellite orbs can launch.

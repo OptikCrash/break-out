@@ -13,6 +13,7 @@ func _initialize() -> void:
 		[&"multi_ball", false, 0.0, 1.0, 0, 25],
 		[&"breaker", false, 10.0, 1.0, 0, 25],
 		[&"sticky_paddle", false, 10.0, 1.0, 0, 25],
+		[&"satellite_shield", false, 0.0, 1.0, 0, 25],
 		[&"blaster", false, 10.0, 1.0, 0, 25],
 		[&"force_field", false, 0.0, 1.0, 0, 25],
 	]
