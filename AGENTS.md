@@ -142,3 +142,6 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - Resistant (`r`) is destructible but has `counts_for_completion = false`. Recount
   unqueued completion bricks on destruction rather than decrementing for every score signal.
   Breaker pickup refreshes current balls only; shared HUD time and per-ball time clear on level end.
+- For manually stepped collision tests, call `set_physics_process(false)` after adding
+  the ball to the tree: script initialization enables its physics callback on entry.
+  Keep the test world enabled so its collision bodies remain in the physics space.

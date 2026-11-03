@@ -60,7 +60,41 @@ func _run() -> void:
 	_check(game.reset_ready and game.bricks_left == 0 and game.score == 110, "Required brick completes level with Resistant remaining")
 	_check(not survivor.is_queued_for_deletion() and not ball.breaker_active and game.effects.active.is_empty(), "Completion leaves optional brick and clears effects")
 	game.free()
+	await _check_physics_collision()
 	quit(1 if failures else 0)
+
+func _check_physics_collision() -> void:
+	var world := Node2D.new()
+	# Step the ball explicitly after the physics server registers the shapes.
+	root.add_child(world)
+	var brick = preload("res://brick.tscn").instantiate()
+	brick.configure("r")
+	brick.position = Vector2(400, 300)
+	world.add_child(brick)
+	var ball = preload("res://ball.tscn").instantiate()
+	ball.launched = true
+	ball.position = Vector2(432, 380)
+	world.add_child(ball)
+	ball.set_physics_process(false)
+	var awards: Array[int] = []
+	ball.brick_broken.connect(func(points: int): awards.append(points))
+	await physics_frame
+	await physics_frame
+	ball.velocity = Vector2(0, -550)
+	ball._physics_process(0.1)
+	_check(ball.position.y > 348.0 and ball.position.y < 380.0, "Physics sweep contacts Resistant instead of crossing it")
+	_check(ball.velocity == Vector2(0, 550) and brick.hit_points == 1 and awards.is_empty(), "Real ordinary collision bounces without damage or score")
+	ball.position = Vector2(432, 380)
+	ball.velocity = Vector2(0, -550)
+	ball.breaker_active = true
+	ball._physics_process(0.1)
+	_check(brick.is_queued_for_deletion() and awards == [50], "Real Breaker collision destroys Resistant and emits fifty points")
+	_check(ball.velocity == Vector2(0, -550), "Real Breaker collision preserves forward velocity")
+	await process_frame
+	await process_frame
+	ball._physics_process(0.1)
+	_check(ball.position.y < 332.0 and awards == [50], "Breaker crosses the former brick after deletion without another award")
+	world.free()
 
 func _check(condition: bool, message: String) -> void:
 	if not condition:
