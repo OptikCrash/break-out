@@ -142,3 +142,7 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 
 - Capsule effects clear on a life loss, which means the last live ball reaching the
   Death Zone; removing an earlier ball must preserve the paddle timers and width.
+
+- Ball speed effects scale current velocity by the ratio of new/old multipliers;
+  `ball.speed` stays the base launch speed. Use `main.add_ball()` so new balls inherit
+  active speed effects before launch. Do not repeatedly multiply velocity each tick.
