@@ -9,7 +9,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	# Content IDs, symbols and numbers are part of the level format contract.
-	var expected := [[&"normal", "#", 1, 10, true], [&"reinforced", "x", 2, 20, true], [&"indestructible", "o", 0, 0, false], [&"mystery", "?", 1, 0, true]]
+	var expected := [[&"normal", "#", 1, 10, true], [&"reinforced", "x", 2, 20, true], [&"indestructible", "o", 0, 0, false], [&"mystery", "?", 1, 0, true], [&"resistant", "r", 1, 50, true]]
 	var ids := []
 	var symbols := []
 	for i in expected.size():

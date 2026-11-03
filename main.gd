@@ -54,7 +54,7 @@ func _ready() -> void:
 	hud.update_lives(lives)
 	hud.restart_pressed.connect(restart)
 	hud.back_to_title_pressed.connect(back_to_title)
-	_count_destructible_bricks()
+	_count_completion_bricks()
 
 func _process(_delta: float) -> void:
 	if reset_ready && Input.is_action_just_pressed("restart"):
@@ -102,7 +102,7 @@ func _on_death_zone_body_entered(body: Node2D) -> void:
 func _on_ball_brick_broken(points: int) -> void:
 	if reset_ready or level_complete:
 		return
-	bricks_left -= 1
+	_count_completion_bricks()
 	score += points
 	hud.update_score(score)
 	if bricks_left == 0:
@@ -143,7 +143,7 @@ func continue_level() -> void:
 	if not bricks.load_level(levels[current_level_index + 1]):
 		return
 	current_level_index += 1
-	_count_destructible_bricks()
+	_count_completion_bricks()
 	paddle.position = paddle_start
 	paddle.velocity = Vector2.ZERO
 	paddle.following_mouse = false
@@ -157,10 +157,10 @@ func continue_level() -> void:
 	for active_ball in get_balls():
 		active_ball.set_physics_process(true)
 
-func _count_destructible_bricks() -> void:
+func _count_completion_bricks() -> void:
 	bricks_left = 0
 	for brick in bricks.get_children():
-		if brick.definition.destructible:
+		if brick.definition.counts_for_completion and not brick.is_queued_for_deletion():
 			bricks_left += 1
 
 func _physics_process(delta: float) -> void:
@@ -188,6 +188,9 @@ func _catch_capsule(effect: Resource) -> void:
 	if effect.extra_balls > 0:
 		_split_ball(effect)
 	effects.apply(effect)
+	if effect.id == &"breaker":
+		for active_ball in get_balls():
+			active_ball.breaker_time_left = effect.duration
 	_update_ball_speeds()
 	paddle.set_width_multiplier(effects.width_multiplier())
 	hud.update_effects(effects.active)
@@ -198,6 +201,8 @@ func _catch_capsule(effect: Resource) -> void:
 
 func _clear_effects_and_capsules() -> void:
 	effects.active.clear()
+	for active_ball in get_balls():
+		active_ball.breaker_active = false
 	_update_ball_speeds()
 	hud.update_effects(effects.active)
 	paddle.set_width_multiplier(1.0)

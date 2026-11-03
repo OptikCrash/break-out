@@ -106,8 +106,11 @@ func _run() -> void:
 	game._on_death_zone_body_entered(game.ball)
 	await process_frame
 	_check(game.get_balls().size() == 1 and game.lives == 2, "Pending split cannot survive its source")
+	# Completion recounts real bricks, so use a one-brick layout.
+	var final_layout := Level.new()
+	final_layout.grid = "#"
+	game.bricks.load_level(final_layout)
 	game._catch_capsule(Multi)
-	game.bricks_left = 1
 	game.ball._break_brick(game.bricks.get_child(0))
 	await process_frame
 	_check(game.level_complete and game.get_balls().size() == 1, "Completion cancels pending split")

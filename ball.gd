@@ -7,7 +7,7 @@ const BallRules = preload("res://ball_rules.gd")
 signal brick_broken(points: int)
 var launched := false
 var speed_multiplier := 1.0
-# No pickup enables this yet; each ball owns its independent duration.
+# Each ball owns its independent duration.
 var breaker_time_left := 0.0
 var breaker_active: bool:
 	get:
@@ -41,13 +41,22 @@ func _physics_process(delta: float) -> void:
 
 			velocity = BallRules.paddle_direction(x_dir) * current_speed
 		else:
-			velocity = velocity.bounce(collision.get_normal())
-			if hit.is_in_group("brick"):
-				_break_brick(hit)
+			_hit_surface(hit, collision.get_normal())
 
-func _break_brick(brick: Node) -> void:
-	if brick.take_hit():
+func _hit_surface(hit: Node, normal: Vector2) -> void:
+	var passes_through := false
+	if hit.is_in_group("brick"):
+		# A queued brick can still collide in another physics step this frame.
+		passes_through = breaker_active and hit.definition.requires_breaker
+		_break_brick(hit)
+	if not passes_through:
+		velocity = velocity.bounce(normal)
+
+func _break_brick(brick: Node) -> bool:
+	if brick.take_hit(breaker_active):
 		brick_broken.emit(brick.definition.points)
+		return true
+	return false
 
 func _rest_on_paddle() -> void:
 	# Half the paddle's height (8) plus the ball's radius (16): resting on top, no gap.

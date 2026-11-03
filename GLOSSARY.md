@@ -20,7 +20,8 @@ sequence; clearing one loads the next.
 **Brick Type**:
 What a brick cell's character means: Normal (`#`, 1 hit), Reinforced (`x`, 2 hits), or
 Indestructible (`o`, never breaks, doesn't count toward a level's win condition), or
-Mystery (`?`, 1 hit, 0 points, drops a Capsule, counts toward completion).
+Mystery (`?`, 1 hit, 0 points, drops a Capsule, counts toward completion), or
+Resistant (`r`, Breaker-only, 1 hit, 50 points, excluded from completion).
 
 **Launch**:
 The player input (and the moment) that sends the ball moving for the first time, or after a life
@@ -63,7 +64,7 @@ power-up and hazard pool.
 
 **Resistant Brick**:
 A brick that a normal ball hit bounces off without effect; destroyed in one hit by a ball in the
-Breaker state. Worth 50 points when destroyed; does not count toward a level's win condition.
+Breaker state, which continues through the destroyed brick. Grid symbol: `r`. Worth 50 points when destroyed; does not count toward a level's win condition.
 
 **Capsule tuning (issue #50 provisional defaults)**:
 Fall speed is 240 pixels/second. Wide Paddle multiplies the base 128-pixel width by 1.5
