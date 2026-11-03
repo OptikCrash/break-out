@@ -4,11 +4,28 @@ extends CharacterBody2D
 
 var half_width := 64.0
 var recent_velocity_x := 0.0
+var feedback_scale := Vector2.ONE
+var feedback_tween: Tween
+
+func play_feedback() -> void:
+	if feedback_tween:
+		feedback_tween.kill()
+	feedback_tween = create_tween()
+	feedback_tween.tween_method(_set_feedback_scale, feedback_scale, Vector2(1.12, 0.75), 0.05)
+	feedback_tween.tween_method(_set_feedback_scale, Vector2(1.12, 0.75), Vector2.ONE, 0.15).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+
+func _set_feedback_scale(value: Vector2) -> void:
+	feedback_scale = value
+	_update_sprite_scale()
+
+func _update_sprite_scale() -> void:
+	# Compose with width effects; never animate the collision surface.
+	$Sprite2D.scale = Vector2(half_width / 64.0, 0.53125) * feedback_scale
 
 func set_width_multiplier(multiplier: float) -> void:
 	half_width = 64.0 * multiplier
 	$CollisionShape2D.scale.x = multiplier
-	$Sprite2D.scale.x = multiplier
+	_update_sprite_scale()
 
 # Whichever input was used last is in charge: a mouse move hands control to
 # the mouse, a fresh move action hands it back to the keyboard or gamepad. Both are

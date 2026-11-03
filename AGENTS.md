@@ -221,3 +221,12 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - When merging Companion Paddle with Satellite Shield, preserve both stable IDs in
   the uniform pool and its pinned content test; keep both deferred companion cleanup
   and waiting-orb cleanup in the shared life-loss/level-end path.
+
+## Presentation feedback
+
+- Paddle squash animates only the sprite. Compose its feedback scale with the current
+  width multiplier, because `main.gd` reapplies width every physics step; keep the
+  collider and `half_width` stable during feedback.
+- Brick `broken(points, at)` is a presentation signal emitted after queuing deletion,
+  forwarded by Bricks. The ball/bolt score signals still own scoring and completion.
+  Capture capsule positions when caught, not when spawned: capsules move while falling.
