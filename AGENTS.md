@@ -143,6 +143,14 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - Capsule effects clear on a life loss, which means the last live ball reaching the
   Death Zone; removing an earlier ball must preserve the paddle timers and width.
 
+- Multi-ball copies use `add_ball()` collision exceptions in both directions: the ball
+  scene mask includes layer 4, so overlapping copies otherwise collide with each other.
+- Capsule catches run inside physics queries: defer Multi-ball body creation and
+  recheck the source ball and end-of-level state before spawning copies.
 - Ball speed effects scale current velocity by the ratio of new/old multipliers;
   `ball.speed` stays the base launch speed. Use `main.add_ball()` so new balls inherit
   active speed effects before launch. Do not repeatedly multiply velocity each tick.
+
+- Deferred-spawn tests that freeze balls in `node_added` must also disable physics
+  on `ready`, after script initialization enables callbacks. Keep the node process
+  mode active so manual collision checks still have a physics body in the space.

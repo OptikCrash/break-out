@@ -74,7 +74,8 @@ func _run() -> void:
 	await process_frame
 	_check(not is_instance_valid(capsule), "Death Zone physically removes missed capsule")
 	_check(game.score == score_before and game.lives == lives_before, "Miss has no score or life penalty")
-	game._on_death_zone_body_entered(game.ball)
+	for active_ball in game.get_balls():
+		game._on_death_zone_body_entered(active_ball)
 	_check(game.effects.active.is_empty() and game.paddle.half_width == 64.0, "Life loss restores base width and clears timers")
 	game.ball._break_brick(game.bricks.get_child(0))
 	_check(game.reset_ready, "Remaining normal brick completes level")
