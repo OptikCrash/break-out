@@ -42,6 +42,11 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   new scene will act on the same press. `tests/title_screen_test.gd` covers this.
 - A full-screen Control that reads clicks in `_unhandled_input` needs `mouse_filter = Ignore`
   on itself and on any ColorRect/container over it, or the GUI eats the click first.
+- Input actions (`Input.is_action_just_pressed("launch")`) are updated before the GUI sees an
+  event, so a mouse button bound to an action works even over ColorRects. Raw mouse motion is
+  not: `paddle.gd` reads it in `_input` because the play field's ColorRects would mark it handled.
+- Headless runs start with a 64x64 root window, and `canvas_items` stretch scales event positions
+  to match. Tests that send mouse positions set `root.size = Vector2i(1920, 1080)` first.
 
 ## UI layout
 

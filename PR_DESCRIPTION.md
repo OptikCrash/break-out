@@ -1,67 +1,71 @@
-Closes #23
+Closes #26
 
-Adds a title screen (`TitleScreen.tscn` + `title.gd`) and makes it `run/main_scene`, so F5 and
-web builds open on it. Space, Enter, gamepad A (all through Godot's built-in `ui_accept` action)
-or a left click start the game. Nothing in `main.tscn`, the HUD or restart (R) changed.
+The paddle now follows the mouse, and a left click launches the ball. A/D, the arrow keys and
+Space work exactly as before.
 
-## The Godot idea: `change_scene_to_file`
+## Click to launch: one more event on the `launch` action
 
-A `SceneTree` has one **current scene**. `get_tree().change_scene_to_file("res://main.tscn")`
-frees the title screen and loads `main.tscn` in its place. The swap waits until the end of the
-frame, so the code that asked for it finishes running first. This is the same approach
-`main.gd` already uses for restart (`reload_current_scene()`, which loads a new copy of the
-current scene). Pause and game-over will follow the same pattern, with "Back to Title" being
-`get_tree().change_scene_to_file("res://TitleScreen.tscn")`.
+The Input Map (`project.godot`'s `[input]` section) lets one action have several events. The
+change adds a left mouse button event to `launch`, next to Space. `ball.gd` already asks
+`Input.is_action_just_pressed("launch")`, so it didn't change. Godot updates action state in the
+`Input` singleton before the GUI sees the event, so the click counts even over the play field's
+ColorRects. A gamepad button can be added the same way later.
 
-**Alternative considered: an autoloaded scene manager.** An autoload is a node Godot keeps
-alive across scene changes. It would be the place for fade transitions, loading screens or
-state that must outlive a scene. This project has none of those yet, and a manager would add a
-global plus an extra layer around a single engine call. Plain `change_scene_to_file` is easy to
-read and easy to swap out later. If fades or shared state are added, we can wrap the same call
-in an autoload without changing the scenes.
+**Alternative rejected:** checking for `InputEventMouseButton` in `ball.gd`. That would mean two
+launch code paths, and remapping controls in a settings menu wouldn't cover it.
 
-## A subtlety: one Space press, two meanings
+## Paddle follows the mouse: last input wins
 
-Space is both `ui_accept` (start) and `launch`. The new headless test showed that swapping
-scenes as soon as Space was pressed made the ball launch the moment the game appeared. Godot
-treats a press as "just pressed" during the **next physics step**, and the deferred scene swap
-runs before that step, so the new ball sees the same press. `title.gd` waits for
-`get_tree().physics_frame` before swapping. That lets the step pass while the title screen is
-still the current scene, and the ball starts resting on the paddle as before. Handling it here
-keeps the fix in presentation code; the alternative was making `ball.gd` ignore launch input on
-its first frame, which would change gameplay code for a menu problem.
+`paddle.gd` keeps one flag, `following_mouse`:
+- an `InputEventMouseMotion` sets it, and stores the mouse's x in world space;
+- holding a move key clears it, and the paddle runs the old keyboard code unchanged.
 
-## Layout and input details
+So whichever device the player last touched is in control. A mouse resting on the desk sends no
+motion events, so it never pulls against the keyboard. Releasing the key leaves the paddle where
+it is, and it won't jump back to the mouse until the mouse moves again. **Rejected:** adding the
+two inputs together, or polling the mouse position every frame. Either way a still mouse would
+keep dragging the paddle back while a key is held, which is the jitter the issue warns about.
 
-- The root `Control`, the black `Background` ColorRect and a `CenterContainer` all use Full Rect
-  anchors, so the text stays centred at 1920x1080 and when the window is resized (stretch mode
-  is `canvas_items`). There are no pixel offsets.
-- Clicks are read in `_unhandled_input`. Every node has `mouse_filter = Ignore` so the GUI does
-  not consume the click before it reaches the script.
-- A `starting` flag stops a Space press and a click in the same frame from asking for the scene
-  change twice.
-- No art: default font at larger sizes, white on black like the play area, and the controls
-  hint in light grey (still high contrast).
+### Godot ideas involved
+
+- **`_input` vs `_unhandled_input`.** `_unhandled_input` only gets events the GUI didn't consume.
+  The backgrounds, walls and bricks are `ColorRect`s, which are Controls with
+  `mouse_filter = Stop`, so mouse motion over the play field would never arrive. Reading motion
+  in `_input` avoids editing six ColorRects across `main.tscn` and `brick.tscn`. Only motion is read there, and only
+  to aim the paddle. A future pause screen pauses the tree, and paused nodes don't get `_input`.
+- **Viewport vs world coordinates.** `event.position` is in viewport pixels.
+  `get_canvas_transform().affine_inverse()` converts it to world space. That stays correct with
+  `canvas_items` stretch when the window is resized, and if a camera is ever added.
+- **The walls are the clamp.** The paddle isn't moved by setting `position`. Each physics step it
+  gets exactly the velocity that would take it to the mouse
+  (`(mouse_x - global_position.x) / delta`) and calls `move_and_slide()` as before. The
+  `CharacterBody2D` collides with the wall shapes, so the walkable bounds are the walls'
+  collision shapes themselves, with no second copy of the wall positions in code. Setting
+  `position` directly would need hand-written bounds and would let the paddle pass through
+  anything solid. The speed limit (`speed`) still applies to keyboard movement only. The paddle
+  follows the mouse exactly, which is how mouse paddles usually feel.
 
 ## Tests
 
-`tests/title_screen_test.gd` (headless, no addon) checks:
-- `run/main_scene` is the title screen;
-- the text block is centred and every label fits on screen at 1920x1080 and 1280x720;
-- Space, Enter and a left click each load `main.tscn`, and the ball is not launched afterwards.
-  The test failed before the `physics_frame` wait was added.
-- holding Space through the scene change does not launch the ball, and after letting go, the next
-  Space press does launch it. This proves the wait only skips the press that started the game
-  and doesn't block the launch input.
+New `tests/paddle_mouse_test.gd` (headless, no addon) loads `main.tscn` and checks:
+- `launch` includes a left mouse click;
+- the paddle follows the mouse, and the left and right walls stop it at x = 480 and 1440
+  (wall inner edge ± half the paddle);
+- in a 1280x720 window, the window's centre still maps to the middle of the field;
+- a held D key moves the paddle away from a mouse that isn't moving, releasing D doesn't snap it
+  back, and moving the mouse again takes control back;
+- a left click launches the ball.
 
-Validation: headless editor import gave no errors, and all six `tests/*_test.gd` passed when run
-one by one with `godot --headless --path . --script ...` and checked for `ERROR:` output.
-`scripts/run-tests.sh` and `scripts/test-runner.sh` were not run directly in this environment
-because shell scripts needed permission I didn't have; CI runs both. There is no display here, so
-nobody has yet looked at the screen in a real window, and gamepad A is untested (it comes from
-Godot's default `ui_accept` mapping).
+`tests/title_screen_test.gd` already checks that the click that starts the game from the title
+does not also launch the ball. It still passes now that a click is a `launch` event too.
 
-README now says F5 (or F6 on `TitleScreen.tscn`) starts at the title screen. AGENTS.md gains a
-short "Scene flow" section on this pattern and the one-press-two-actions trap.
+Validation: headless editor import gave no errors. All seven `tests/*_test.gd` exited 0 when run
+one by one with `godot --headless --path . --script ...`, with no `ERROR:` / `FAIL` output.
+`scripts/run-tests.sh` and `scripts/test-runner.sh` weren't run directly here because running
+shell scripts needed a permission this environment didn't have; CI runs both. There's no display
+here, so nobody has tried the mouse feel in a real window yet.
+
+README lists the mouse controls. AGENTS.md notes the action-vs-GUI ordering, why `paddle.gd` uses
+`_input`, and that headless tests start with a 64x64 window.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
