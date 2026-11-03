@@ -124,3 +124,13 @@ The spread can extend the 45° Sticky limit to 25° above horizontal on this rel
 Splitting an already split caught copy adds its pending rotation to the new spread.
 The design does not specify this interaction; preserving the catch and applying the
 usual split spread are implementation defaults for review.
+
+**Force Field (issue #65)**:
+`force_field` is a power-up worth 25 catch points. Catching it sets three charges,
+replacing any remaining charges. Each subsequent hazard catch consumes one charge
+and applies no effect or points; power-ups apply and score normally without spending
+a charge. The third blocked hazard removes the field; the fourth applies normally.
+Charges have no timer. The HUD shows remaining charges in the active-effects panel.
+Life loss (last live ball) and level completion clear charges, following other capsule
+effects. The design does not specify charge clearing; this is an implementation default
+for review.

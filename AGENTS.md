@@ -186,3 +186,7 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - Caught Multi-ball copies also carry a one-use `release_rotation` from the authored
   split angle. Consume it on release and clear it on reset; later Sticky catches
   must not inherit an earlier split’s spread.
+
+- Force Field charges live separately on `main.gd`, never in the timed `active`
+  dictionary. HUD charge entries are display-only; hazard gating happens before
+  applying any capsule effects. Charges clear with the other capsule effects.

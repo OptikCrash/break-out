@@ -82,7 +82,8 @@ See `PLAN.md` for scope and milestones.
 
 Custom levels can use `?` for a one-hit, zero-point Mystery Brick. It drops a random
 Wide Paddle, Slow Ball, Sticky Paddle, Extra Life, Multi-ball, Breaker, Shrink Paddle hazard, or
-Speed-up Ball hazard capsule. Multi-ball adds two copies of a ball; only losing
+Speed-up Ball hazard, or Force Field capsule. Force Field blocks the next three
+hazard catches; catching it again resets its charges to three. Multi-ball adds two copies of a ball; only losing
 the last ball costs a life. Breaker lasts ten seconds and refreshes every current
 ball’s independent timer. Resistant bricks (`r`) stop ordinary balls but break
 for 50 points when hit by a Breaker ball, which continues through them. They
