@@ -2,7 +2,9 @@
 
 A small Breakout/Arkanoid clone built with Godot 4.7.2 and GDScript.
 The Godot project is at the repository root. Open `project.godot` in Godot
-4.7.2 and press F6 on `main.tscn`, or F5 to run the project.
+4.7.2 and press F5 to run the project, or F6 on `TitleScreen.tscn`. Both start at
+the title screen; press Space or Enter, or click, to start the game. F6 on
+`main.tscn` still skips straight to gameplay.
 Move with A/D or the arrow keys, launch with Space, and restart with R.
 
 ## Export for the web
@@ -19,7 +21,8 @@ Move with A/D or the arrow keys, launch with Space, and restart with R.
    python3 -m http.server 8000
    ```
 
-   Open <http://localhost:8000/> and click the game before using the keyboard.
+   Open <http://localhost:8000/>. The build opens on the title screen; click it
+   (which also gives the page keyboard focus) to start the game.
 
 Keep all generated files together when sharing the build through an HTTPS web
 host. These are editor export instructions only; verified export presets,

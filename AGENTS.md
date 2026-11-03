@@ -31,6 +31,18 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   `instantiate()` of the child scene won't have. `SceneState` (`load(...).get_state()`) lets a
   headless test check for such overrides, as `tests/hud_script_test.gd` does.
 
+## Scene flow
+
+- `TitleScreen.tscn` is `run/main_scene`; screens move between scenes with
+  `get_tree().change_scene_to_file(...)`. "Back to Title" is
+  `change_scene_to_file("res://TitleScreen.tscn")`.
+- An action pressed counts as "just pressed" during the next physics step, and the scene swap
+  is applied before that step. If the key that leaves a screen is also a gameplay action
+  (Space is `ui_accept` and `launch`), `await get_tree().physics_frame` before swapping, or the
+  new scene will act on the same press. `tests/title_screen_test.gd` covers this.
+- A full-screen Control that reads clicks in `_unhandled_input` needs `mouse_filter = Ignore`
+  on itself and on any ColorRect/container over it, or the GUI eats the click first.
+
 ## UI layout
 
 - Some scenes were built when the window was Godot's default 1152x648. Controls placed with
