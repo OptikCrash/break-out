@@ -7,6 +7,7 @@ extends Resource
 @export var paddle_width_multiplier := 1.0
 @export var ball_speed_multiplier := 1.0
 @export var extra_lives := 0
+@export var hazard_charges := 0
 @export var extra_balls := 0
 @export var split_angle_degrees := 0.0
 
@@ -21,4 +22,8 @@ func validation_error() -> String:
 		return "Ball count must be nonnegative and spread in [0, 90) degrees."
 	if extra_balls > 0 and (extra_balls != 2 or split_angle_degrees == 0.0 or duration != 0.0):
 		return "Multi-ball needs two extra balls, a spread and no timer."
+	if hazard_charges < 0:
+		return "Hazard charges must be nonnegative."
+	if hazard_charges > 0 and (hazard_charges != 3 or duration != 0.0 or hazard):
+		return "Force Field needs three charges, no timer and must be a power-up."
 	return ""

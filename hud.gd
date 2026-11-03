@@ -44,7 +44,11 @@ const HAZARD_COLOR := Color(0.95, 0.35, 0.3)
 # `active` is effect_rules.gd's dictionary: effect ID -> {definition, remaining}.
 # main.gd calls this every physics frame, so rows are kept by effect ID and only
 # created or removed when an effect starts or ends, not rebuilt each frame.
-func update_effects(active: Dictionary) -> void:
+func update_effects(active: Dictionary, force_field_charges: int = 0) -> void:
+	# A display-only entry reuses rows without putting charges in the timer state.
+	active = active.duplicate()
+	if force_field_charges > 0:
+		active[&"force_field"] = {"definition": preload("res://effects/force_field.tres"), "charges": force_field_charges}
 	var rows := $ActiveEffects/Rows
 	for row in rows.get_children():
 		if not active.has(StringName(row.name)):
@@ -59,7 +63,10 @@ func update_effects(active: Dictionary) -> void:
 			rows.add_child(row)
 		# Whole seconds, rounded up, so the number doesn't flicker every frame
 		# and never shows 0 while the effect is still running.
-		row.get_node("Name").text = "%s  %ds" % [_effect_label(entry.definition), ceili(entry.remaining)]
+		if entry.has("charges"):
+			row.get_node("Name").text = "%s  %d charges" % [_effect_label(entry.definition), entry.charges]
+		else:
+			row.get_node("Name").text = "%s  %ds" % [_effect_label(entry.definition), ceili(entry.remaining)]
 	$ActiveEffects.visible = not active.is_empty()
 
 func _effect_label(effect: Resource) -> String:
