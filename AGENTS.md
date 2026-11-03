@@ -100,6 +100,8 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   the signal, guarding repeated final hits within the same frame.
 - Level progression keeps `main.tscn` alive. Configure `main.levels` for a custom
   sequence (typed arrays in dynamic test fixtures use `game.levels.assign([...])`).
+  `main` is the only level owner: `Bricks` has no default level and builds nothing until
+  `load_level()` is called, so a bare `bricks.gd` test node must call it explicitly.
   `Bricks.load_level()` detaches old children before queuing deletion so the next
   level's destructible count cannot include the previous layout.
 - Level validation rejects grids without `#` or `x` (including all-hole grids),

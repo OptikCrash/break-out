@@ -17,7 +17,8 @@ func _run() -> void:
 	var bricks = Node2D.new()
 	bricks.set_script(preload("res://bricks.gd"))
 	root.add_child(bricks)
-	_check(bricks.get_child_count() == 68, "Default loader must instantiate Level 1")
+	_check(bricks.level == null and bricks.get_child_count() == 0, "Bricks must not build a layout until main hands it one")
+	_check(bricks.load_level(level) and bricks.get_child_count() == 68, "Loader must instantiate Level 1")
 	for i in cells.size():
 		_check(bricks.get_child(i).position == Vector2(32 + cells[i].x * 64, 128 + cells[i].y * 32), "Brick must use the cell's pixel position")
 	bricks.free()
@@ -28,10 +29,10 @@ func _run() -> void:
 	_check(sample.brick_cells() == [Vector2i(1, 0), Vector2i(2, 0), Vector2i(0, 1)], "Dots must leave holes without shifting cells")
 	bricks = Node2D.new()
 	bricks.set_script(preload("res://bricks.gd"))
-	bricks.level = sample
 	bricks.grid_start = Vector2(10, 20)
 	bricks.brick_size = Vector2(30, 40)
 	root.add_child(bricks)
+	bricks.load_level(sample)
 	_check(bricks.get_child_count() == 3, "Every non-dot character must instantiate a brick")
 	_check(bricks.get_child(2).position == Vector2(10, 60), "Loader must honor exported sizing and origin")
 	bricks.free()
@@ -64,8 +65,8 @@ func _check_designed_level(number: int, normal: int, reinforced: int, permanent:
 	_check(normal + 2 * reinforced == hits, "Required hits must pin the difficulty ramp")
 	var bricks = Node2D.new()
 	bricks.set_script(preload("res://bricks.gd"))
-	bricks.level = level
 	root.add_child(bricks)
+	bricks.load_level(level)
 	var cells := level.brick_cells()
 	_check(bricks.get_child_count() == normal + reinforced + permanent, "All designed bricks must load")
 	for i in cells.size():

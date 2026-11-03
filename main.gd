@@ -32,8 +32,7 @@ func _ready() -> void:
 			push_error("Level sequence position %d: %s" % [index + 1, error])
 			ball.set_physics_process(false)
 			return
-	if bricks.level != levels[0]:
-		bricks.load_level(levels[0])
+	bricks.load_level(levels[0])
 	hud.update_level(1)
 	hud.continue_pressed.connect(continue_level)
 	hud.update_message("")
@@ -109,6 +108,9 @@ func back_to_title() -> void:
 func continue_level() -> void:
 	if not level_complete:
 		return
+	# Unreachable today: _ready() already validated every level in the sequence,
+	# using the same validation_error() that load_level() checks. If it ever
+	# fails anyway, load_level() has pushed the error and the old layout stays.
 	if not bricks.load_level(levels[current_level_index + 1]):
 		return
 	current_level_index += 1

@@ -37,9 +37,9 @@ func _run() -> void:
 
 	var game = preload("res://main.tscn").instantiate()
 	var bricks = game.get_node("PlayArea/Bricks")
-	bricks.level = Level.new()
-	bricks.level.grid = "#xxo"
-	game.levels.assign([bricks.level])
+	var level := Level.new()
+	level.grid = "#xxo"
+	game.levels.assign([level])
 	game.process_mode = Node.PROCESS_MODE_DISABLED
 	root.add_child(game)
 	var ball = game.get_node("PlayArea/Ball")
