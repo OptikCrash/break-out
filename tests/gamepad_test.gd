@@ -10,6 +10,8 @@ func _initialize() -> void:
 	call_deferred("run")
 
 func run() -> void:
+	root.size = Vector2i(1920, 1080)
+	await process_frame
 	check_bindings()
 	await check_movement("Left stick left", _stick(-1.0), -1)
 	await check_movement("Left stick right", _stick(1.0), 1)
@@ -49,6 +51,13 @@ func start_game() -> Node:
 func check_movement(label: String, event: InputEvent, sign_x: int) -> void:
 	var game := await start_game()
 	var paddle: Node2D = game.get_node("PlayArea/Paddle")
+	# The merged mouse controller must hand control back to either pad input.
+	var motion := InputEventMouseMotion.new()
+	motion.position = Vector2(700, 540)
+	Input.parse_input_event(motion)
+	await physics_frame
+	await physics_frame
+	_check(paddle.following_mouse, "Mouse motion must take control before the pad")
 	var start_x := paddle.position.x
 	Input.parse_input_event(event)
 	for i in 5:

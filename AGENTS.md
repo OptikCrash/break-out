@@ -42,6 +42,14 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   is applied before that step. If the key that leaves a screen is also a gameplay action
   (Space is `ui_accept` and `launch`), `await get_tree().physics_frame` before swapping, or the
   new scene will act on the same press. `tests/title_screen_test.gd` covers this.
+- Pausing: `get_tree().paused` belongs to the SceneTree, so it stays on across
+  `reload_current_scene()` / `change_scene_to_file()`. Unpause before you swap scenes. Paused nodes
+  get no input either, so the key that unpauses must be read by a node with
+  `process_mode = Always` (`PauseScreen.tscn`), not by `main.gd`. A hidden CanvasLayer still
+  receives `_unhandled_input`, so check `visible` first.
+- `Button` emits `pressed` on release, so the press has already stopped being "just pressed" and
+  a Space press on a menu button can't also launch the ball. The `physics_frame` wait in `title.gd`
+  is only needed because it acts on the raw press.
 - Godot's built-in `ui_accept` has no gamepad button (only Enter, Keypad Enter, Space), so a
   focused `Button` can't be pressed by a pad. `project.godot` overrides `ui_accept` to add
   joypad A. An override replaces the built-in event list, so keep the three keys in it.
@@ -56,6 +64,14 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   comes from `_unhandled_input`, like the title screen's, still needs the physics-frame wait.
 - A full-screen Control that reads clicks in `_unhandled_input` needs `mouse_filter = Ignore`
   on itself and on any ColorRect/container over it, or the GUI eats the click first.
+- Input actions (`Input.is_action_just_pressed("launch")`) are updated before the GUI sees an
+  event, so a mouse button bound to an action works even over ColorRects. Raw mouse motion is
+  not: `paddle.gd` reads it in `_input` because the play field's ColorRects would mark it handled.
+- "Most recent input wins" has to be decided from events (`event.is_action_pressed()`, which
+  skips echoes), not from polled held state (`Input.get_axis()`), or a held key overrides
+  every newer mouse move.
+- Headless runs start with a 64x64 root window, and `canvas_items` stretch scales event positions
+  to match. Tests that send mouse positions set `root.size = Vector2i(1920, 1080)` first.
 
 ## UI layout
 
@@ -68,3 +84,7 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - `project.godot` uses `window/stretch/mode="canvas_items"`, so the logical viewport stays
   1920x1080 when the window is resized and the canvas is scaled. In headless checks, compare
   against `get_viewport().get_visible_rect()`, not the window size.
+
+- In Godot 4.7.2, the built-in `ui_accept` and `ui_cancel` bindings here have no
+  joypad buttons. Keep explicit A/B bindings in `project.godot` alongside their
+  keyboard events; d-pad focus alone does not prove a gamepad can activate a menu.

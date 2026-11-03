@@ -5,10 +5,12 @@ The Godot project is at the repository root. Open `project.godot` in Godot
 4.7.2 and press F5 to run the project, or F6 on `TitleScreen.tscn`. Both start at
 the title screen; press Space or Enter, or click, to start the game. F6 on
 `main.tscn` still skips straight to gameplay.
-Move with A/D or the arrow keys, launch with Space, and restart with R.
+Move with A/D, the arrow keys or the mouse, launch with Space or a left click, and restart with R.
 With a gamepad, move with the left stick or D-pad, launch with A (Cross on
 PlayStation) and restart with Y (Triangle). Menus use the D-pad or left stick
 to move between buttons and A to press one.
+While the ball is in play, Escape (or gamepad Start) pauses the game and opens a
+menu with Resume, Restart and Back to Title. Start or B (Circle) also resumes.
 
 ## Export for the web
 
