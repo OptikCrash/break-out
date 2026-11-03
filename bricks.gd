@@ -1,5 +1,6 @@
 extends Node2D
 signal capsule_dropped(at: Vector2)
+signal brick_destroyed(at: Vector2)
 
 const protoBrick := preload("res://brick.tscn")
 
@@ -30,5 +31,6 @@ func load_level(next_level: Level) -> bool:
 		brick.configure(level.brick_symbol_at(cell))
 		brick.position = grid_start + Vector2(cell) * brick_size
 		brick.capsule_dropped.connect(func(at: Vector2): capsule_dropped.emit(at))
+		brick.destroyed.connect(func(at: Vector2): brick_destroyed.emit(at))
 		add_child(brick)
 	return true
