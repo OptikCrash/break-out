@@ -16,6 +16,7 @@ func _initialize() -> void:
 		[&"satellite_shield", false, 0.0, 1.0, 0, 25],
 		[&"blaster", false, 10.0, 1.0, 0, 25],
 		[&"force_field", false, 0.0, 1.0, 0, 25],
+		[&"companion_paddle", false, 0.0, 1.0, 0, 25],
 	]
 	_check(Rules.DEFINITIONS.size() == expected.size(), "Pin pool size")
 	var ids := []

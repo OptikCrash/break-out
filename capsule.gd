@@ -15,6 +15,11 @@ func _physics_process(delta: float) -> void:
 func _on_body_entered(body: Node2D) -> void:
 	if is_queued_for_deletion() or not body.is_in_group("paddle"):
 		return
+	if body.is_in_group("companion"):
+		if effect != null and effect.hazard and not body.is_queued_for_deletion():
+			queue_free()
+			body.take_hit()
+		return
 	queue_free()
 	caught.emit(effect)
 

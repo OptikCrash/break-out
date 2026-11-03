@@ -7,6 +7,11 @@ var effects = EffectRules.new()
 var force_field_charges := 0
 var capsule_rng := RandomNumberGenerator.new()
 
+const COMPANION_SCENE = preload("res://companion_paddle.tscn")
+var companion_generation := 0
+var companions: Array[Node2D] = []
+
+
 const BOLT_SCENE = preload("res://blaster_bolt.tscn")
 const BALL_SCENE = preload("res://ball.tscn")
 const OrbVisual = preload("res://placeholder_satellite_orbs.gd")
@@ -238,6 +243,9 @@ func _catch_capsule(effect: Resource) -> void:
 	if negated:
 		hud.update_effects(effects.active, force_field_charges)
 		return
+	if effect.companion_count > 0:
+		companion_generation += 1
+		_replace_companions.call_deferred(effect, companion_generation)
 	if effect.extra_balls > 0:
 		_split_ball(effect)
 	effects.apply(effect)
@@ -254,6 +262,8 @@ func _catch_capsule(effect: Resource) -> void:
 	hud.update_lives(lives)
 
 func _clear_effects_and_capsules() -> void:
+	companion_generation += 1
+	_clear_companions()
 	effects.active.clear()
 	satellite_orbs = 0
 	effects.shot_time_left = 0.0
@@ -343,3 +353,39 @@ func _update_ball_effects() -> void:
 	for active_ball in get_balls():
 		active_ball.set_speed_multiplier(multiplier)
 		active_ball.set_sticky_active(effects.active.has(&"sticky_paddle"))
+
+func _clear_companions() -> void:
+	for companion in companions:
+		if is_instance_valid(companion) and not companion.is_queued_for_deletion():
+			companion.queue_free()
+	companions.clear()
+
+func _replace_companions(effect: Resource, generation: int) -> void:
+	if generation != companion_generation or reset_ready or level_complete:
+		return
+	_clear_companions()
+	for index in effect.companion_count:
+		var companion = COMPANION_SCENE.instantiate()
+		companion.main_paddle = paddle
+		companion.health = effect.companion_health
+		companion.follow_speed = effect.companion_follow_speed
+		var left_wall = $PlayArea/Walls/Left
+		var right_wall = $PlayArea/Walls/Right
+		companion.horizontal_bounds = Vector2(
+			left_wall.global_position.x + left_wall.shape.size.x / 2.0,
+			right_wall.global_position.x - right_wall.shape.size.x / 2.0)
+		companion.offset = Vector2(effect.companion_offset.x * (-1 if index == 0 else 1), effect.companion_offset.y)
+		$PlayArea.add_child(companion)
+		companion.global_position = paddle.global_position + companion.offset
+		companion._physics_process(0.0)
+		companions.append(companion)
+		companion.destroyed.connect(_on_companion_destroyed)
+
+func _on_companion_destroyed() -> void:
+	var survivors: Array[Node2D] = []
+	for companion in companions:
+		if is_instance_valid(companion) and not companion.is_queued_for_deletion():
+			survivors.append(companion)
+	companions = survivors
+	if companions.size() == 1:
+		companions[0].offset.x = 0.0

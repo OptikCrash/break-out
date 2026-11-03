@@ -41,6 +41,11 @@ func _physics_process(delta: float) -> void:
 
 	if collision:
 		var hit := collision.get_collider()
+		# Floating paddles can be hit from below: reflect away instead of
+		# steering upward into the same surface again on the next step.
+		if hit.is_in_group("companion") and collision.get_normal().y >= 0.0:
+			_hit_surface(hit, collision.get_normal())
+			return
 
 		if hit.is_in_group("paddle"):
 			var ball_x: float = collision.get_position().x
@@ -51,10 +56,12 @@ func _physics_process(delta: float) -> void:
 
 			var x_dir: float = (ball_x - paddle_x) / hit.half_width
 
-			if sticky_active:
+			if sticky_active and not hit.is_in_group("companion"):
 				catch_on_paddle(x_dir)
 			else:
 				velocity = BallRules.paddle_direction(x_dir) * current_speed
+			if hit.is_in_group("companion"):
+				hit.take_hit()
 		else:
 			_hit_surface(hit, collision.get_normal())
 

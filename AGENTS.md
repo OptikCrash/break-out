@@ -198,6 +198,26 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   dictionary. HUD charge entries are display-only; hazard gating happens before
   applying any capsule effects. Charges clear with the other capsule effects.
 
+- Companion scenes inherit `paddle.tscn` with their own root script and retain the
+  `paddle` group for shared ball/capsule detection. Only the main paddle collects
+  power-ups or catches Sticky balls; companions consume hazards locally.
+- After manually moving a physics body in a headless test, await a physics frame
+  and then a process frame before checking collisions at its new position, so the
+  physics server has synchronized the transform.
+- Companion replacement defers body creation out of capsule physics queries. Its
+  generation counter invalidates pending replacements on life loss/level end.
+- Floating companions can be hit underneath or on a side. Reflect those contacts
+  using the collision normal; the upward paddle-angle rule would send an underside
+  hit straight back into the surface and drain health across consecutive frames.
+
+- Companion wall bounds come from the inner edges of the wall collision shapes.
+  Clamp centers by their half-width on spawn as well as while following; target-only
+  clamping leaves an initially out-of-bounds companion outside until it catches up.
+
 - When combining Satellite Shield and Blaster, retain both content-pool entries and
   validation branches. Lifecycle cleanup clears waiting orbs, bolts and shot cooldown;
   the same physics-step power action can trigger both alongside Sticky release.
+
+- When merging Companion Paddle with Satellite Shield, preserve both stable IDs in
+  the uniform pool and its pinned content test; keep both deferred companion cleanup
+  and waiting-orb cleanup in the shared life-loss/level-end path.

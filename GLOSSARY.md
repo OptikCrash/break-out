@@ -146,6 +146,31 @@ Life loss (last live ball) and level completion clear charges, following other c
 effects. The design does not specify charge clearing; this is an implementation default
 for review.
 
+**Companion Paddle (issue #67 provisional defaults)**:
+`companion_paddle` awards 25 catch points and always replaces the whole power-up with
+exactly two fresh companions, each with three hit points, even if both still survive.
+They start at horizontal offsets −160/+160 pixels and 96 pixels above the main paddle.
+Each follows its own horizontal target at 600 pixels/second without overshoot; vertical
+placement stays 96 pixels above the main paddle. When one dies the other's horizontal
+target becomes the main paddle center; it catches up at the same speed rather than
+teleporting. Offsets and follow speed are authored in the effect definition.
+Each retains the ordinary base 128×16 paddle surface and existing paddle sprite;
+Wide/Shrink and Sticky affect only the main paddle. Companion bounces use ordinary
+paddle angles and preserve ball speed. Only top-face bounces spend one health;
+side and underside contacts reflect off the collision normal at unchanged speed,
+without spending health or catching Sticky balls. This contact-face distinction is a
+provisional default: the design did not specify non-top contacts, and steering an
+underside hit upward would repeatedly hit the same surface. An intercepted hazard spends one health;
+power-up capsules pass untouched. Intercepted hazards give no score/effect and do not
+spend Force Field charges. Companions have no timer and clear on last-ball life loss
+or level completion; pending creation is canceled too. Spacing, speed, fixed base width,
+Sticky interaction, gradual re-centering and lifecycle clearing are implementation
+defaults where the design was unspecified. Always resetting on any re-catch generalizes
+PLAN.md's one-survivor reset rule, as requested by issue #67; it remains provisional.
+Companion centers are clamped between the inner wall edges plus/minus their 64-pixel
+half-width, including on spawn, so their whole bounce surface stays inside the play area.
+This placement rule is a provisional default following issue #67 review feedback.
+
 **Satellite Shield (issue #66)**:
 `satellite_shield` awards 25 catch points and resets the waiting orb count to three.
 Orbs are visual placeholders without physics until launched, one per `power_action`

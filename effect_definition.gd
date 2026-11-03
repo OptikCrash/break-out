@@ -10,6 +10,10 @@ extends Resource
 @export var bolt_speed := 0.0
 @export var extra_lives := 0
 @export var hazard_charges := 0
+@export var companion_count := 0
+@export var companion_health := 0
+@export var companion_offset := Vector2.ZERO
+@export var companion_follow_speed := 0.0
 @export var extra_balls := 0
 @export var split_angle_degrees := 0.0
 # Satellite Shield is charge-based: orbs wait at the paddle instead of a timer.
@@ -36,4 +40,7 @@ func validation_error() -> String:
 		return "Hazard charges must be nonnegative."
 	if hazard_charges > 0 and (hazard_charges != 3 or duration != 0.0 or hazard):
 		return "Force Field needs three charges, no timer and must be a power-up."
+	if companion_count != 0 or companion_health != 0 or companion_offset != Vector2.ZERO or companion_follow_speed != 0.0:
+		if companion_count != 2 or companion_health != 3 or companion_offset.x <= 0.0 or companion_offset.y >= 0.0 or companion_follow_speed <= 0.0 or duration != 0.0 or hazard:
+			return "Companions need two paddles, three health, positive spacing/speed, upward offset and no hazard/timer."
 	return ""
