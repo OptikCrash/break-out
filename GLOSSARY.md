@@ -88,3 +88,11 @@ Creation waits until physics queries finish; a lost source or completed level
 cancels its pending copies.
 Repeat-catch behavior, resting catches and spread were unspecified in PLAN.md and
 the issue; these are explicit implementation defaults for review.
+**Ball speed capsule tuning (issue #53 provisional defaults)**:
+Slow Ball (`slow_ball`) multiplies ball speed by 0.75; Speed-up Ball (`speed_up_ball`)
+multiplies it by 1.5. Both last 10 seconds, refresh independently without stacking,
+and multiply together to 1.125 times the underlying speed. They affect all live balls,
+including balls added or launched during the effect. Expiry or lifecycle clearing removes
+only the effect multiplier, preserving direction and each ball's underlying speed.
+The factors and overlap calculation were unspecified in the design; these are explicit
+implementation defaults for review. Catch scores remain +25 and +0 respectively.

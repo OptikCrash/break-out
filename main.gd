@@ -165,6 +165,7 @@ func _count_destructible_bricks() -> void:
 
 func _physics_process(delta: float) -> void:
 	effects.advance(delta)
+	_update_ball_speeds()
 	paddle.set_width_multiplier(effects.width_multiplier())
 	hud.update_effects(effects.active)
 
@@ -187,6 +188,7 @@ func _catch_capsule(effect: Resource) -> void:
 	if effect.extra_balls > 0:
 		_split_ball(effect)
 	effects.apply(effect)
+	_update_ball_speeds()
 	paddle.set_width_multiplier(effects.width_multiplier())
 	hud.update_effects(effects.active)
 	score += EffectRules.catch_points(effect)
@@ -196,6 +198,7 @@ func _catch_capsule(effect: Resource) -> void:
 
 func _clear_effects_and_capsules() -> void:
 	effects.active.clear()
+	_update_ball_speeds()
 	hud.update_effects(effects.active)
 	paddle.set_width_multiplier(1.0)
 	for capsule in get_tree().get_nodes_in_group("capsule"):
@@ -214,6 +217,7 @@ func add_ball() -> Node2D:
 			new_ball.add_collision_exception_with(other)
 			other.add_collision_exception_with(new_ball)
 	new_ball.reset()
+	new_ball.set_speed_multiplier(effects.speed_multiplier())
 	return new_ball
 
 func _connect_ball(active_ball: Node2D) -> void:
@@ -258,3 +262,8 @@ func _add_split_balls(source: Node2D, effect: Resource) -> void:
 		copy.launched = source.launched
 		copy.velocity = split_velocity
 		copy.breaker_time_left = source.breaker_time_left
+
+func _update_ball_speeds() -> void:
+	var multiplier: float = effects.speed_multiplier()
+	for active_ball in get_balls():
+		active_ball.set_speed_multiplier(multiplier)

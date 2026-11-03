@@ -8,6 +8,8 @@ func _initialize() -> void:
 		[&"wide_paddle", false, 10.0, 1.5, 0, 25],
 		[&"shrink_paddle", true, 10.0, 0.75, 0, 0],
 		[&"extra_life", false, 0.0, 1.0, 1, 25],
+		[&"slow_ball", false, 10.0, 1.0, 0, 25],
+		[&"speed_up_ball", true, 10.0, 1.0, 0, 0],
 		[&"multi_ball", false, 0.0, 1.0, 0, 25],
 	]
 	_check(Rules.DEFINITIONS.size() == expected.size(), "Pin pool size")
@@ -55,7 +57,7 @@ func _initialize() -> void:
 	rules.advance(5.0)
 	_check(not rules.active.has(wide.id) and rules.active[shrink.id].remaining == 5.0, "Different timers expire independently")
 	_check(rules.width_multiplier() == 0.75, "Expiring Wide leaves Shrink active")
-	var multi = Rules.DEFINITIONS[3]
+	var multi = Rules.DEFINITIONS[5]
 	_check(multi.extra_balls == 2 and multi.split_angle_degrees == 20.0, "Pin two copies and twenty-degree spread")
 	var velocities = Rules.split_velocities(Vector2(0, -700), multi)
 	_check(velocities.size() == 2, "Split creates two velocities")
@@ -79,6 +81,32 @@ func _initialize() -> void:
 	invalid.split_angle_degrees = 20.0
 	invalid.duration = 10.0
 	_check(not invalid.validation_error().is_empty(), "Reject timed Multi-ball")
+	var slow = Rules.DEFINITIONS[3]
+	var fast = Rules.DEFINITIONS[4]
+	_check(slow.ball_speed_multiplier == 0.75 and fast.ball_speed_multiplier == 1.5, "Pin speed tuning")
+	rules.active.clear()
+	rules.apply(slow)
+	_check(rules.speed_multiplier() == 0.75, "Slow multiplier")
+	rules.advance(4.0)
+	rules.apply(fast)
+	_check(rules.speed_multiplier() == 1.125, "Speed effects multiply")
+	rules.apply(slow)
+	_check(rules.active[slow.id].remaining == 10.0 and rules.speed_multiplier() == 1.125, "Slow refresh does not stack")
+	rules.advance(6.0)
+	rules.apply(fast)
+	_check(rules.active[fast.id].remaining == 10.0, "Speed-up refreshes")
+	rules.advance(4.0)
+	_check(rules.speed_multiplier() == 1.5, "Slow expiry leaves speed-up")
+	rules.advance(6.0)
+	_check(rules.speed_multiplier() == 1.0, "Speed-up expiry restores baseline")
+	invalid = slow.duplicate()
+	invalid.ball_speed_multiplier = 0.0
+	_check(not invalid.validation_error().is_empty(), "Reject zero speed")
+	invalid.ball_speed_multiplier = -1.0
+	_check(not invalid.validation_error().is_empty(), "Reject negative speed")
+	invalid.ball_speed_multiplier = 0.75
+	invalid.duration = 0.0
+	_check(not invalid.validation_error().is_empty(), "Reject permanent speed effects")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 50
 	var reference := RandomNumberGenerator.new()
@@ -86,9 +114,9 @@ func _initialize() -> void:
 	var seen := {}
 	for i in 300:
 		var effect = Rules.random_effect(rng)
-		_check(effect == Rules.DEFINITIONS[reference.randi_range(0, 3)], "Uniform draw uses one equal-weight index")
+		_check(effect == Rules.DEFINITIONS[reference.randi_range(0, Rules.DEFINITIONS.size() - 1)], "Uniform draw uses one equal-weight index")
 		seen[effect.id] = true
-	_check(seen.size() == 4, "All registered effects are reachable")
+	_check(seen.size() == 6, "All registered effects are reachable")
 	_check(Rules.CAPSULE_SPEED == 240.0, "Pin fall speed")
 	quit(1 if failures else 0)
 

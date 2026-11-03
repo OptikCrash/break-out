@@ -5,6 +5,8 @@ const DEFINITIONS = [
 	preload("res://effects/wide_paddle.tres"),
 	preload("res://effects/shrink_paddle.tres"),
 	preload("res://effects/extra_life.tres"),
+	preload("res://effects/slow_ball.tres"),
+	preload("res://effects/speed_up_ball.tres"),
 	preload("res://effects/multi_ball.tres"),
 ]
 const CAPSULE_SPEED := 240.0
@@ -34,4 +36,10 @@ func width_multiplier() -> float:
 	var multiplier := 1.0
 	for entry in active.values():
 		multiplier *= entry.definition.paddle_width_multiplier
+	return multiplier
+
+func speed_multiplier() -> float:
+	var multiplier := 1.0
+	for entry in active.values():
+		multiplier *= entry.definition.ball_speed_multiplier
 	return multiplier

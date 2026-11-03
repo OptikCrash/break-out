@@ -14,6 +14,7 @@ func _run() -> void:
 	var freeze_ball := func(node: Node):
 		if node.is_in_group("ball"):
 			node.set_physics_process(false)
+			node.ready.connect(func(): node.set_physics_process(false), CONNECT_ONE_SHOT)
 	node_added.connect(freeze_ball)
 	var source = game.ball
 	source.set_physics_process(false)
@@ -82,6 +83,21 @@ func _run() -> void:
 		if not before_split.has(active_ball):
 			_check(active_ball.position == launched.position and active_ball.launched, "Prefer first launched source over resting ball")
 			_check(active_ball.brick_broken.is_connected(game._on_ball_brick_broken), "Spawned copies report scoring")
+	# Copies inherit the active multiplier as well as the already-scaled velocity.
+	game._catch_capsule(preload("res://effects/slow_ball.tres"))
+	game._catch_capsule(preload("res://effects/speed_up_ball.tres"))
+	game._catch_capsule(Multi)
+	await process_frame
+	var split_balls = game.get_balls()
+	_check(split_balls.size() == 9, "Speed effects still allow two copies")
+	for copy in [split_balls[7], split_balls[8]]:
+		_check(copy.speed_multiplier == 1.125, "Copies inherit overlapping speed effects")
+		_check(is_equal_approx(copy.velocity.length(), Vector2(100, -500).length() * 1.125), "Copies preserve scaled source speed")
+	game.effects.advance(10.0)
+	game._update_ball_speeds()
+	for copy in [split_balls[7], split_balls[8]]:
+		_check(copy.speed_multiplier == 1.0, "Copy multiplier expires")
+		_check(is_equal_approx(copy.velocity.length(), Vector2(100, -500).length()), "Expiry restores underlying copy speed exactly once")
 	# A pending split cannot resurrect a ball already lost in the same frame.
 	game.lives = 4
 	for active_ball in game.get_balls():
