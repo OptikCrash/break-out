@@ -12,9 +12,10 @@ don't rise to that bar and are just recorded here instead).
 
 ## Current state
 
-The core loop works: paddle, ball angle set by where it hits the paddle, a 17×5 brick grid,
-lives, score, win/lose, restart. 1920×1080, GL Compatibility renderer. Known rough edges are
-milestone 1's scope.
+M1 and M2 are merged: the core loop (paddle, ball angle set by paddle hit position, a 17×5 brick
+grid, lives, score, win/lose, restart) is bug-fixed, tested, and has a title screen, a pause
+menu, a Game Over/Win screen with buttons, and mouse/gamepad input alongside keyboard. 1920×1080,
+GL Compatibility renderer. M3 (below) is current.
 
 ## Conventions
 
@@ -63,9 +64,36 @@ Title, pause, and game-over screens; mouse or gamepad input alongside keyboard.
 
 ### M3: Content variety
 
-Levels defined as data instead of the single hard-coded grid; brick types.
+Levels defined as data instead of the single hard-coded grid, plus brick types. No new features
+beyond what's listed here (power-up-dependent brick types are explicitly M4's, below).
+
+- **Level format:** a custom `Level` Resource (`level.gd`), authored as `.tres` files under
+  `levels/`. Each level has an ASCII-art multi-line string grid, one row per line, one character
+  per brick cell: `.` empty, `#` Normal, `x` Reinforced, `o` Indestructible. `bricks.gd` reads a
+  `Level` resource instead of generating a hard-coded rectangle.
+- **Brick types** (exactly three for M3):
+  - **Normal** — 1 hit, 10 points, today's look.
+  - **Reinforced** — 2 hits, visibly changes after the first hit, 20 points.
+  - **Indestructible** — never breaks, worth 0 points, and does **not** count toward the brick
+    count that ends a level.
+  - Points are only awarded when a brick is actually destroyed, never per intermediate hit.
+- **Level progression:** levels play in a fixed sequence. Clearing a level (all non-Indestructible
+  bricks gone) shows a "Level X Complete!" splash with a Continue button/action (mouse click or
+  the existing accept input, matching the Game Over/Win screen's pattern); continuing resets the
+  ball/paddle (like a life-lost reset, no life cost) and loads the next level. Lives and score
+  carry over between levels. After the last level, the existing "You Win!" screen shows. No
+  level-select screen in M3.
+- **HUD:** a "Level: X" label alongside the existing Score and Lives labels.
+- **Level content:** three levels, a small difficulty ramp —
+  1. Today's layout minus one row (17×4), all Normal bricks.
+  2. A geometric pattern introducing Reinforced bricks.
+  3. A geometric pattern introducing Indestructible bricks alongside Reinforced.
 
 ### M4: Power-ups
+
+Includes the power-up-dependent brick types identified while scoping M3, since they only mean
+anything once power-ups exist: a brick that drops a power-up on break, a brick that drops a
+hazard on break, and a brick that's mostly indestructible but can be broken by some power-up.
 
 ### M5: Speed-up and game feel
 

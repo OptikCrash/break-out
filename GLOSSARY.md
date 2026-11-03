@@ -10,8 +10,16 @@ from the full 1920×1080 window, which also holds the HUD.
 The invisible area below the Play Area's bottom wall; the ball entering it costs a life.
 
 **Brick Grid**:
-The rows-and-columns layout of bricks generated at the start of a run (currently 17×5, fixed in
-code; M3 makes this data-driven per level).
+The rows-and-columns layout of bricks loaded from a Level's ASCII grid (one row per line, one
+character per cell). Dimensions vary per level.
+
+**Level**:
+A `Level` Resource (`.tres` under `levels/`) defining one brick grid. Levels play in a fixed
+sequence; clearing one loads the next.
+
+**Brick Type**:
+What a brick cell's character means: Normal (`#`, 1 hit), Reinforced (`x`, 2 hits), or
+Indestructible (`o`, never breaks, doesn't count toward a level's win condition).
 
 **Launch**:
 The player input (and the moment) that sends the ball moving for the first time, or after a life
