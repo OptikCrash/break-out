@@ -226,3 +226,7 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   the multiplier, then add it back. Decay adjusts held Sticky speed too. Multi-ball
   copies must retain boost total, rate and remaining clock alongside velocity, or
   the copied bonus becomes permanent. Boost tuning lives in pure `ball_rules.gd`.
+
+- Paddle Boost collision tests must leave decay active and assert the observed total,
+  clock and rate before changing state. Restoring saved values after a stationary
+  hit masks an accidental timer restart; account for the collision step in expectations.

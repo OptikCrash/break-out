@@ -1,6 +1,7 @@
 extends SceneTree
 
 const Rules = preload("res://ball_rules.gd")
+const BOUNCE_STEP := 0.02
 var failures := 0
 
 func _initialize() -> void:
@@ -31,15 +32,22 @@ func _run() -> void:
 	ball.tick_boost(1.5)
 	_check(is_equal_approx(ball.boost, 100.0), "Half-duration linear fade")
 	await _bounce(ball, paddle)
-	_check(is_equal_approx(ball.boost, 300.0) and ball.boost_time_left == 3.0, "Second hit adds and restarts full clock")
+	var stacked_boost := 100.0 - (200.0 / 3.0) * BOUNCE_STEP + 200.0
+	_check(is_equal_approx(ball.boost, stacked_boost) and ball.boost_time_left == 3.0, "Second hit adds after step decay and restarts full clock")
 	ball.set_speed_multiplier(0.75)
-	_check(is_equal_approx(ball.velocity.length(), 712.5), "Slow scales base only: 412.5 plus 300")
+	_check(is_equal_approx(ball.velocity.length(), 412.5 + stacked_boost), "Slow scales base only")
 	ball.set_speed_multiplier(1.5)
-	_check(is_equal_approx(ball.velocity.length(), 1125.0), "Speed-up scales base only: 825 plus 300")
+	_check(is_equal_approx(ball.velocity.length(), 825.0 + stacked_boost), "Speed-up scales base only")
 	ball.tick_boost(1.0)
+	var expected_rate := stacked_boost / 3.0
+	var expected_boost := stacked_boost - expected_rate * (1.0 + BOUNCE_STEP)
 	paddle.recent_velocity_x = 0.0
 	await _bounce(ball, paddle)
-	_check(is_equal_approx(ball.boost, 200.0) and ball.boost_time_left == 2.0, "Stationary hit preserves total and clock")
+	_check(ball.velocity.y < 0.0, "Stationary paddle collision actually bounces")
+	_check(is_equal_approx(ball.boost, expected_boost), "Stationary hit only applies normal step decay")
+	_check(is_equal_approx(ball.boost_time_left, 2.0 - BOUNCE_STEP), "Stationary hit does not restart clock")
+	_check(is_equal_approx(ball.boost_decay_rate, expected_rate), "Stationary hit preserves decay rate")
+	_check(is_equal_approx(ball.velocity.length(), 825.0 + expected_boost), "Stationary bounce retains multiplied base plus decayed boost")
 	ball.tick_boost(2.0)
 	_check(ball.boost == 0.0 and is_equal_approx(ball.velocity.length(), 825.0), "Full fade restores multiplied base")
 	ball.tick_boost(10.0)
@@ -90,16 +98,7 @@ func _bounce(ball, paddle) -> void:
 	ball.velocity = Vector2.DOWN * (ball.speed * ball.speed_multiplier + ball.boost)
 	await physics_frame
 	await process_frame
-	# Freeze decay for this manually stepped collision.
-	var remaining: float = ball.boost_time_left
-	var total: float = ball.boost
-	var rate: float = ball.boost_decay_rate
-	ball.boost_time_left = 0.0
-	ball._physics_process(0.02)
-	if paddle.recent_velocity_x == 0.0:
-		ball.boost_time_left = remaining
-		ball.boost = total
-		ball.boost_decay_rate = rate
+	ball._physics_process(BOUNCE_STEP)
 
 func _check(condition: bool, message: String) -> void:
 	if not condition:
