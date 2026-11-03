@@ -156,8 +156,21 @@ func _run() -> void:
 		copy.set_physics_process(false)
 		_check(copy.caught and copy.catch_offset == 0.5 and is_equal_approx(copy.caught_speed, 550.0), "Split copies retain catch offset and held speed")
 	game._physics_process(10.0)
-	for copy in game.get_balls():
-		_check(not copy.caught and copy.velocity.is_equal_approx(base), "Expiry releases all caught copies at held speed")
+	var released = game.get_balls()
+	for index in range(released.size()):
+		var copy = released[index]
+		var angle := 0.0 if index == 0 else deg_to_rad(-20.0 if index == 1 else 20.0)
+		_check(not copy.caught and copy.velocity.is_equal_approx(base.rotated(angle)), "Expiry applies the authored split angle to each caught copy")
+		_check(is_equal_approx(copy.velocity.length(), 550.0), "Split release preserves held speed")
+		_check(copy.release_rotation == 0.0, "Split rotation is consumed on release")
+		for other in released.slice(index + 1):
+			_check(not copy.velocity.is_equal_approx(other.velocity), "Released split trajectories are pairwise different")
+		copy.catch_on_paddle(0.5)
+		copy.release_catch()
+		_check(copy.velocity.is_equal_approx(base), "Later catches do not reuse the split angle")
+	ball.release_rotation = 0.25
+	ball.reset()
+	_check(ball.release_rotation == 0.0, "Reset clears pending split rotation")
 	game.free()
 	quit(1 if failures else 0)
 

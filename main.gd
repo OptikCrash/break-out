@@ -261,7 +261,9 @@ func _add_split_balls(source: Node2D, effect: Resource) -> void:
 		return
 	# Balls do not collide with each other. A common origin avoids placing a
 	# copy inside a nearby wall or brick; the rotated velocities separate them.
-	for split_velocity in EffectRules.split_velocities(source.velocity, effect):
+	var split_velocities := EffectRules.split_velocities(source.velocity, effect)
+	for index in range(split_velocities.size()):
+		var split_velocity: Vector2 = split_velocities[index]
 		var copy = add_ball()
 		copy.position = source.position
 		copy.speed = source.speed
@@ -272,6 +274,9 @@ func _add_split_balls(source: Node2D, effect: Resource) -> void:
 		copy.caught = source.caught
 		copy.catch_offset = source.catch_offset
 		copy.caught_speed = source.caught_speed
+		if source.caught:
+			var angle := deg_to_rad(float(effect.split_angle_degrees))
+			copy.release_rotation = source.release_rotation + (-angle if index == 0 else angle)
 
 func _update_ball_effects() -> void:
 	var multiplier: float = effects.speed_multiplier()

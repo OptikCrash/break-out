@@ -116,5 +116,11 @@ both use the same cap. The weighting, cap, 45° limit and one-step meaning of "r
 are implementation defaults for review.
 
 When Multi-ball copies a caught ball, the copies retain its catch offset and held speed,
-remaining caught until Power-up Action or expiry releases them. The design does not
-specify this interaction; preserving the catch is an implementation default for review.
+remaining caught until Power-up Action or expiry releases them. Copies apply the authored
+Multi-ball spread (−20° and +20°) after the Sticky direction and momentum calculation,
+with unchanged held speed; the source keeps its original release angle. This one-use
+rotation clears on release or reset, so later catches use ordinary Sticky rules.
+The spread can extend the 45° Sticky limit to 25° above horizontal on this release.
+Splitting an already split caught copy adds its pending rotation to the new spread.
+The design does not specify this interaction; preserving the catch and applying the
+usual split spread are implementation defaults for review.

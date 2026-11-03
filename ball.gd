@@ -11,6 +11,8 @@ var sticky_active := false
 var caught := false
 var catch_offset := 0.0
 var caught_speed := 0.0
+# One-use Multi-ball spread for copies created while caught.
+var release_rotation := 0.0
 # Each ball owns its independent duration.
 var breaker_time_left := 0.0
 var breaker_active: bool:
@@ -77,6 +79,7 @@ func _rest_on_paddle() -> void:
 func reset() -> void:
 	launched = false
 	caught = false
+	release_rotation = 0.0
 	velocity = Vector2.ZERO
 	# Winning stops physics, so placement cannot wait for the next physics tick.
 	_rest_on_paddle()
@@ -101,7 +104,8 @@ func release_catch() -> void:
 	caught = false
 	launched = true
 	_rest_on_paddle()
-	velocity = BallRules.sticky_release(catch_offset, caught_speed, paddle.recent_velocity_x)
+	velocity = BallRules.sticky_release(catch_offset, caught_speed, paddle.recent_velocity_x).rotated(release_rotation)
+	release_rotation = 0.0
 
 func set_sticky_active(active: bool) -> void:
 	sticky_active = active

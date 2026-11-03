@@ -182,3 +182,7 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 
 - Multi-ball copies of a Sticky catch must copy `caught`, `catch_offset` and
   `caught_speed`: copying only zero velocity creates launched balls that never move.
+
+- Caught Multi-ball copies also carry a one-use `release_rotation` from the authored
+  split angle. Consume it on release and clear it on reset; later Sticky catches
+  must not inherit an earlier split’s spread.
