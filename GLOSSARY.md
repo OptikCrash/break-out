@@ -75,3 +75,12 @@ both fall and effect time. A final Mystery Brick still completes the level immed
 its pending drop is discarded with the level's other loose capsules.
 These tuning and reset choices were unspecified in PLAN.md and the issue; they are
 explicit implementation defaults for review, rather than previously agreed design values.
+
+**Ball speed capsule tuning (issue #53 provisional defaults)**:
+Slow Ball (`slow_ball`) multiplies ball speed by 0.75; Speed-up Ball (`speed_up_ball`)
+multiplies it by 1.5. Both last 10 seconds, refresh independently without stacking,
+and multiply together to 1.125 times the underlying speed. They affect all live balls,
+including balls added or launched during the effect. Expiry or lifecycle clearing removes
+only the effect multiplier, preserving direction and each ball's underlying speed.
+The factors and overlap calculation were unspecified in the design; these are explicit
+implementation defaults for review. Catch scores remain +25 and +0 respectively.
