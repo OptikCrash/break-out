@@ -11,7 +11,7 @@ func run() -> void:
 	_check(ProjectSettings.get_setting("application/run/main_scene") == TITLE,
 		"run/main_scene must be the title screen")
 	await check_layout()
-	for event in [_key(KEY_SPACE), _key(KEY_ENTER), _click()]:
+	for event in [_key(KEY_SPACE), _key(KEY_ENTER), _joy_a(), _click()]:
 		await check_starts_game(event)
 	await check_held_space_then_launch()
 	quit(1 if failures else 0)
@@ -80,6 +80,13 @@ func _key(keycode: Key) -> InputEventKey:
 	var event := InputEventKey.new()
 	event.keycode = keycode
 	event.physical_keycode = keycode
+	event.pressed = true
+	return event
+
+# Godot's default ui_accept has no gamepad button; project.godot adds A.
+func _joy_a() -> InputEventJoypadButton:
+	var event := InputEventJoypadButton.new()
+	event.button_index = JOY_BUTTON_A
 	event.pressed = true
 	return event
 

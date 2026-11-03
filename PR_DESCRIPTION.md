@@ -1,67 +1,66 @@
-Closes #23
+Closes #25
 
-Adds a title screen (`TitleScreen.tscn` + `title.gd`) and makes it `run/main_scene`, so F5 and
-web builds open on it. Space, Enter, gamepad A (all through Godot's built-in `ui_accept` action)
-or a left click start the game. Nothing in `main.tscn`, the HUD or restart (R) changed.
+On Game Over or Win, two buttons now appear under the message: **Restart (R)** and **Back to
+Title**. Restart has focus when they appear, so Enter/Space or gamepad A picks it right away.
+Left/Right (arrows or D-pad) moves between the buttons, and the mouse works as well. `R` still
+restarts directly. While playing, the buttons are hidden.
 
-## The Godot idea: `change_scene_to_file`
+## The Godot ideas
 
-A `SceneTree` has one **current scene**. `get_tree().change_scene_to_file("res://main.tscn")`
-frees the title screen and loads `main.tscn` in its place. The swap waits until the end of the
-frame, so the code that asked for it finishes running first. This is the same approach
-`main.gd` already uses for restart (`reload_current_scene()`, which loads a new copy of the
-current scene). Pause and game-over will follow the same pattern, with "Back to Title" being
-`get_tree().change_scene_to_file("res://TitleScreen.tscn")`.
+**Signals from the HUD, decisions in `main.gd`.** `HUD.tscn` connects each button's `pressed`
+signal to its own signals, `restart_pressed` and `back_to_title_pressed`. `main.gd` connects to
+those in `_ready()`. The HUD only reports what the player chose. The game decides what that
+means: `restart()` (the same `reload_current_scene()` that R used) or `back_to_title()`
+(`change_scene_to_file("res://TitleScreen.tscn")`, the pattern from #23). R and the button
+call the same `restart()`. It clears `reset_ready` first, so R and a click in the same frame
+can't request two scene changes.
+*Alternative considered:* calling `get_tree().reload_current_scene()` straight from `hud.gd`.
+It's shorter, but then the HUD would own game flow, and R and the button would have two copies
+of the restart logic.
 
-**Alternative considered: an autoloaded scene manager.** An autoload is a node Godot keeps
-alive across scene changes. It would be the place for fade transitions, loading screens or
-state that must outlive a scene. This project has none of those yet, and a manager would add a
-global plus an extra layer around a single engine call. Plain `change_scene_to_file` is easy to
-read and easy to swap out later. If fades or shared state are added, we can wrap the same call
-in an autoload without changing the scenes.
+**Focus.** A Control with focus gets keyboard and gamepad input. Buttons in an
+`HBoxContainer` are focus neighbours of each other automatically, so `ui_left`/`ui_right` move
+between them without setting anything up. `hud.show_end_buttons()` calls
+`Restart.grab_focus()` when the buttons appear.
 
-## A subtlety: one Space press, two meanings
+**`ui_accept` had no gamepad button.** Godot's built-in `ui_accept` action only has Enter,
+Keypad Enter and Space. The new test showed that gamepad A did nothing, and that the title
+screen from #23 didn't start on A either, although the #23 PR said it did. `project.godot` now
+overrides `ui_accept` to add joypad A. An override replaces the whole built-in list, so the
+three keys are listed again. The D-pad was already bound to `ui_left`/`ui_right`.
 
-Space is both `ui_accept` (start) and `launch`. The new headless test showed that swapping
-scenes as soon as Space was pressed made the ball launch the moment the game appeared. Godot
-treats a press as "just pressed" during the **next physics step**, and the deferred scene swap
-runs before that step, so the new ball sees the same press. `title.gd` waits for
-`get_tree().physics_frame` before swapping. That lets the step pass while the title screen is
-still the current scene, and the ball starts resting on the paddle as before. Handling it here
-keeps the fix in presentation code; the alternative was making `ball.gd` ignore launch input on
-its first frame, which would change gameplay code for a menu problem.
+**No physics-frame wait needed here.** `Button`s fire on *release*, for keyboard and gamepad
+too. So pressing Space on Restart doesn't give the new scene a fresh "just pressed" Space, and
+the ball stays on the paddle (the test checks this). The title screen still needs its wait,
+because it reacts to the *press* in `_unhandled_input`.
 
-## Layout and input details
+## Layout
 
-- The root `Control`, the black `Background` ColorRect and a `CenterContainer` all use Full Rect
-  anchors, so the text stays centred at 1920x1080 and when the window is resized (stretch mode
-  is `canvas_items`). There are no pixel offsets.
-- Clicks are read in `_unhandled_input`. Every node has `mouse_filter = Ignore` so the GUI does
-  not consume the click before it reaches the script.
-- A `starting` flag stops a Space press and a click in the same frame from asking for the scene
-  change twice.
-- No art: default font at larger sizes, white on black like the play area, and the controls
-  hint in light grey (still high contrast).
+`EndButtons` is anchored to the viewport centre (it sits directly under the `Hud`
+`CanvasLayer`) and offset 96 px below it, under the centred message. It grows from its centre,
+so it stays centred at 1920x1080 and after a resize. I raised `MessageLabel`'s font size to 64
+so the heading isn't smaller than the 32 px button text. Its anchoring from #8 is unchanged.
+The buttons use the default theme, like the rest of the UI, so there's no new art.
+
+## Message text
+
+I dropped the hard-coded "\nPress R to restart" and kept the shortcut in the button label
+instead (**Restart (R)**). That way the hint is still visible but isn't shown twice. The
+messages are now just "Game Over!" / "You Win!".
 
 ## Tests
 
-`tests/title_screen_test.gd` (headless, no addon) checks:
-- `run/main_scene` is the title screen;
-- the text block is centred and every label fits on screen at 1920x1080 and 1280x720;
-- Space, Enter and a left click each load `main.tscn`, and the ball is not launched afterwards.
-  The test failed before the `physics_frame` wait was added.
-- holding Space through the scene change does not launch the ball, and after letting go, the next
-  Space press does launch it. This proves the wait only skips the press that started the game
-  and doesn't block the launch input.
-
-Validation: headless editor import gave no errors, and all six `tests/*_test.gd` passed when run
-one by one with `godot --headless --path . --script ...` and checked for `ERROR:` output.
-`scripts/run-tests.sh` and `scripts/test-runner.sh` were not run directly in this environment
-because shell scripts needed permission I didn't have; CI runs both. There is no display here, so
-nobody has yet looked at the screen in a real window, and gamepad A is untested (it comes from
-Godot's default `ui_accept` mapping).
-
-README now says F5 (or F6 on `TitleScreen.tscn`) starts at the title screen. AGENTS.md gains a
-short "Scene flow" section on this pattern and the one-press-two-actions trap.
+- New `tests/end_screen_test.gd`:
+  - The buttons are hidden during play, and R does nothing then.
+  - On both Game Over and Win, the buttons appear with Restart focused.
+  - They are centred, below the message and on screen at 1920x1080 and 1280x720.
+  - Each of these reloads a fresh game without launching the ball: R, Enter, Space, gamepad A
+    and a click on Restart.
+  - Each of these opens the title screen: Right then Enter, D-pad right then A, and a click on
+    Back to Title.
+- `title_screen_test.gd` also covers gamepad A now.
+- `hud_layout_test.gd` and `brick_hit_test.gd` use the new message text, and `brick_hit_test`
+  checks that the buttons appear on a win.
+- `scripts/run-tests.sh`: 7 tests pass.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
