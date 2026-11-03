@@ -84,6 +84,10 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   Full Rect preset) instead of typing in new pixel offsets.
 - Controls directly under a `CanvasLayer` (such as `Hud`) are anchored to the viewport, not
   to a parent Control.
+- The Play Area covers x 384-1536, so new HUD panels go in the side gutters (the
+  Active Effects panel is anchored top-right) rather than over the bricks.
+  `hud.update_effects()` runs every physics frame: update existing rows instead of
+  rebuilding them.
 - `project.godot` uses `window/stretch/mode="canvas_items"`, so the logical viewport stays
   1920x1080 when the window is resized and the canvas is scaled. In headless checks, compare
   against `get_viewport().get_visible_rect()`, not the window size.
