@@ -68,6 +68,14 @@ power-up and hazard pool.
 A brick that a normal ball hit bounces off without effect; destroyed in one hit by a ball in the
 Breaker state, which continues through the destroyed brick. Grid symbol: `r`. Worth 50 points when destroyed; does not count toward a level's win condition.
 
+**Paddle Boost**:
+A ball-speed accumulator above base speed, added to on a paddle bounce when the paddle is moving
+(scaled from its recent velocity). A hit adds to the accumulator (capped) and resets its decay
+clock to full duration, so repeated hits stack and extend the fade; with no further hits it decays
+linearly to 0. Composes additively with speed-multiplier effects (Slow Ball/Speed-up Ball), never
+drops the ball below its base speed, and never changes bounce angle.
+_Avoid_: Speed boost (ambiguous with the Speed-up Ball hazard).
+
 **Capsule tuning (issue #50 provisional defaults)**:
 Fall speed is 240 pixels/second. Wide Paddle multiplies the base 128-pixel width by 1.5
 (192 pixels); Shrink Paddle multiplies it by 0.75 (96 pixels). Both together multiply
