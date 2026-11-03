@@ -10,7 +10,7 @@ func run() -> void:
 	root.size = Vector2i(1920, 1080)
 	var game = preload("res://main.tscn").instantiate()
 	var first := Level.new()
-	first.grid = "#x"
+	first.grid = "#xo"
 	var last := Level.new()
 	last.grid = "#"
 	game.levels.assign([first, last])
@@ -51,7 +51,10 @@ func run() -> void:
 	_expect([&"paddle_bounce"], "Paddle collision")
 	var reinforced = game.bricks.get_child(1)
 	ball._hit_surface(reinforced, Vector2.DOWN)
-	_expect([], "Surviving brick is not a wall bounce or break")
+	_expect([&"wall_bounce"], "Surviving Reinforced brick reflects with wall bounce")
+	var indestructible = game.bricks.get_child(2)
+	ball._hit_surface(indestructible, Vector2.DOWN)
+	_expect([&"wall_bounce"], "Indestructible brick reflects with wall bounce")
 	ball._hit_surface(reinforced, Vector2.DOWN)
 	ball._break_brick(reinforced)
 	_expect([&"brick_break"], "Destruction sounds once, including same-frame repeated hit")

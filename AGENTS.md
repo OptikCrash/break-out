@@ -234,6 +234,8 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - Sound calls go through main's `sounds.play_cue()`; balls emit `sound_requested`
   and `add_ball()` wires it. Use Bricks' presentation signal for break audio so
   bolts and balls share it without duplicating score/completion handling.
+- Reflections from surviving bricks use `wall_bounce`, including Reinforced and
+  Indestructible bricks. A destroying hit uses only the existing `brick_break` cue.
 - The sound dispatcher skips playback with Godot's Dummy audio driver (headless),
   while still generating streams and emitting cue requests for tests. Scheduling
   WAV playback without an output driver can leave mixer references at test exit.

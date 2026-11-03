@@ -70,12 +70,14 @@ func _physics_process(delta: float) -> void:
 
 func _hit_surface(hit: Node, normal: Vector2) -> void:
 	var passes_through := false
+	var brick_broke := false
 	if hit.is_in_group("brick"):
 		# A queued brick can still collide in another physics step this frame.
 		passes_through = breaker_active and hit.definition.requires_breaker
-		_break_brick(hit)
+		brick_broke = _break_brick(hit)
 	if not passes_through:
-		if not hit.is_in_group("brick"):
+		# Destruction already requests brick_break through Bricks' signal.
+		if not brick_broke:
 			sound_requested.emit(&"paddle_bounce" if hit.is_in_group("paddle") else &"wall_bounce")
 		velocity = velocity.bounce(normal)
 
