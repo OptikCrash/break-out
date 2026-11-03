@@ -60,7 +60,36 @@ func run() -> void:
 			_check(game.ball.position == game.paddle.position + Vector2(0, -24), "Continue rests ball on paddle")
 			_check(game.lives == 2 and game.score == total, "Continue preserves lives and score")
 		game.free()
+	_test_custom_sequence()
 	quit(1 if failures else 0)
+
+func _test_custom_sequence() -> void:
+	var first := Level.new()
+	first.grid = "#o"
+	var last := Level.new()
+	last.grid = "ox"
+	var game = preload("res://main.tscn").instantiate()
+	game.levels.assign([first, last])
+	root.add_child(game)
+	_check(game.bricks.level == first and game.bricks_left == 1, "Custom first level replaces default layout and excludes Indestructible bricks")
+	game.ball._break_brick(game.bricks.get_child(0))
+	_check(game.level_complete and game.bricks_left == 0, "Surviving Indestructible brick does not block completion")
+	# A collision callback can arrive after the last brick in the same frame.
+	game._on_death_zone_body_entered(game.ball)
+	game._on_ball_brick_broken(10)
+	_check(game.lives == 3 and game.score == 10, "Splash ignores late death and score callbacks")
+	game.continue_level()
+	game.continue_level()
+	_check(game.current_level_index == 1 and game.bricks.level == last, "Duplicate Continue advances only once")
+	_check(game.bricks.get_child_count() == 2 and game.bricks_left == 1, "Same-frame replacement excludes detached old bricks")
+	var reinforced = game.bricks.get_child(1)
+	game.ball._break_brick(reinforced)
+	_check(not game.reset_ready and game.score == 10, "Intermediate reinforced hit does not win or score")
+	game.ball._break_brick(reinforced)
+	_check(game.reset_ready and not game.level_complete and game.score == 30, "Custom final level wins with Indestructible brick remaining")
+	game.continue_level()
+	_check(game.current_level_index == 1, "Continue cannot advance beyond final level")
+	game.free()
 
 func _check(condition: bool, message: String) -> void:
 	if not condition:
