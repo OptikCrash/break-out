@@ -33,10 +33,9 @@ paddle hit uses this same rule, keeping the ball's current speed.
 **Power-up Action** (`power_action`):
 The shared input action for whatever a currently-active power-up lets the player trigger
 (releasing a Sticky Paddle catch, firing the Blaster, launching the Satellite Shield's balls).
-Bound to the same key as `launch`/accept. Provisional default (issue #64): each active
-power-up reads the action independently, with no arbitration. One press intentionally
-fires Blaster, releases Sticky catches and launches Satellite Shield balls in the same
-frame when those effects coexist. Satellite Shield is not implemented yet.
+Bound to the same key as `launch`/accept. Multiple power-ups may act on the same press:
+Sticky release, a Blaster shot and a Satellite launch do not arbitrate between each other.
+A resting ball uses the shared press to launch before Satellite orbs can launch.
 
 **Multi-ball Life Rule**:
 With more than one ball in play, a ball reaching the Death Zone is just removed; a life is lost
@@ -171,3 +170,12 @@ PLAN.md's one-survivor reset rule, as requested by issue #67; it remains provisi
 Companion centers are clamped between the inner wall edges plus/minus their 64-pixel
 half-width, including on spawn, so their whole bounce surface stays inside the play area.
 This placement rule is a provisional default following issue #67 review feedback.
+
+**Satellite Shield (issue #66)**:
+`satellite_shield` awards 25 catch points and resets the waiting orb count to three.
+Orbs are visual placeholders without physics until launched, one per `power_action`
+press. Each launch creates an ordinary ball with a fresh 10-second Breaker timer;
+orbiting time does not spend it. Launched balls follow the Multi-ball Life Rule.
+Waiting orbs clear on last-ball life loss and level completion, matching other effects.
+This clearing behavior is an implementation default; the issue resolves PLAN.md’s
+one-at-a-time versus simultaneous launch choice in favor of one per press.

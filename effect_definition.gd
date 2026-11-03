@@ -16,6 +16,8 @@ extends Resource
 @export var companion_follow_speed := 0.0
 @export var extra_balls := 0
 @export var split_angle_degrees := 0.0
+# Satellite Shield is charge-based: orbs wait at the paddle instead of a timer.
+@export var orbs := 0
 
 func validation_error() -> String:
 	if id == &"" or display_name.is_empty():
@@ -28,6 +30,8 @@ func validation_error() -> String:
 		return "Ball count must be nonnegative and spread in [0, 90) degrees."
 	if extra_balls > 0 and (extra_balls != 2 or split_angle_degrees == 0.0 or duration != 0.0):
 		return "Multi-ball needs two extra balls, a spread and no timer."
+	if orbs < 0 or (orbs > 0 and duration != 0.0):
+		return "Orb count must be nonnegative, and orbs are charges with no timer."
 	if shot_cooldown < 0.0 or bolt_speed < 0.0:
 		return "Weapon tuning must be nonnegative."
 	if id == &"blaster" and (duration <= 0.0 or shot_cooldown <= 0.0 or bolt_speed <= 0.0):
