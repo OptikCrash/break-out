@@ -9,7 +9,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	# Content IDs, symbols and numbers are part of the level format contract.
-	var expected := [[&"normal", "#", 1, 10, true], [&"reinforced", "x", 2, 20, true], [&"indestructible", "o", 0, 0, false]]
+	var expected := [[&"normal", "#", 1, 10, true], [&"reinforced", "x", 2, 20, true], [&"indestructible", "o", 0, 0, false], [&"mystery", "?", 1, 0, true]]
 	var ids := []
 	var symbols := []
 	for i in expected.size():
@@ -20,7 +20,7 @@ func _run() -> void:
 		symbols.append(definition.grid_symbol)
 		_check([definition.id, definition.grid_symbol, definition.hit_points, definition.points, definition.destructible] == expected[i], "Pin type ID, symbol, hit points, score and destructibility")
 		_check(BrickRules.definition_for_symbol(definition.grid_symbol) == definition, "Symbol resolves to its definition")
-	_check(BrickRules.definition_for_symbol("?") == null, "Unknown symbols have no definition")
+	_check(BrickRules.definition_for_symbol("!") == null, "Unknown symbols have no definition")
 	_check(BrickRules.remaining_hit_points(2, true) == 1, "First reinforced hit leaves one HP")
 	_check(BrickRules.remaining_hit_points(1, true) == 0, "Final hit leaves zero HP")
 	_check(BrickRules.remaining_hit_points(0, true) == 0, "HP cannot become negative")
@@ -31,6 +31,11 @@ func _run() -> void:
 	invalid = BrickRules.DEFINITIONS[0].duplicate()
 	invalid.hit_points = 0
 	_check(not invalid.validation_error().is_empty(), "Destructible bricks require hit points")
+	invalid = BrickRules.DEFINITIONS[0].duplicate()
+	invalid.points = -1
+	_check(not invalid.validation_error().is_empty(), "Negative brick scores fail validation")
+	invalid.points = 0
+	_check(invalid.validation_error().is_empty(), "Zero-point destructible bricks are allowed")
 	invalid = BrickRules.DEFINITIONS[2].duplicate()
 	invalid.points = 10
 	_check(not invalid.validation_error().is_empty(), "Indestructible bricks cannot score")

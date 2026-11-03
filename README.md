@@ -22,7 +22,7 @@ when ready. Clearing the final level shows "You Win!".
 The ordered `levels` array on `main.gd` selects the sequence. The gameplay scene
 stays alive while only the brick layout changes, preserving score and lives
 without an autoload. Each level grid must contain at least one Normal (`#`) or
-Reinforced (`x`) brick; all-hole and all-Indestructible grids are rejected because
+Reinforced (`x`) or Mystery (`?`) brick; all-hole and all-Indestructible grids are rejected because
 they cannot trigger completion. Level 2 is a diamond of Normal bricks around a Reinforced core. Level 3 adds
 Indestructible side rails around a denser Reinforced formation. Both keep open
 approaches from below; the rails never sit beneath destructible bricks.
@@ -77,3 +77,13 @@ passes cleanly when zero tests exist. No test addons are required.
 `scripts/test-runner.sh` checks discovery and failure handling using temporary
 headless Godot fixtures outside the project. It leaves no game test assets behind.
 See `PLAN.md` for scope and milestones.
+
+## Capsules
+
+Custom levels can use `?` for a one-hit, zero-point Mystery Brick. It drops a random
+Wide Paddle, Shrink Paddle hazard, or Extra Life capsule. Catch power-ups for 25 points;
+hazards give no points, and missed capsules have no penalty. Wide and Shrink last ten
+seconds and can overlap; catching the same effect refreshes its timer. The HUD lists
+active timers. Life loss and level completion clear effects and loose capsules.
+Capsules use plain placeholder shapes and text pending Chris's art.
+See GLOSSARY.md for provisional tuning values.

@@ -19,7 +19,8 @@ sequence; clearing one loads the next.
 
 **Brick Type**:
 What a brick cell's character means: Normal (`#`, 1 hit), Reinforced (`x`, 2 hits), or
-Indestructible (`o`, never breaks, doesn't count toward a level's win condition).
+Indestructible (`o`, never breaks, doesn't count toward a level's win condition), or
+Mystery (`?`, 1 hit, 0 points, drops a Capsule, counts toward completion).
 
 **Launch**:
 The player input (and the moment) that sends the ball moving for the first time, or after a life
@@ -63,3 +64,14 @@ power-up and hazard pool.
 **Resistant Brick**:
 A brick that a normal ball hit bounces off without effect; destroyed in one hit by a ball in the
 Breaker state. Worth 50 points when destroyed; does not count toward a level's win condition.
+
+**Capsule tuning (issue #50 provisional defaults)**:
+Fall speed is 240 pixels/second. Wide Paddle multiplies the base 128-pixel width by 1.5
+(192 pixels); Shrink Paddle multiplies it by 0.75 (96 pixels). Both together multiply
+(144 pixels), each retaining its independent 10-second timer. Catching the same effect
+refreshes only that timer. Extra Life adds exactly one life, without a cap or timer.
+Life loss and level completion clear timed effects and loose capsules. Pausing freezes
+both fall and effect time. A final Mystery Brick still completes the level immediately;
+its pending drop is discarded with the level's other loose capsules.
+These tuning and reset choices were unspecified in PLAN.md and the issue; they are
+explicit implementation defaults for review, rather than previously agreed design values.

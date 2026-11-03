@@ -36,7 +36,7 @@ func _physics_process(delta: float) -> void:
 
 			var current_speed = velocity.length()
 
-			var x_dir: float = (ball_x - paddle_x) / 64.0
+			var x_dir: float = (ball_x - paddle_x) / hit.half_width
 
 			velocity = BallRules.paddle_direction(x_dir) * current_speed
 		else:

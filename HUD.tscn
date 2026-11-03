@@ -76,3 +76,10 @@ offset_right = 140.0
 offset_bottom = 176.0
 theme_override_font_sizes/font_size = 32
 text = "Continue"
+
+[node name="ActiveEffects" type="Label" parent="."]
+offset_left = 1180.0
+offset_top = 120.0
+offset_right = 1520.0
+offset_bottom = 260.0
+mouse_filter = 2

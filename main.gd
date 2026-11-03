@@ -1,5 +1,10 @@
 extends Node2D
 
+const EffectRules = preload("res://effect_rules.gd")
+const Capsule = preload("res://capsule.tscn")
+var effects = EffectRules.new()
+var capsule_rng := RandomNumberGenerator.new()
+
 const BALL_SCENE = preload("res://ball.tscn")
 
 const TITLE_SCENE := "res://TitleScreen.tscn"
@@ -26,6 +31,8 @@ var bricks_left = 0
 var reset_ready := false
 
 func _ready() -> void:
+	capsule_rng.randomize()
+	bricks.capsule_dropped.connect(_spawn_capsule)
 	paddle_start = paddle.position
 	for active_ball in get_balls():
 		_connect_ball(active_ball)
@@ -81,6 +88,7 @@ func _on_death_zone_body_entered(body: Node2D) -> void:
 	body.queue_free()
 	if not get_balls().is_empty():
 		return
+	_clear_effects_and_capsules()
 	lives -= 1
 	hud.update_lives(lives)
 	if lives == 0:
@@ -98,6 +106,7 @@ func _on_ball_brick_broken(points: int) -> void:
 	score += points
 	hud.update_score(score)
 	if bricks_left == 0:
+		_clear_effects_and_capsules()
 		for active_ball in get_balls():
 			active_ball.reset()
 		_stop_balls()
@@ -153,6 +162,42 @@ func _count_destructible_bricks() -> void:
 	for brick in bricks.get_children():
 		if brick.definition.destructible:
 			bricks_left += 1
+
+func _physics_process(delta: float) -> void:
+	effects.advance(delta)
+	paddle.set_width_multiplier(effects.width_multiplier())
+	hud.update_effects(effects.active)
+
+# Physics-query callbacks cannot safely add a monitoring Area2D directly.
+func _spawn_capsule(at: Vector2) -> void:
+	_add_capsule.call_deferred(at)
+
+func _add_capsule(at: Vector2) -> void:
+	if reset_ready or level_complete:
+		return
+	var capsule := Capsule.instantiate()
+	capsule.effect = EffectRules.random_effect(capsule_rng)
+	capsule.position = $PlayArea.to_local(at)
+	capsule.caught.connect(_catch_capsule)
+	$PlayArea.add_child(capsule)
+
+func _catch_capsule(effect: Resource) -> void:
+	if reset_ready or level_complete:
+		return
+	effects.apply(effect)
+	paddle.set_width_multiplier(effects.width_multiplier())
+	hud.update_effects(effects.active)
+	score += EffectRules.catch_points(effect)
+	lives += effect.extra_lives
+	hud.update_score(score)
+	hud.update_lives(lives)
+
+func _clear_effects_and_capsules() -> void:
+	effects.active.clear()
+	hud.update_effects(effects.active)
+	paddle.set_width_multiplier(1.0)
+	for capsule in get_tree().get_nodes_in_group("capsule"):
+		capsule.queue_free()
 
 # Future Multi-ball creation uses this so every instance reports score to main.
 func add_ball() -> Node2D:
