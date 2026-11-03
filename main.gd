@@ -7,6 +7,7 @@ var effects = EffectRules.new()
 var force_field_charges := 0
 var capsule_rng := RandomNumberGenerator.new()
 
+const BOLT_SCENE = preload("res://blaster_bolt.tscn")
 const BALL_SCENE = preload("res://ball.tscn")
 const OrbVisual = preload("res://placeholder_satellite_orbs.gd")
 
@@ -180,12 +181,19 @@ func _count_completion_bricks() -> void:
 
 func _physics_process(delta: float) -> void:
 	effects.advance(delta)
+	if not reset_ready and not level_complete and Input.is_action_just_pressed("power_action"):
+		if effects.fire_blaster():
+			var bolt = BOLT_SCENE.instantiate()
+			bolt.position = $PlayArea.to_local(paddle.global_position)
+			bolt.speed = effects.active[&"blaster"].definition.bolt_speed
+			bolt.brick_broken.connect(_on_ball_brick_broken)
+			$PlayArea.add_child(bolt)
 	_update_ball_effects()
 	paddle.set_width_multiplier(effects.width_multiplier())
 	hud.update_effects(effects.active, force_field_charges)
 	orb_visual.orbit_size.x = paddle.half_width + 28.0
 	# Read in the physics step, like ball.gd, so both see the same "just pressed".
-	# No arbitration: one press can also release a Sticky catch.
+	# No arbitration: one press can also fire Blaster and release a Sticky catch.
 	if Input.is_action_just_pressed("power_action"):
 		launch_orb()
 
@@ -248,6 +256,10 @@ func _catch_capsule(effect: Resource) -> void:
 func _clear_effects_and_capsules() -> void:
 	effects.active.clear()
 	satellite_orbs = 0
+	effects.shot_time_left = 0.0
+	for bolt in get_tree().get_nodes_in_group("blaster_bolt"):
+		if is_ancestor_of(bolt):
+			bolt.queue_free()
 	force_field_charges = 0
 	for active_ball in get_balls():
 		active_ball.breaker_active = false

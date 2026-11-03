@@ -79,9 +79,10 @@ func _check_launches() -> void:
 	game._catch_capsule(Shield)
 	var slow_ball = game.launch_orb()
 	_check(is_equal_approx(slow_ball.velocity.length(), 550.0 * 0.75), "Orb launches at the current speed effect")
-	# No arbitration: the same press releases a Sticky catch and launches an orb.
+	# No arbitration: one press releases Sticky, fires Blaster and launches an orb.
 	game.effects.active.clear()
 	game._catch_capsule(Sticky)
+	game._catch_capsule(preload("res://effects/blaster.tres"))
 	first.velocity = Vector2(0, 550)
 	first.catch_on_paddle(0.0)
 	first.set_physics_process(true)
@@ -89,6 +90,7 @@ func _check_launches() -> void:
 	await _press_power_action()
 	first.set_physics_process(false)
 	_check(not first.caught and game.satellite_orbs == orbs_before - 1, "One press releases the catch and launches an orb")
+	_check(get_nodes_in_group("blaster_bolt").size() == 1, "The same press also fires one Blaster bolt")
 	# A resting ball takes the shared press for its own launch.
 	game._clear_effects_and_capsules()
 	first.reset()

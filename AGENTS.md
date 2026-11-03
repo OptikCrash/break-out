@@ -55,8 +55,8 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   joypad A. An override replaces the built-in event list, so keep the three keys in it.
   Arrows/D-pad already move focus through `ui_left`/`ui_right`/`ui_up`/`ui_down`.
 - `power_action` mirrors `launch` (Space, pad A, left click), so one press triggers both. Rebind
-  them together (`tests/power_action_test.gd` checks they match), and a power-up reading
-  `power_action` must not also act while the ball is waiting to `launch` on the same press.
+  them together (`tests/power_action_test.gd` checks they match), and action power-ups read it independently: a launch press may also fire Blaster
+  (see the provisional overlap default in GLOSSARY.md).
 - Gamepad bindings use `device: -1` (any pad). Godot names buttons by position (Xbox layout):
   `JOY_BUTTON_A` is the bottom face button, Cross on PlayStation. A stick direction is an
   `InputEventJoypadMotion` with `axis_value` -1 or 1; the action's `deadzone` (0.2) filters
@@ -192,6 +192,12 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   split angle. Consume it on release and clear it on reset; later Sticky catches
   must not inherit an earlier split’s spread.
 
+- Balls and Blaster bolts share `brick_damage.gd` for take_hit and score reporting;
+  Breaker damage permits Resistant hits, but does not bypass Reinforced hit points.
 - Force Field charges live separately on `main.gd`, never in the timed `active`
   dictionary. HUD charge entries are display-only; hazard gating happens before
   applying any capsule effects. Charges clear with the other capsule effects.
+
+- When combining Satellite Shield and Blaster, retain both content-pool entries and
+  validation branches. Lifecycle cleanup clears waiting orbs, bolts and shot cooldown;
+  the same physics-step power action can trigger both alongside Sticky release.
