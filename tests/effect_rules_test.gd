@@ -1,0 +1,72 @@
+extends SceneTree
+
+const Rules = preload("res://effect_rules.gd")
+var failures := 0
+
+func _initialize() -> void:
+	var expected := [
+		[&"wide_paddle", false, 10.0, 1.5, 0, 25],
+		[&"shrink_paddle", true, 10.0, 0.75, 0, 0],
+		[&"extra_life", false, 0.0, 1.0, 1, 25],
+	]
+	var ids := []
+	for i in Rules.DEFINITIONS.size():
+		var effect = Rules.DEFINITIONS[i]
+		_check(effect.validation_error().is_empty(), "Effect content validates")
+		_check(not ids.has(effect.id), "Stable effect IDs are unique")
+		ids.append(effect.id)
+		_check([effect.id, effect.hazard, effect.duration, effect.paddle_width_multiplier, effect.extra_lives, Rules.catch_points(effect)] == expected[i], "Pin effect data and scoring")
+	var invalid = Rules.DEFINITIONS[0].duplicate()
+	invalid.id = &""
+	_check(not invalid.validation_error().is_empty(), "Reject missing effect ID")
+	invalid = Rules.DEFINITIONS[0].duplicate()
+	invalid.duration = -1.0
+	_check(not invalid.validation_error().is_empty(), "Reject negative duration")
+	invalid.duration = 0.0
+	_check(not invalid.validation_error().is_empty(), "Reject permanent width changes")
+	invalid.duration = 10.0
+	invalid.paddle_width_multiplier = 0.0
+	_check(not invalid.validation_error().is_empty(), "Reject zero width")
+	var rules = Rules.new()
+	var wide = Rules.DEFINITIONS[0]
+	var shrink = Rules.DEFINITIONS[1]
+	rules.apply(wide)
+	_check(rules.width_multiplier() == 1.5, "Wide multiplier")
+	rules.advance(4.0)
+	rules.apply(shrink)
+	_check(rules.width_multiplier() == 1.125, "Different effects combine multiplicatively")
+	rules.apply(wide)
+	_check(rules.active[wide.id].remaining == 10.0 and rules.active.size() == 2, "Same effect refreshes without stacking")
+	rules.advance(9.0)
+	_check(rules.width_multiplier() == 1.125, "Effects remain before boundary")
+	rules.advance(1.0)
+	_check(rules.active.is_empty() and rules.width_multiplier() == 1.0, "Expire exactly at ten seconds")
+	rules.apply(shrink)
+	_check(rules.width_multiplier() == 0.75, "Shrink multiplier")
+	rules.apply(Rules.DEFINITIONS[2])
+	_check(rules.active.size() == 1, "Instant effect has no timer")
+	rules.advance(100.0)
+	_check(rules.active.is_empty(), "Oversized step expires cleanly")
+	rules.apply(wide)
+	rules.advance(5.0)
+	rules.apply(shrink)
+	rules.advance(5.0)
+	_check(not rules.active.has(wide.id) and rules.active[shrink.id].remaining == 5.0, "Different timers expire independently")
+	_check(rules.width_multiplier() == 0.75, "Expiring Wide leaves Shrink active")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 50
+	var reference := RandomNumberGenerator.new()
+	reference.seed = 50
+	var seen := {}
+	for i in 300:
+		var effect = Rules.random_effect(rng)
+		_check(effect == Rules.DEFINITIONS[reference.randi_range(0, 2)], "Uniform draw uses one equal-weight index")
+		seen[effect.id] = true
+	_check(seen.size() == 3, "All registered effects are reachable")
+	_check(Rules.CAPSULE_SPEED == 240.0, "Pin fall speed")
+	quit(1 if failures else 0)
+
+func _check(condition: bool, message: String) -> void:
+	if not condition:
+		printerr("FAIL: ", message)
+		failures += 1

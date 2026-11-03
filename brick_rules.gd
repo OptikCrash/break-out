@@ -4,6 +4,7 @@ const DEFINITIONS = [
 	preload("res://bricks/normal.tres"),
 	preload("res://bricks/reinforced.tres"),
 	preload("res://bricks/indestructible.tres"),
+	preload("res://bricks/mystery.tres"),
 ]
 
 static func definition_for_symbol(symbol: String) -> Resource:

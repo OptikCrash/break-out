@@ -35,3 +35,9 @@ func show_continue_button() -> void:
 func hide_continue_button() -> void:
 	$Continue.release_focus()
 	$Continue.hide()
+
+func update_effects(active: Dictionary) -> void:
+	var lines := PackedStringArray()
+	for entry in active.values():
+		lines.append("%s: %.1fs" % [entry.definition.display_name, entry.remaining])
+	$ActiveEffects.text = "\n".join(lines)

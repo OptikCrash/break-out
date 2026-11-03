@@ -45,8 +45,8 @@ position = Vector2(576, 900)
 [node name="Bricks" type="Node2D" parent="PlayArea" unique_id=1836451092]
 script = ExtResource("3_h2yge")
 
-[node name="DeathZone" type="Area2D" parent="PlayArea" unique_id=132079342]
-collision_layer = 0
+[node name="DeathZone" type="Area2D" parent="PlayArea" unique_id=132079342 groups=["death_zone"]]
+collision_layer = 16
 collision_mask = 4
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="PlayArea/DeathZone" unique_id=639071732]

@@ -2,6 +2,13 @@ extends CharacterBody2D
 
 @export var speed : = 1000.0
 
+var half_width := 64.0
+
+func set_width_multiplier(multiplier: float) -> void:
+	half_width = 64.0 * multiplier
+	$CollisionShape2D.scale.x = multiplier
+	$Sprite2D.scale.x = multiplier
+
 # Whichever input was used last is in charge: a mouse move hands control to
 # the mouse, a fresh move action hands it back to the keyboard or gamepad. Both are
 # decided from input events, not from what is held down, so moving the mouse

@@ -93,7 +93,7 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 
 - `Level.grid` uses equal-width rows and `.` for holes; spaces are invalid. The parser
   accepts LF/CRLF and one final newline. It validates the whole grid before returning
-  cells, so malformed data cannot spawn a partial layout. `#`/`x`/`o` map to the stable Normal/Reinforced/Indestructible definitions in
+  cells, so malformed data cannot spawn a partial layout. `#`/`x`/`o`/`?` map to the stable Normal/Reinforced/Indestructible/Mystery definitions in
   `bricks/`. Definition resources are shared: keep remaining hit points on each
   brick instance, never mutate the definition when a brick is hit.
 - `brick_broken(points)` emits only on destruction; the brick queues deletion before
@@ -104,5 +104,17 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   `load_level()` is called, so a bare `bricks.gd` test node must call it explicitly.
   `Bricks.load_level()` detaches old children before queuing deletion so the next
   level's destructible count cannot include the previous layout.
-- Level validation rejects grids without `#` or `x` (including all-hole grids),
+- Level validation rejects grids without `#`, `x` or `?` (including all-hole grids),
   before replacing a layout; every level needs a destructible brick to trigger completion.
+
+## Capsules and effects
+
+- `effects/*.tres` own stable effect IDs and tuning. `effect_rules.gd` owns the uniform
+  pool, pure timers, scoring and width calculation; shared resources are never mutated.
+- Capsule Area2Ds monitor paddle bodies (layer 2) and Death Zone areas (layer 16).
+  Death Zone still monitors only balls (layer 4), so a missed capsule cannot cost a life.
+- Brick drop signals carry global brick-center positions. Defer capsule creation out of
+  physics queries and recheck end-of-level state before adding the Area2D: the final
+  brick can finish a level before that deferred call runs.
+- Paddle width changes scale its shape node and existing sprite, leaving the shared shape
+  resource untouched. Ball bounce offsets divide by the current paddle half-width.
