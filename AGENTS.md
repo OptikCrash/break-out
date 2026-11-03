@@ -221,3 +221,8 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - When merging Companion Paddle with Satellite Shield, preserve both stable IDs in
   the uniform pool and its pinned content test; keep both deferred companion cleanup
   and waiting-orb cleanup in the shared life-loss/level-end path.
+
+- Paddle Boost is additive after speed effects: remove `ball.boost` before changing
+  the multiplier, then add it back. Decay adjusts held Sticky speed too. Multi-ball
+  copies must retain boost total, rate and remaining clock alongside velocity, or
+  the copied bonus becomes permanent. Boost tuning lives in pure `ball_rules.gd`.

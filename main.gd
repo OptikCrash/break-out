@@ -340,6 +340,9 @@ func _add_split_balls(source: Node2D, effect: Resource) -> void:
 		copy.launched = source.launched
 		copy.velocity = split_velocity
 		copy.breaker_time_left = source.breaker_time_left
+		copy.boost = source.boost
+		copy.boost_time_left = source.boost_time_left
+		copy.boost_decay_rate = source.boost_decay_rate
 		# A caught source has zero velocity: copies must wait for release too.
 		copy.caught = source.caught
 		copy.catch_offset = source.catch_offset

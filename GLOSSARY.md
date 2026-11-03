@@ -187,3 +187,17 @@ orbiting time does not spend it. Launched balls follow the Multi-ball Life Rule.
 Waiting orbs clear on last-ball life loss and level completion, matching other effects.
 This clearing behavior is an implementation default; the issue resolves PLAN.md’s
 one-at-a-time versus simultaneous launch choice in favor of one per press.
+
+**Paddle Boost tuning (issue #74 provisional defaults)**:
+A normal moving-paddle bounce adds `abs(recent_velocity_x) × 0.25` pixels/second,
+up to a 550 pixels/second accumulator cap. Each boosting hit, including a hit at
+cap, restarts a three-second linear fade at `new total / 3` pixels/second².
+Stationary hits neither add boost nor restart the clock. Actual speed is
+`underlying speed × speed multiplier + boost`; the ordinary underlying speed is
+550. Changing multipliers removes the boost before scaling and adds it back unchanged.
+Sticky catches add no boost; existing boost keeps fading while caught, including
+from the held release speed. Multi-ball copies retain the total, rate and remaining
+clock. Reset clears boost. Companions currently report zero recent velocity and
+therefore preserve their existing speed behavior. Weighting, cap, duration and these
+lifecycle interactions are implementation defaults for review; no new content ID or
+capsule is introduced.

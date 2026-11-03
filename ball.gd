@@ -8,6 +8,20 @@ const BallRules = preload("res://ball_rules.gd")
 signal brick_broken(points: int)
 var launched := false
 var speed_multiplier := 1.0
+var boost := 0.0
+var boost_time_left := 0.0
+var boost_decay_rate := 0.0
+var boost_active: bool:
+	get:
+		return boost_time_left > 0.0
+	set(value):
+		if value:
+			boost_time_left = BallRules.BOOST_DURATION
+			boost_decay_rate = boost / BallRules.BOOST_DURATION
+		else:
+			_change_boost(0.0)
+			boost_time_left = 0.0
+			boost_decay_rate = 0.0
 var sticky_active := false
 var caught := false
 var catch_offset := 0.0
@@ -24,6 +38,7 @@ var breaker_active: bool:
 
 func _physics_process(delta: float) -> void:
 	breaker_time_left = BallRules.tick_breaker(breaker_time_left, delta)
+	tick_boost(delta)
 	if caught:
 		_rest_on_paddle()
 		if Input.is_action_just_pressed("power_action"):
@@ -52,14 +67,13 @@ func _physics_process(delta: float) -> void:
 			# global_position: measured from the screen, like the collision point above.
 			var paddle_x: float = hit.global_position.x
 
-			var current_speed = velocity.length()
-
 			var x_dir: float = (ball_x - paddle_x) / hit.half_width
 
 			if sticky_active and not hit.is_in_group("companion"):
 				catch_on_paddle(x_dir)
 			else:
-				velocity = BallRules.paddle_direction(x_dir) * current_speed
+				apply_paddle_boost(hit.recent_velocity_x)
+				velocity = BallRules.paddle_direction(x_dir) * velocity.length()
 			if hit.is_in_group("companion"):
 				hit.take_hit()
 		else:
@@ -82,6 +96,7 @@ func _rest_on_paddle() -> void:
 	position = paddle.position + Vector2(0, -24)
 
 func reset() -> void:
+	boost_active = false
 	launched = false
 	caught = false
 	release_rotation = 0.0
@@ -89,10 +104,35 @@ func reset() -> void:
 	# Winning stops physics, so placement cannot wait for the next physics tick.
 	_rest_on_paddle()
 
+# Change magnitude only; the paddle contact still owns direction.
+func _change_boost(total: float) -> void:
+	var difference := total - boost
+	if caught:
+		caught_speed = maxf(0.0, caught_speed + difference)
+	elif not velocity.is_zero_approx():
+		velocity = velocity.normalized() * maxf(0.0, velocity.length() + difference)
+	boost = total
+
+func apply_paddle_boost(paddle_velocity: float) -> void:
+	if paddle_velocity == 0.0:
+		return
+	_change_boost(BallRules.boosted_total(boost, paddle_velocity))
+	boost_active = true
+
+func tick_boost(delta: float) -> void:
+	if not boost_active:
+		return
+	boost_time_left = maxf(0.0, boost_time_left - delta)
+	_change_boost(BallRules.tick_boost(boost, boost_decay_rate, delta) if boost_time_left > 0.0 else 0.0)
+	if boost_time_left == 0.0:
+		boost_decay_rate = 0.0
+
 func set_speed_multiplier(multiplier: float) -> void:
-	# Scale the current velocity, preserving direction and any underlying speed changes.
-	caught_speed *= multiplier / speed_multiplier
-	velocity *= multiplier / speed_multiplier
+	# Remove the additive boost before scaling, then put it back unchanged.
+	if caught:
+		caught_speed = BallRules.changed_multiplier_speed(caught_speed, boost, speed_multiplier, multiplier)
+	if not velocity.is_zero_approx():
+		velocity = velocity.normalized() * BallRules.changed_multiplier_speed(velocity.length(), boost, speed_multiplier, multiplier)
 	speed_multiplier = multiplier
 
 func catch_on_paddle(offset: float) -> void:
