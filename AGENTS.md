@@ -183,6 +183,11 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - Multi-ball copies of a Sticky catch must copy `caught`, `catch_offset` and
   `caught_speed`: copying only zero velocity creates launched balls that never move.
 
+- Satellite Shield orbs are a charge count on `main.satellite_orbs` (not `effects.active`) and a
+  drawn-only `placeholder_satellite_orbs.gd` under the paddle. `main.gd` reads `power_action`
+  in `_physics_process` (same clock as `ball.gd`) and skips while any ball is un-launched, since
+  that press is the ball's `launch`. A launched orb is an `add_ball()` ball with a fresh Breaker timer.
+
 - Caught Multi-ball copies also carry a one-use `release_rotation` from the authored
   split angle. Consume it on release and clear it on reset; later Sticky catches
   must not inherit an earlier split’s spread.
