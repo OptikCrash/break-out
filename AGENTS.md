@@ -62,3 +62,7 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - `project.godot` uses `window/stretch/mode="canvas_items"`, so the logical viewport stays
   1920x1080 when the window is resized and the canvas is scaled. In headless checks, compare
   against `get_viewport().get_visible_rect()`, not the window size.
+
+- In Godot 4.7.2, the built-in `ui_accept` and `ui_cancel` bindings here have no
+  joypad buttons. Keep explicit A/B bindings in `project.godot` alongside their
+  keyboard events; d-pad focus alone does not prove a gamepad can activate a menu.

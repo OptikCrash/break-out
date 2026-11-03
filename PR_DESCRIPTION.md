@@ -36,14 +36,16 @@ Restart and Back to Title therefore unpause first, then call the same `reload_cu
   it gets its own `process_mode` and its own test. The menu is on layer 10, above the HUD
   (layer 1).
 
-## Space on a menu button doesn't launch the ball
+## Input bindings
 
-Space is both `ui_accept` (it activates the focused button) and `launch`. The title screen
-needed a `physics_frame` wait for this (#23). I added the same wait here and then found the
-test passed without it: `Button` emits `pressed` when the key is **released**, and by then the
-press no longer counts as "just pressed", so the new ball never launches. I removed the wait to
-keep the code plain. The test still presses Space on Restart and checks the new ball stays on
-the paddle, so it will catch a regression. I added a note to AGENTS.md.
+Godot 4.7.2's default `ui_accept` and `ui_cancel` events in this project only include
+keyboard keys. Explicit A/B bindings preserve Enter, keypad Enter, Space and Escape
+and let standard Button focus handle gamepad activation and cancellation. Keeping
+this in the Input Map avoids custom per-button gamepad handling. Tests send actual
+joypad events for Start, d-pad navigation, A activation and B cancellation.
+
+Buttons emit `pressed` on release, so Space on Restart does not launch the fresh
+ball. The regression test checks this without adding a scene-transition delay.
 
 ## Layout and look
 
@@ -73,11 +75,11 @@ the paddle, so it will catch a regression. I added a note to AGENTS.md.
 I checked that the test catches real breakage: removing `process_mode = Always` makes every
 resume check fail.
 
-Validation: headless editor import gave no errors. All seven `tests/*_test.gd` exited 0 with no
-`ERROR:` output when run one by one with `godot --headless --path . --script ...`. I couldn't run
-`scripts/run-tests.sh` and `scripts/test-runner.sh` directly because this environment needs
-permission for shell scripts; CI runs both. There is no display here, so nobody has looked at
-the menu in a real window yet, and a physical gamepad hasn't been tried. Start and A come from
-the Input Map and were only tested as simulated events.
+Validation: Godot 4.7.2 headless editor import, `scripts/test-runner.sh` and
+`scripts/run-tests.sh` all pass without unexpected Godot errors. The runner's own
+regression checks deliberately exercise failing fixtures. The pause tests also
+cover Tab navigation, gamepad activation of all three options, Start/B resume,
+and ignoring held Escape repeat events.
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
+No display or physical controller is available here, so visual inspection and
+physical gamepad testing remain unverified.

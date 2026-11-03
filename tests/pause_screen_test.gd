@@ -13,6 +13,8 @@ func run() -> void:
 	await check_gating()
 	await check_pause_freezes_play()
 	await check_layout()
+	await check_gamepad_and_tab()
+	await check_key_repeat()
 	# Resume: Escape again, keyboard on the focused button, mouse click.
 	await check_resume(_key(KEY_ESCAPE))
 	await check_resume(_key(KEY_ENTER))
@@ -24,6 +26,63 @@ func run() -> void:
 	await check_leave("BackToTitle", 2, _key(KEY_ENTER), TITLE)
 	await check_leave("BackToTitle", 2, null, TITLE)
 	quit(1 if failures else 0)
+
+func check_gamepad_and_tab() -> void:
+	var game := await _start_game()
+	await _launch(game)
+	await _tap(_joy(JOY_BUTTON_START))
+	_check(paused and game.pause_screen.visible, "Gamepad Start must open pause")
+	await _tap(_joy(JOY_BUTTON_DPAD_DOWN))
+	_check(game.pause_screen.get_node("Center/Menu/Restart").has_focus(),
+		"Gamepad d-pad must focus Restart")
+	await _tap(_joy(JOY_BUTTON_A))
+	for i in 4:
+		await physics_frame
+	_check(not paused and current_scene != game and current_scene.scene_file_path == GAME,
+		"Gamepad A must restart and unpause")
+	game = current_scene
+	await _launch(game)
+	await _tap(_joy(JOY_BUTTON_START))
+	await _tap(_joy(JOY_BUTTON_START))
+	_check(not paused and not game.pause_screen.visible, "Gamepad Start must resume")
+	await _tap(_joy(JOY_BUTTON_START))
+	await _tap(_joy(JOY_BUTTON_A))
+	_check(not paused, "Gamepad A on Resume must unpause")
+	await _tap(_joy(JOY_BUTTON_START))
+	await _tap(_joy(JOY_BUTTON_B))
+	_check(not paused, "Gamepad B must resume")
+	await _tap(_joy(JOY_BUTTON_START))
+	await _tap(_key(KEY_TAB))
+	await _tap(_key(KEY_TAB))
+	_check(game.pause_screen.get_node("Center/Menu/BackToTitle").has_focus(),
+		"Tab must navigate to Back to Title")
+	await _tap(_joy(JOY_BUTTON_A))
+	for i in 4:
+		await physics_frame
+	_check(not paused and current_scene.scene_file_path == TITLE,
+		"Gamepad A after Tab navigation must return to title and unpause")
+
+func check_key_repeat() -> void:
+	var game := await _start_game()
+	await _launch(game)
+	var repeat := _key(KEY_ESCAPE)
+	repeat.echo = true
+	Input.parse_input_event(repeat)
+	await process_frame
+	_check(not paused, "An Escape repeat must not open pause")
+	await _tap(_key(KEY_ESCAPE))
+	Input.parse_input_event(repeat)
+	await process_frame
+	_check(paused, "Holding Escape must not close pause")
+	Input.parse_input_event(_release(_key(KEY_ESCAPE)))
+	await _tap(_key(KEY_ESCAPE))
+	_check(not paused, "A fresh Escape press must still resume")
+
+func _joy(button: JoyButton) -> InputEventJoypadButton:
+	var event := InputEventJoypadButton.new()
+	event.button_index = button
+	event.pressed = true
+	return event
 
 func check_input_map() -> void:
 	var escape := _key(KEY_ESCAPE)
