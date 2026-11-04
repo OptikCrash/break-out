@@ -37,6 +37,15 @@ func run() -> void:
 	var picker_rect := picker.get_global_rect()
 	_check(picker_rect.end.x <= 384.0 and picker_rect.position.x >= 0.0, "Picker stays out of the Play Area")
 	_check(not picker_rect.intersects(reset_rect) and picker_rect.end.y <= 1080.0, "Picker fits below Reset")
+	# The effect panel shares the left gutter; stack them without overlap at any window size.
+	for window_size in [Vector2i(1920, 1080), Vector2i(960, 540)]:
+		root.size = window_size
+		await process_frame
+		await process_frame
+		var effect_rect: Rect2 = lab.get_node("LabOverlay/EffectPanel").get_global_rect()
+		_check(not picker.get_global_rect().intersects(effect_rect) and effect_rect.size.y > 0.0,
+			"Level picker and effect panel don't overlap")
+	root.size = Vector2i(1920, 1080)
 
 	# Clicking swaps the layout through the real loading path.
 	var level_2: Level = load("res://levels/level_2.tres")
