@@ -44,6 +44,9 @@ func run() -> void:
 	lab.reset_lab()
 	# Exercise GUI hit testing too, not only the connected pressed signals.
 	var shield_button := rows.get_node("satellite_shield") as Button
+	# The list scrolls below the level picker; bring the button into view as a player would.
+	lab.get_node("LabOverlay/EffectPanel/Margin/Content/Scroll").ensure_control_visible(shield_button)
+	await process_frame
 	var click := InputEventMouseButton.new()
 	click.button_index = MOUSE_BUTTON_LEFT
 	click.position = shield_button.get_global_rect().get_center()

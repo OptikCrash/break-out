@@ -22,13 +22,19 @@ and press **F6** (Run Current Scene). It is never reachable from the title scree
   ball appears on the paddle. Lives never drop and there is no Game Over.
 - **No end screens**: clearing the level reloads it instead of showing "Level
   Complete" or "You Win!". There is no pause menu.
-- **Catch an effect panel** (left gutter): click any current capsule effect to
+- **Catch an effect panel** (left gutter, under the level picker): click any current capsule effect to
   apply the real catch, including catch points and Force Field hazard blocking.
   Hazard labels and HUD-colored swatches distinguish hazards from power-ups.
   The list scrolls if the pool grows; Reset clears the resulting state.
 - **Reset button** (top-left): one ball back on the paddle, the current level's
   bricks rebuilt, and active effects, capsules, companions and waiting Satellite
   orbs cleared through `main.gd`'s own `_clear_effects_and_capsules()`.
+- **Level picker** (left, under Reset): one button per `.tres` file in `levels/`,
+  found by scanning the folder when the lab opens, so a new level file shows up
+  without editing any list. Clicking one checks it with `Level.validation_error()`
+  and loads it with `Bricks.load_level()`, then resets as above. A bad file is
+  rejected with the reason shown under the list, and the current level stays.
+  Reset afterwards rebuilds the picked level.
 
 How it is built: `test_lab.tscn` is an *inherited scene* of `main.tscn` (Godot's
 **Scene → New Inherited Scene**), so it always has the current `PlayArea`, ball,
