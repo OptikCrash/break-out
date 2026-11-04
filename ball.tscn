@@ -1,12 +1,48 @@
 [gd_scene format=3 uid="uid://cvngfod5x8bwh"]
 
 [ext_resource type="Script" uid="uid://cktggu8qma0xk" path="res://ball.gd" id="1_x8fbi"]
-[ext_resource type="Texture2D" uid="uid://odaiej3by05f" path="res://assets/ball.png" id="2_41u45"]
+[ext_resource type="Texture2D" uid="uid://b128xy3f4j0hu" path="res://assets/ball_sprite.png" id="2_41u45"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_wx6e8"]
 radius = 16.0
 
-[node name="Ball" type="CharacterBody2D" groups=["ball"] unique_id=1745437129]
+[sub_resource type="AtlasTexture" id="AtlasTexture_ktgx5"]
+atlas = ExtResource("2_41u45")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hgol0"]
+atlas = ExtResource("2_41u45")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n5601"]
+atlas = ExtResource("2_41u45")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gchj4"]
+atlas = ExtResource("2_41u45")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_wx6e8"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ktgx5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hgol0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n5601")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gchj4")
+}],
+"loop": 0,
+"name": &"default",
+"speed": 12.0
+}]
+
+[node name="Ball" type="CharacterBody2D" unique_id=1745437129 groups=["ball"]]
 collision_layer = 4
 collision_mask = 15
 script = ExtResource("1_x8fbi")
@@ -14,6 +50,6 @@ script = ExtResource("1_x8fbi")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=708792081]
 shape = SubResource("CircleShape2D_wx6e8")
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=438805240]
+[node name="Sprite2D" type="AnimatedSprite2D" parent="." unique_id=434559287]
 position = Vector2(0, 9.536743e-07)
-texture = ExtResource("2_41u45")
+sprite_frames = SubResource("SpriteFrames_wx6e8")

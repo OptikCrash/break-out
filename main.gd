@@ -33,7 +33,7 @@ const TITLE_SCENE := "res://TitleScreen.tscn"
 	preload("res://levels/level_2.tres"),
 	preload("res://levels/level_3.tres"),
 ]
-@export var lives = 3
+@export var lives = 30
 @onready var paddle := $PlayArea/Paddle
 # Convenience for callers needing the first ball; lifecycle uses the whole group.
 var ball: Node2D:

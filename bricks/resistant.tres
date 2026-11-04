@@ -1,6 +1,6 @@
-[gd_resource type="Resource" load_steps=2 format=3]
+[gd_resource type="Resource" format=3 uid="uid://bxdxdo82ibdfu"]
 
-[ext_resource type="Script" path="res://brick_definition.gd" id="1"]
+[ext_resource type="Script" uid="uid://bf0cwkvjmknxu" path="res://brick_definition.gd" id="1"]
 
 [resource]
 script = ExtResource("1")

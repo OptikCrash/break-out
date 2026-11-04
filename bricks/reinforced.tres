@@ -1,6 +1,7 @@
-[gd_resource type="Resource" load_steps=2 format=3]
+[gd_resource type="Resource" format=3 uid="uid://ddy2bb0j3fl0a"]
 
-[ext_resource type="Script" path="res://brick_definition.gd" id="1"]
+[ext_resource type="Script" uid="uid://bf0cwkvjmknxu" path="res://brick_definition.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://c6d6fk8qqqoms" path="res://assets/brick_sturdy.png" id="2_oilkj"]
 
 [resource]
 script = ExtResource("1")
@@ -8,3 +9,4 @@ id = &"reinforced"
 grid_symbol = "x"
 hit_points = 2
 points = 20
+texture = ExtResource("2_oilkj")

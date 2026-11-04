@@ -8,6 +8,7 @@ extends Resource
 @export var requires_breaker := false
 @export var counts_for_completion := true
 @export var destructible: bool = true
+@export var texture: Texture2D
 
 func validation_error() -> String:
 	if id == &"" or grid_symbol.length() != 1:
