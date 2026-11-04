@@ -201,3 +201,11 @@ clock. Reset clears boost. Companions currently report zero recent velocity and
 therefore preserve their existing speed behavior. Weighting, cap, duration and these
 lifecycle interactions are implementation defaults for review; no new content ID or
 capsule is introduced.
+
+**Test Lab**:
+A development-only scene (`devtools/test_lab.tscn`) for trying out levels, power-ups/hazards and
+art in the real gameplay loop without playing through it — opened directly in the Godot editor,
+never reachable from `TitleScreen` or shipped in a release export. Mirrors the dungeon-crawler's
+Combat Lab, scaled to break-out: no versioned scenario schema or promotion workflow, since
+break-out's levels/effects are already plain data with their own tests.
+_Avoid_: Debug mode, sandbox (ambiguous with other uses already in these docs).

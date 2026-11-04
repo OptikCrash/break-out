@@ -33,6 +33,34 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   `instantiate()` of the child scene won't have. `SceneState` (`load(...).get_state()`) lets a
   headless test check for such overrides, as `tests/hud_script_test.gd` does.
 
+## Test Lab (devtools/)
+
+- `devtools/test_lab.tscn` inherits `main.tscn`; `devtools/test_lab.gd` extends `main.gd`
+  and overrides the `_lose_life()` / `_finish_level()` hooks. Put new gameplay in `main.gd`
+  (the lab picks it up); put lab-only rules in the override. Lab-only nodes go under
+  `LabOverlay` in `test_lab.tscn`, never in `main.tscn` or `HUD.tscn`.
+- Production files must never link to `devtools/` by path or UID; `tests/devtools_boundary_test.gd`
+  enforces it. Tests and `devtools/` itself may reference production files.
+- Lab buttons use `focus_mode = None`: a focused Button also takes Space (`ui_accept`), so one
+  launch press would also press Reset.
+- An inherited scene can't delete inherited nodes, so `test_lab.gd` frees `PauseScreen` at runtime.
+- Lab Reset keeps the first ball, so a deferred Multi-ball split from that ball still passes the
+  source-validity guard. `_clear_effects_and_capsules()` bumps `split_generation` (like
+  `companion_generation`) to cancel it; any new deferred spawn needs the same counter.
+- The lab effect panel builds from `EffectRules.DEFINITIONS` and connects each button
+  to inherited `_catch_capsule()`. Force Field intentionally blocks panel hazards too;
+  use Reset first when testing an unblocked hazard.
+- When M9 adds a Web export preset, it must exclude `devtools/*` (ADR-0002).
+- The lab's "current level" is `bricks.level` (what is on screen), not `levels[current_level_index]`:
+  the level picker loads files that aren't in `main.levels`, and Reset rebuilds the picked one.
+  The picker reports bad level files in its Status label instead of `push_error()`, so a test
+  can click a malformed file without the runner failing on `ERROR:`. Point `levels_dir` at a
+  `user://` scratch folder to test bad files; never add a broken `.tres` to `levels/`.
+- Lab panels share the left gutter (x 32-352): Reset, then `LevelPicker` (y 184-464), then
+  `EffectPanel` (488 to bottom). A new panel must take space from these, not overlap them;
+  `test_lab_level_picker_test.gd` checks the two don't intersect. The effect list scrolls,
+  so a click test must `ensure_control_visible()` a lower button before clicking it.
+
 ## Scene flow
 
 - `TitleScreen.tscn` is `run/main_scene`; screens move between scenes with
