@@ -14,6 +14,8 @@ var capsule_rng := RandomNumberGenerator.new()
 const COMPANION_SCENE = preload("res://companion_paddle.tscn")
 var companion_generation := 0
 var companions: Array[Node2D] = []
+# Bumped by cleanup so a Multi-ball split queued before it never lands after it.
+var split_generation := 0
 
 
 const BOLT_SCENE = preload("res://blaster_bolt.tscn")
@@ -312,6 +314,7 @@ func _catch_capsule(effect: Resource, at := Vector2.INF) -> void:
 
 func _clear_effects_and_capsules() -> void:
 	companion_generation += 1
+	split_generation += 1
 	_clear_companions()
 	effects.active.clear()
 	satellite_orbs = 0
@@ -372,11 +375,11 @@ func _split_ball(effect: Resource) -> void:
 			source = candidate
 			break
 	# Capsule catches arrive during physics queries; add bodies after they finish.
-	_add_split_balls.call_deferred(source, effect)
+	_add_split_balls.call_deferred(source, effect, split_generation)
 
-func _add_split_balls(source: Node2D, effect: Resource) -> void:
-	# A last-ball loss or level completion can occur before the deferred split.
-	if reset_ready or level_complete or not is_instance_valid(source):
+func _add_split_balls(source: Node2D, effect: Resource, generation: int) -> void:
+	# A last-ball loss, level completion or cleanup can occur before the deferred split.
+	if generation != split_generation or reset_ready or level_complete or not is_instance_valid(source):
 		return
 	if source.is_queued_for_deletion() or not get_balls().has(source):
 		return

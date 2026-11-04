@@ -50,6 +50,17 @@ func run() -> void:
 		"Reset rebuilds the current level's bricks")
 	_check(lab.bricks_left > 0, "Completion count matches the rebuilt layout")
 
+	# Reset before a queued Multi-ball split runs: the split must not land in the
+	# fresh lab. No frame passes between the catch and the reset.
+	lab.ball.launched = true
+	lab.ball.velocity = Vector2(0, -300)
+	lab._catch_capsule(multi)
+	lab.reset_lab()
+	await process_frame
+	await process_frame
+	_check(lab.get_balls().size() == 1 and not lab.ball.launched,
+		"A split queued before Reset never spawns copies afterwards")
+
 	# Clearing the level reloads it rather than ending the session.
 	var final_level := Level.new()
 	final_level.grid = "#"

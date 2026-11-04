@@ -44,6 +44,9 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - Lab buttons use `focus_mode = None`: a focused Button also takes Space (`ui_accept`), so one
   launch press would also press Reset.
 - An inherited scene can't delete inherited nodes, so `test_lab.gd` frees `PauseScreen` at runtime.
+- Lab Reset keeps the first ball, so a deferred Multi-ball split from that ball still passes the
+  source-validity guard. `_clear_effects_and_capsules()` bumps `split_generation` (like
+  `companion_generation`) to cancel it; any new deferred spawn needs the same counter.
 - When M9 adds a Web export preset, it must exclude `devtools/*` (ADR-0002).
 
 ## Scene flow
