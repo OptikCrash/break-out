@@ -12,6 +12,7 @@ func _ready() -> void:
 	pause_screen.queue_free()
 	pause_screen = null
 	$LabOverlay/ResetButton.pressed.connect(reset_lab)
+	_build_effect_buttons()
 
 func can_pause() -> bool:
 	return false
@@ -53,3 +54,26 @@ func reset_lab() -> void:
 	bricks.load_level(levels[current_level_index])
 	_count_completion_bricks()
 	hud.update_message("")
+
+# Use the capsule pool itself so new gameplay effects appear here automatically.
+func _build_effect_buttons() -> void:
+	var rows := $LabOverlay/EffectPanel/Margin/Content/Scroll/Rows
+	for effect in EffectRules.DEFINITIONS:
+		var button := Button.new()
+		button.name = String(effect.id)
+		button.text = ("Hazard: " if effect.hazard else "") + effect.display_name
+		button.tooltip_text = "Catch %s through the gameplay capsule path." % effect.display_name
+		button.focus_mode = Control.FOCUS_NONE
+		button.custom_minimum_size.y = 48.0
+		button.add_theme_font_size_override("font_size", 22)
+		button.add_theme_color_override("font_color", Color.WHITE)
+		var swatch := ColorRect.new()
+		swatch.name = "placeholder_swatch"
+		swatch.color = hud.HAZARD_COLOR if effect.hazard else hud.POWER_UP_COLOR
+		swatch.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		swatch.set_anchors_and_offsets_preset(Control.PRESET_LEFT_WIDE)
+		swatch.offset_right = 6.0
+		button.add_child(swatch)
+		# No falling capsule or alternate effect implementation in the lab.
+		button.pressed.connect(_catch_capsule.bind(effect))
+		rows.add_child(button)
