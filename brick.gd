@@ -37,12 +37,9 @@ func take_hit(breaker := false) -> bool:
 	return false
 
 func _update_color() -> void:
-	var rect := $CollisionShape2D/ColorRect
-	if type_id == &"reinforced":
-		rect.color = Color(0.45, 0.65, 0.9) if hit_points == 2 else Color(0.75, 0.85, 1.0)
-	elif type_id == &"mystery":
-		rect.color = Color(0.8, 0.7, 0.2)
-	elif type_id == &"resistant":
-		rect.color = Color(0.65, 0.3, 0.65)
-	elif type_id == &"indestructible":
-		rect.color = Color(0.45, 0.45, 0.45)
+	var sprite: Sprite2D = $CollisionShape2D/Sprite2D
+	var damaged: bool = definition.destructible and hit_points < definition.hit_points
+	if damaged and definition.damaged_texture:
+		sprite.texture = definition.damaged_texture
+	elif definition.texture:
+		sprite.texture = definition.texture

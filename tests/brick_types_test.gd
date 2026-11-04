@@ -55,10 +55,10 @@ func _run() -> void:
 	var indestructible = bricks.get_child(3)
 	_check(game.bricks_left == 3, "Indestructible bricks excluded at start")
 	_check(normal.type_id == &"normal" and reinforced.type_id == &"reinforced" and indestructible.type_id == &"indestructible", "Loader instantiates the specified types")
-	var intact_color: Color = reinforced.get_node("CollisionShape2D/ColorRect").color
+	var intact_texture: Texture2D = reinforced.get_node("CollisionShape2D/Sprite2D").texture
 	ball._break_brick(reinforced)
 	_check(reinforced.hit_points == 1 and not reinforced.is_queued_for_deletion(), "Reinforced survives its first hit")
-	_check(reinforced.get_node("CollisionShape2D/ColorRect").color != intact_color, "First hit changes appearance")
+	_check(reinforced.get_node("CollisionShape2D/Sprite2D").texture == reinforced.definition.damaged_texture and intact_texture == reinforced.definition.texture, "First hit swaps to the cracked texture")
 	_check(other_reinforced.hit_points == 2 and reinforced.definition.hit_points == 2, "Damage belongs to the instance, not shared content")
 	_check(game.score == 0 and awards.is_empty() and game.bricks_left == 3, "Intermediate hits award no score or signal")
 	for i in 10:

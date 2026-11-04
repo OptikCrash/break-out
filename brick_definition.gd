@@ -9,6 +9,8 @@ extends Resource
 @export var counts_for_completion := true
 @export var destructible: bool = true
 @export var texture: Texture2D
+# Shown once a multi-hit brick has taken damage; empty keeps `texture`.
+@export var damaged_texture: Texture2D
 
 func validation_error() -> String:
 	if id == &"" or grid_symbol.length() != 1:
