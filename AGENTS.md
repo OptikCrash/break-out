@@ -33,6 +33,19 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   `instantiate()` of the child scene won't have. `SceneState` (`load(...).get_state()`) lets a
   headless test check for such overrides, as `tests/hud_script_test.gd` does.
 
+## Test Lab (devtools/)
+
+- `devtools/test_lab.tscn` inherits `main.tscn`; `devtools/test_lab.gd` extends `main.gd`
+  and overrides the `_lose_life()` / `_finish_level()` hooks. Put new gameplay in `main.gd`
+  (the lab picks it up); put lab-only rules in the override. Lab-only nodes go under
+  `LabOverlay` in `test_lab.tscn`, never in `main.tscn` or `HUD.tscn`.
+- Production files must never link to `devtools/` by path or UID; `tests/devtools_boundary_test.gd`
+  enforces it. Tests and `devtools/` itself may reference production files.
+- Lab buttons use `focus_mode = None`: a focused Button also takes Space (`ui_accept`), so one
+  launch press would also press Reset.
+- An inherited scene can't delete inherited nodes, so `test_lab.gd` frees `PauseScreen` at runtime.
+- When M9 adds a Web export preset, it must exclude `devtools/*` (ADR-0002).
+
 ## Scene flow
 
 - `TitleScreen.tscn` is `run/main_scene`; screens move between scenes with

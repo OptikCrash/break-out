@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://c7tl4bx2lab84"]
+
+[ext_resource type="PackedScene" uid="uid://y2o3nlh4h0cf" path="res://main.tscn" id="1_main"]
+[ext_resource type="Script" uid="uid://dntgmxwt63hxv" path="res://devtools/test_lab.gd" id="2_lab"]
+
+[node name="TestLab" instance=ExtResource("1_main")]
+script = ExtResource("2_lab")
+
+[node name="LabOverlay" type="CanvasLayer" parent="."]
+layer = 2
+
+[node name="Title" type="Label" parent="LabOverlay"]
+offset_left = 32.0
+offset_top = 32.0
+offset_right = 352.0
+offset_bottom = 76.0
+theme_override_font_sizes/font_size = 32
+text = "Test Lab"
+
+[node name="ResetButton" type="Button" parent="LabOverlay"]
+offset_left = 32.0
+offset_top = 96.0
+offset_right = 352.0
+offset_bottom = 160.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 28
+text = "Reset"
