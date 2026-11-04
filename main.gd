@@ -1,5 +1,8 @@
 extends Node2D
 
+const SoundEvents = preload("res://sound_events.gd")
+@onready var sounds := SoundEvents.new()
+
 const EffectRules = preload("res://effect_rules.gd")
 const BallRules = preload("res://ball_rules.gd")
 const Capsule = preload("res://capsule.tscn")
@@ -62,9 +65,12 @@ func _show_points(points: int, at: Vector2, signed := false) -> void:
 	popup.global_position = at
 
 func _ready() -> void:
+	sounds.name = "SoundEvents"
+	add_child(sounds)
 	capsule_rng.randomize()
 	bricks.capsule_dropped.connect(_spawn_capsule)
 	bricks.brick_broken.connect(_show_points)
+	bricks.brick_broken.connect(func(_points: int, _at: Vector2): sounds.play_cue(&"brick_break"))
 	bricks.brick_destroyed.connect(_spawn_brick_burst)
 	paddle_start = paddle.position
 	# A child of the paddle, so the orbit follows it without extra code.
@@ -127,10 +133,12 @@ func _on_death_zone_body_entered(body: Node2D) -> void:
 		return
 	_clear_effects_and_capsules()
 	lives -= 1
+	sounds.play_cue(&"life_lost")
 	screen_shake.shake(LIFE_LOST_SHAKE.x, LIFE_LOST_SHAKE.y)
 	hud.update_lives(lives)
 	if lives == 0:
 		reset_ready = true
+		sounds.play_cue(&"game_over")
 		hud.update_message("Game Over!")
 		hud.show_end_buttons()
 	else:
@@ -149,12 +157,14 @@ func _on_ball_brick_broken(points: int) -> void:
 			active_ball.reset()
 		_stop_balls()
 		if current_level_index + 1 < levels.size():
+			sounds.play_cue(&"level_complete")
 			level_complete = true
 			paddle.set_physics_process(false)
 			hud.update_message("Level %d Complete!" % (current_level_index + 1))
 			hud.show_continue_button()
 		else:
 			reset_ready = true
+			sounds.play_cue(&"win")
 			hud.update_message("You Win!")
 			hud.show_end_buttons()
 
@@ -263,6 +273,7 @@ func _spawn_brick_burst(at: Vector2) -> void:
 func _catch_capsule(effect: Resource, at := Vector2.INF) -> void:
 	if reset_ready or level_complete:
 		return
+	sounds.play_cue(&"hazard_catch" if effect.hazard else &"power_up_catch")
 	paddle.play_feedback()
 	_show_points(EffectRules.catch_points(effect), paddle.global_position if at == Vector2.INF else at, true)
 	var negated := EffectRules.negates_hazard(effect, force_field_charges)
@@ -326,6 +337,8 @@ func add_ball() -> Node2D:
 	return new_ball
 
 func _connect_ball(active_ball: Node2D) -> void:
+	if not active_ball.sound_requested.is_connected(sounds.play_cue):
+		active_ball.sound_requested.connect(sounds.play_cue)
 	if not active_ball.brick_broken.is_connected(_on_ball_brick_broken):
 		active_ball.brick_broken.connect(_on_ball_brick_broken)
 

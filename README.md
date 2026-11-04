@@ -78,6 +78,16 @@ passes cleanly when zero tests exist. No test addons are required.
 headless Godot fixtures outside the project. It leaves no game test assets behind.
 See `PLAN.md` for scope and milestones.
 
+The suite currently contains 31 `tests/*_test.gd` files. The level-progression
+test flushes synthetic input with `Input.flush_buffered_events()` and waits for
+a `process_frame` between a Button press and release. Several physics steps can
+run within one GUI frame, so waiting only for physics frames can lose the press.
+The extra tone-generation work on this branch likely exposed that assumption;
+it was a test synchronization problem rather than blocked level transitions.
+The test checks both unrestricted frames and `Engine.max_fps = 10` to exercise
+multiple physics steps per GUI frame, then restores `Engine.max_fps = 0` before
+its remaining checks.
+
 ## Capsules
 
 Custom levels can use `?` for a one-hit, zero-point Mystery Brick. It drops a random
@@ -112,3 +122,28 @@ Satellite Shield resets three waiting orbs, drawn as placeholder circles orbitin
 paddle. Each Power-up Action press launches one as an ordinary ball with a fresh
 ten-second Breaker timer. The same press can fire Blaster and release Sticky catches.
 A resting ball takes the shared press to launch before Satellite orbs can launch.
+
+## Placeholder sound
+
+`main.gd` owns a `SoundEvents` child (`sound_events.gd`). Its `play_cue()` method
+accepts the nine named gameplay cues in `CUES`; its `volume` multiplier ranges
+from 0 (mute) to 1, defaulting to 0.5. Changing it also updates playing voices.
+There is no settings screen or saved audio setting yet.
+
+These short sine tones are procedurally synthesized placeholders, explicitly
+approved for M6 as an audio-only exception to the team's no-art rule. They use
+no recorded or sourced samples. Replace the dispatcher's cached streams with
+Chris's audio when available; gameplay callers can keep the same cue names.
+A fixed twelve-player pool bounds overlap; a full pool replaces the next voice.
+Synthesized streams are generated once and shared across gameplay scene reloads;
+each scene keeps its own players and volume so restarting does not rebuild PCM.
+A static cache avoids rebuilding samples in every `_ready()` without requiring an
+autoload: only the immutable streams need to outlive a gameplay scene, while
+players should stop with that scene and volume should remain local.
+Final-life loss plays both life-lost and game-over cues, and a final level plays
+win in place of level-complete. Blocked hazards still use the hazard-catch cue.
+Reflections from surviving bricks (including Reinforced and Indestructible) use
+the wall-bounce cue; a destroying hit uses only brick-break, even if it reflects.
+Audio balance, cue distinction and browser playback need a listening playthrough;
+headless tests check routing and PCM generation, not perceived sound. The Dummy
+audio driver skips playback while retaining observable cue requests.

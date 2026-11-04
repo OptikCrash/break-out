@@ -252,3 +252,21 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - Brick `broken(points, at)` is a presentation signal emitted after queuing deletion,
   forwarded by Bricks. The ball/bolt score signals still own scoring and completion.
   Capture capsule positions when caught, not when spawned: capsules move while falling.
+
+- Sound calls go through main's `sounds.play_cue()`; balls emit `sound_requested`
+  and `add_ball()` wires it. Use Bricks' presentation signal for break audio so
+  bolts and balls share it without duplicating score/completion handling.
+- Reflections from surviving bricks use `wall_bounce`, including Reinforced and
+  Indestructible bricks. A destroying hit uses only the existing `brick_break` cue.
+- The sound dispatcher skips playback with Godot's Dummy audio driver (headless),
+  while still generating streams and emitting cue requests for tests. Scheduling
+  WAV playback without an output driver can leave mixer references at test exit.
+- Synthesized cue streams are cached across gameplay scenes; treat them as shared,
+  immutable resources. Playback players and volume remain local to each dispatcher.
+
+- Synthetic menu input tests must flush buffered events and allow a process frame
+  between press and release. Several physics steps can share one GUI frame on a
+  slow runner; physics-frame waits alone can lose a Button press. Bound brick-hit
+  loops so a failed Continue reports assertions instead of hanging the process.
+- Reset `Engine.max_fps` to 0 after deliberately limiting test frame rates, so later
+  checks in the same process do not inherit the slow frame rate.
