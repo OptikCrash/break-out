@@ -129,6 +129,8 @@ Synthesized streams are generated once and shared across gameplay scene reloads;
 each scene keeps its own players and volume so restarting does not rebuild PCM.
 Final-life loss plays both life-lost and game-over cues, and a final level plays
 win in place of level-complete. Blocked hazards still use the hazard-catch cue.
+Reflections from surviving bricks (including Reinforced and Indestructible) use
+the wall-bounce cue; a destroying hit uses only brick-break, even if it reflects.
 Audio balance, cue distinction and browser playback need a listening playthrough;
 headless tests check routing and PCM generation, not perceived sound. The Dummy
 audio driver skips playback while retaining observable cue requests.
