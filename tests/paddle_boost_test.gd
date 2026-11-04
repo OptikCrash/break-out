@@ -83,7 +83,7 @@ func _run() -> void:
 	source.velocity = Vector2.UP * 550.0
 	source.apply_paddle_boost(800.0)
 	source.tick_boost(1.0)
-	game._add_split_balls(source, preload("res://effects/multi_ball.tres"))
+	game._add_split_balls(source, preload("res://effects/multi_ball.tres"), game.split_generation)
 	for copy in game.get_balls():
 		copy.set_physics_process(false)
 		_check(is_equal_approx(copy.boost, 200.0 * 2.0 / 3.0) and copy.boost_time_left == 2.0, "Multi-ball inherits bonus and remaining fade")

@@ -12,6 +12,35 @@ to move between buttons and A to press one.
 While the ball is in play, Escape (or gamepad Start) pauses the game and opens a
 menu with Resume, Restart and Back to Title. Start or B (Circle) also resumes.
 
+## Test Lab (development only)
+
+`devtools/test_lab.tscn` is a sandbox for trying levels, power-ups and art in the
+real gameplay loop without playing through the game. Open it in the Godot editor
+and press **F6** (Run Current Scene). It is never reachable from the title screen.
+
+- **Infinite lives**: losing the last ball clears effects as usual, then a new
+  ball appears on the paddle. Lives never drop and there is no Game Over.
+- **No end screens**: clearing the level reloads it instead of showing "Level
+  Complete" or "You Win!". There is no pause menu.
+- **Reset button** (top-left): one ball back on the paddle, the current level's
+  bricks rebuilt, and active effects, capsules, companions and waiting Satellite
+  orbs cleared through `main.gd`'s own `_clear_effects_and_capsules()`.
+
+How it is built: `test_lab.tscn` is an *inherited scene* of `main.tscn` (Godot's
+**Scene → New Inherited Scene**), so it always has the current `PlayArea`, ball,
+paddle, bricks, Death Zone, walls and HUD. Its root script, `devtools/test_lab.gd`,
+`extends "res://main.gd"` and overrides only the session rules: `_lose_life()`,
+`_finish_level()`, `can_pause()`, `restart()` and `back_to_title()`. Loading,
+effects, scoring and capsules all stay in `main.gd`. Inherited scenes cannot
+delete inherited nodes, so the script frees `PauseScreen` in `_ready()`.
+
+Everything for the Test Lab lives under `devtools/`, and production files must
+never link to it (`tests/devtools_boundary_test.gd` checks both `res://devtools/`
+paths and `devtools/` UIDs). Links the other way, from devtools to production,
+are fine. When M9 adds a Web export preset, add `devtools/*` to that preset's
+exclude filter (**Resources → Filters to exclude files/folders**) so the Test Lab
+is not shipped. See `docs/adr/0002-test-lab-dev-only-boundary.md`.
+
 ## Level progression
 
 Clearing all destructible bricks shows "Level X Complete!". Choose Continue
@@ -78,7 +107,7 @@ passes cleanly when zero tests exist. No test addons are required.
 headless Godot fixtures outside the project. It leaves no game test assets behind.
 See `PLAN.md` for scope and milestones.
 
-The suite currently contains 31 `tests/*_test.gd` files. The level-progression
+The suite currently contains 33 `tests/*_test.gd` files. The level-progression
 test flushes synthetic input with `Input.flush_buffered_events()` and waits for
 a `process_frame` between a Button press and release. Several physics steps can
 run within one GUI frame, so waiting only for physics frames can lose the press.

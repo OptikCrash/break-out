@@ -14,6 +14,8 @@ var capsule_rng := RandomNumberGenerator.new()
 const COMPANION_SCENE = preload("res://companion_paddle.tscn")
 var companion_generation := 0
 var companions: Array[Node2D] = []
+# Bumped by cleanup so a Multi-ball split queued before it never lands after it.
+var split_generation := 0
 
 
 const BOLT_SCENE = preload("res://blaster_bolt.tscn")
@@ -27,7 +29,6 @@ const HAZARD_SHAKE := Vector2(8.0, 0.25)
 const LIFE_LOST_SHAKE := Vector2(16.0, 0.4)
 
 const TITLE_SCENE := "res://TitleScreen.tscn"
-
 @export var levels: Array[Level] = [
 	preload("res://levels/level_1.tres"),
 	preload("res://levels/level_2.tres"),
@@ -132,9 +133,14 @@ func _on_death_zone_body_entered(body: Node2D) -> void:
 	if not get_balls().is_empty():
 		return
 	_clear_effects_and_capsules()
-	lives -= 1
 	sounds.play_cue(&"life_lost")
 	screen_shake.shake(LIFE_LOST_SHAKE.x, LIFE_LOST_SHAKE.y)
+	_lose_life()
+
+# The last ball is gone and effects are already cleared. The Test Lab
+# (devtools/test_lab.gd) overrides this to respawn without costing a life.
+func _lose_life() -> void:
+	lives -= 1
 	hud.update_lives(lives)
 	if lives == 0:
 		reset_ready = true
@@ -152,21 +158,26 @@ func _on_ball_brick_broken(points: int) -> void:
 	score += points
 	hud.update_score(score)
 	if bricks_left == 0:
-		_clear_effects_and_capsules()
-		for active_ball in get_balls():
-			active_ball.reset()
-		_stop_balls()
-		if current_level_index + 1 < levels.size():
-			sounds.play_cue(&"level_complete")
-			level_complete = true
-			paddle.set_physics_process(false)
-			hud.update_message("Level %d Complete!" % (current_level_index + 1))
-			hud.show_continue_button()
-		else:
-			reset_ready = true
-			sounds.play_cue(&"win")
-			hud.update_message("You Win!")
-			hud.show_end_buttons()
+		_finish_level()
+
+# Every completion brick is gone. The Test Lab overrides this to reload the
+# same level instead of showing "Level Complete" or "You Win!".
+func _finish_level() -> void:
+	_clear_effects_and_capsules()
+	for active_ball in get_balls():
+		active_ball.reset()
+	_stop_balls()
+	if current_level_index + 1 < levels.size():
+		sounds.play_cue(&"level_complete")
+		level_complete = true
+		paddle.set_physics_process(false)
+		hud.update_message("Level %d Complete!" % (current_level_index + 1))
+		hud.show_continue_button()
+	else:
+		reset_ready = true
+		sounds.play_cue(&"win")
+		hud.update_message("You Win!")
+		hud.show_end_buttons()
 
 # R and the Restart button both land here. Clearing reset_ready means a second
 # request in the same frame (R plus a click) can't ask for another scene change.
@@ -303,6 +314,7 @@ func _catch_capsule(effect: Resource, at := Vector2.INF) -> void:
 
 func _clear_effects_and_capsules() -> void:
 	companion_generation += 1
+	split_generation += 1
 	_clear_companions()
 	effects.active.clear()
 	satellite_orbs = 0
@@ -363,11 +375,11 @@ func _split_ball(effect: Resource) -> void:
 			source = candidate
 			break
 	# Capsule catches arrive during physics queries; add bodies after they finish.
-	_add_split_balls.call_deferred(source, effect)
+	_add_split_balls.call_deferred(source, effect, split_generation)
 
-func _add_split_balls(source: Node2D, effect: Resource) -> void:
-	# A last-ball loss or level completion can occur before the deferred split.
-	if reset_ready or level_complete or not is_instance_valid(source):
+func _add_split_balls(source: Node2D, effect: Resource, generation: int) -> void:
+	# A last-ball loss, level completion or cleanup can occur before the deferred split.
+	if generation != split_generation or reset_ready or level_complete or not is_instance_valid(source):
 		return
 	if source.is_queued_for_deletion() or not get_balls().has(source):
 		return
