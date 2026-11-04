@@ -1,0 +1,12 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://brick_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"resistant"
+grid_symbol = "r"
+hit_points = 1
+points = 50
+requires_breaker = true
+counts_for_completion = false

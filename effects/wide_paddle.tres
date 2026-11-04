@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://effect_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"wide_paddle"
+display_name = "Wide Paddle"
+duration = 10.0
+paddle_width_multiplier = 1.5

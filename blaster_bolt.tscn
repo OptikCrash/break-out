@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://blaster_bolt.gd" id="1"]
+
+[sub_resource type="RectangleShape2D" id="Shape"]
+size = Vector2(6, 16)
+
+[node name="BlasterBolt" type="CharacterBody2D" groups=["blaster_bolt"]]
+collision_layer = 0
+collision_mask = 8
+script = ExtResource("1")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("Shape")
+
+[node name="placeholder_bolt" type="ColorRect" parent="."]
+offset_left = -3.0
+offset_top = -8.0
+offset_right = 3.0
+offset_bottom = 8.0
+mouse_filter = 2
+color = Color(1, 0.85, 0.2, 1)

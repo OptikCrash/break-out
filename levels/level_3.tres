@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Level" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://level.gd" id="1_level"]
+
+[resource]
+script = ExtResource("1_level")
+grid = ".o....#xxx#....o.
+.o..#xxxxxxx#..o.
+.o.##xxxxxxx##.o.
+.o.xxxxxxxxxxx.o.
+.o.##xxxxxxx##.o.
+.o..#xxxxxxx#..o.
+.o....#xxx#....o."

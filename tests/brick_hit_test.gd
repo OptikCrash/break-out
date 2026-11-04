@@ -9,13 +9,14 @@ func _initialize() -> void:
 func _run() -> void:
 	var game = preload("res://main.tscn").instantiate()
 	var bricks = game.get_node("PlayArea/Bricks")
-	bricks.columns = 2
-	bricks.rows = 1
+	var level := Level.new()
+	level.grid = "##"
 	# Exercise the hit rule synchronously, without input or physics timing.
+	game.levels.assign([level])
 	game.process_mode = Node.PROCESS_MODE_DISABLED
 	root.add_child(game)
 	var ball = game.get_node("PlayArea/Ball")
-	ball.brick_broken.connect(func(): broken_signals += 1)
+	ball.brick_broken.connect(func(_points): broken_signals += 1)
 	var first_brick = bricks.get_child(0)
 	var last_brick = bricks.get_child(1)
 	_check(game.score == 0 and game.bricks_left == 2, "Start with two unbroken bricks and zero points")
@@ -38,7 +39,8 @@ func _run() -> void:
 	_check(ball.position == ball.paddle.position + Vector2(0, -24), "Win immediately returns the ball to paddle rest")
 	_check(game.reset_ready, "Final brick enables restart")
 	_check(not ball.launched and not ball.is_physics_processing(), "Win resets and stops the ball")
-	_check(game.get_node("Hud/MessageLabel").text == "You Win!\nPress R to restart", "Final brick displays the win message")
+	_check(game.get_node("Hud/MessageLabel").text == "You Win!", "Final brick displays the win message")
+	_check(game.get_node("Hud/EndButtons").visible, "Final brick shows the Restart and Back to Title buttons")
 
 	game.free()
 	quit(1 if failures else 0)
