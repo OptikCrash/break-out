@@ -78,6 +78,16 @@ passes cleanly when zero tests exist. No test addons are required.
 headless Godot fixtures outside the project. It leaves no game test assets behind.
 See `PLAN.md` for scope and milestones.
 
+The suite currently contains 31 `tests/*_test.gd` files. The level-progression
+test flushes synthetic input with `Input.flush_buffered_events()` and waits for
+a `process_frame` between a Button press and release. Several physics steps can
+run within one GUI frame, so waiting only for physics frames can lose the press.
+The extra tone-generation work on this branch likely exposed that assumption;
+it was a test synchronization problem rather than blocked level transitions.
+The test checks both unrestricted frames and `Engine.max_fps = 10` to exercise
+multiple physics steps per GUI frame, then restores `Engine.max_fps = 0` before
+its remaining checks.
+
 ## Capsules
 
 Custom levels can use `?` for a one-hit, zero-point Mystery Brick. It drops a random
