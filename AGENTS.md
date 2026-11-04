@@ -48,6 +48,11 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   source-validity guard. `_clear_effects_and_capsules()` bumps `split_generation` (like
   `companion_generation`) to cancel it; any new deferred spawn needs the same counter.
 - When M9 adds a Web export preset, it must exclude `devtools/*` (ADR-0002).
+- The lab's "current level" is `bricks.level` (what is on screen), not `levels[current_level_index]`:
+  the level picker loads files that aren't in `main.levels`, and Reset rebuilds the picked one.
+  The picker reports bad level files in its Status label instead of `push_error()`, so a test
+  can click a malformed file without the runner failing on `ERROR:`. Point `levels_dir` at a
+  `user://` scratch folder to test bad files; never add a broken `.tres` to `levels/`.
 
 ## Scene flow
 

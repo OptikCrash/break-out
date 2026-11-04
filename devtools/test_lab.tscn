@@ -25,3 +25,31 @@ offset_bottom = 160.0
 focus_mode = 0
 theme_override_font_sizes/font_size = 28
 text = "Reset"
+
+[node name="LevelPicker" type="VBoxContainer" parent="LabOverlay"]
+offset_left = 32.0
+offset_top = 192.0
+offset_right = 352.0
+offset_bottom = 720.0
+theme_override_constants/separation = 12
+
+[node name="Heading" type="Label" parent="LabOverlay/LevelPicker"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Levels"
+
+[node name="Scroll" type="ScrollContainer" parent="LabOverlay/LevelPicker"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Buttons" type="VBoxContainer" parent="LabOverlay/LevelPicker/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="Status" type="Label" parent="LabOverlay/LevelPicker"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+autowrap_mode = 3
