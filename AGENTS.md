@@ -268,3 +268,5 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   between press and release. Several physics steps can share one GUI frame on a
   slow runner; physics-frame waits alone can lose a Button press. Bound brick-hit
   loops so a failed Continue reports assertions instead of hanging the process.
+- Reset `Engine.max_fps` to 0 after deliberately limiting test frame rates, so later
+  checks in the same process do not inherit the slow frame rate.
