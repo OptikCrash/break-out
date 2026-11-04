@@ -125,6 +125,8 @@ approved for M6 as an audio-only exception to the team's no-art rule. They use
 no recorded or sourced samples. Replace the dispatcher's cached streams with
 Chris's audio when available; gameplay callers can keep the same cue names.
 A fixed twelve-player pool bounds overlap; a full pool replaces the next voice.
+Synthesized streams are generated once and shared across gameplay scene reloads;
+each scene keeps its own players and volume so restarting does not rebuild PCM.
 Final-life loss plays both life-lost and game-over cues, and a final level plays
 win in place of level-complete. Blocked hazards still use the hazard-catch cue.
 Audio balance, cue distinction and browser playback need a listening playthrough;
