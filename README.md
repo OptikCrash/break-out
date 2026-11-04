@@ -127,6 +127,9 @@ Chris's audio when available; gameplay callers can keep the same cue names.
 A fixed twelve-player pool bounds overlap; a full pool replaces the next voice.
 Synthesized streams are generated once and shared across gameplay scene reloads;
 each scene keeps its own players and volume so restarting does not rebuild PCM.
+A static cache avoids rebuilding samples in every `_ready()` without requiring an
+autoload: only the immutable streams need to outlive a gameplay scene, while
+players should stop with that scene and volume should remain local.
 Final-life loss plays both life-lost and game-over cues, and a final level plays
 win in place of level-complete. Blocked hazards still use the hazard-catch cue.
 Reflections from surviving bricks (including Reinforced and Indestructible) use
