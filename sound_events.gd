@@ -24,13 +24,15 @@ const VOICES := 12
 		volume = clampf(value, 0.0, 1.0)
 		for player in players:
 			player.volume_linear = volume
-var streams: Dictionary = {}
+# Share immutable cue resources across scene reloads; players stay scene-owned.
+static var streams: Dictionary = {}
 var players: Array[AudioStreamPlayer] = []
 var next_voice := 0
 
 func _ready() -> void:
-	for cue in CUES:
-		streams[cue] = _tone(CUES[cue])
+	if streams.is_empty():
+		for cue in CUES:
+			streams[cue] = _tone(CUES[cue])
 	for index in VOICES:
 		var player := AudioStreamPlayer.new()
 		player.volume_linear = volume

@@ -261,6 +261,8 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - The sound dispatcher skips playback with Godot's Dummy audio driver (headless),
   while still generating streams and emitting cue requests for tests. Scheduling
   WAV playback without an output driver can leave mixer references at test exit.
+- Synthesized cue streams are cached across gameplay scenes; treat them as shared,
+  immutable resources. Playback players and volume remain local to each dispatcher.
 
 - Synthetic menu input tests must flush buffered events and allow a process frame
   between press and release. Several physics steps can share one GUI frame on a

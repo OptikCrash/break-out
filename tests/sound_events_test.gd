@@ -98,10 +98,13 @@ func run() -> void:
 	game.ball.set_physics_process(false)
 	game.ball._break_brick(game.bricks.get_child(0))
 	_expect([&"brick_break", &"win"], "Final clear uses win")
+	var cached_stream: AudioStreamWAV = game.sounds.streams[&"win"]
 	game.free()
 
 	game = preload("res://main.tscn").instantiate()
 	root.add_child(game)
+	_check(game.sounds.streams[&"win"] == cached_stream, "Scene reload reuses synthesized cue resources")
+	_check(game.sounds.players.size() == 12, "New scene retains its own bounded voice pool")
 	game.sounds.volume = 0.0
 	game.sounds.cue_played.connect(func(cue: StringName): heard.append(cue))
 	game.lives = 1

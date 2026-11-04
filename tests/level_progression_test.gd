@@ -69,6 +69,7 @@ func run() -> void:
 				_check(game.ball.position == game.paddle.position + Vector2(0, -24), "Continue rests ball on paddle")
 				_check(game.lives == 2 and game.score == total, "Continue preserves lives and score")
 			game.free()
+	Engine.max_fps = 0
 	_test_custom_sequence()
 	quit(1 if failures else 0)
 
