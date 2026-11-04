@@ -208,15 +208,51 @@ until the total level count is settled — useful to extend a short level set by
 higher speed, unnecessary if there end up being plenty of levels. Revisit alongside level-content
 planning, not as part of M6.
 
-### M7: Local high scores
+### M7: Test Lab
 
-### M8: Web export
+Designed in a grilling session with Chris on 2026-11-04, mirroring the dungeon-crawler's
+Combat Lab (that project's [decision 0034](../dungeon-crawler/docs/decisions/0034-development-only-combat-lab.md))
+scaled down to what break-out actually needs. See [ADR-0002](docs/adr/0002-test-lab-dev-only-boundary.md)
+for the dev-only/release-boundary reasoning and `GLOSSARY.md` for the vocabulary below.
+
+Acceptance criteria:
+- **`devtools/test_lab.tscn`**: a development-only scene, opened and run directly in the Godot
+  editor (F6), never reachable from `TitleScreen` or any in-game menu, and never wired into the
+  normal `TitleScreen → main.tscn` flow. A regression check confirms no production scene
+  references anything under `devtools/`.
+- **Built on the real gameplay scene**, not a second approximation: the same `Ball`/`Paddle`/
+  `Bricks`/capsule/effect scenes and scripts `main.tscn` already uses, with the Title/Pause/
+  win-lose flow stripped out and a debug overlay added on top.
+- **Level picker**: an auto-discovered list of every `.tres` file under `levels/` (scan the
+  folder, don't hardcode the list), shown as on-screen buttons; clicking one loads that level
+  immediately through the real `Level`/`Bricks` loading path.
+- **Power-up/hazard panel**: one button per effect in the uniform capsule pool (both power-ups
+  and hazards, hazards visually distinguished using the same color convention the HUD's active-
+  effects list already uses), applying the real effect path exactly as if a capsule had been
+  caught — no capsule object needed.
+- **Infinite lives** while in the Test Lab: a ball reaching the Death Zone never costs a life or
+  ends the session, regardless of the normal multi-ball life rule's outcome.
+- **A manual reset button**: ball(s) back on the paddle, current level's bricks reloaded, any
+  active effects/companions/satellite orbs cleared — same cleanup path life-loss/level-complete
+  already trigger.
+- **No real progress affected**: the Test Lab never reads or writes whatever score/lives/save
+  state a future milestone adds to the shipped game; it's a throwaway sandbox session every time
+  it's opened.
+- Document in `README.md`/`AGENTS.md` how to open and use it, and that M9 (Web export) must add
+  `devtools/` to the export filter once that preset exists — M7 can't verify the actual export
+  exclusion yet since no export preset exists until M9, but it must be trivial to exclude by
+  living under one clearly-named root.
+
+### M8: Local high scores
+
+### M9: Web export
 
 The goal stated up front: a small, finished, polished game Chris can share as a web build.
 Produce and verify an actual exported HTML5/Web build (not just the editor instructions README
 already covers) — export presets/settings, confirming input (keyboard, and whatever M2 added)
-and audio (if M5 added sound) work in a browser, and a checked-in or documented way to reproduce
-the export. Comes last, once every other milestone's features are in the build being shared.
+and audio (M6 added sound) work in a browser, excluding `devtools/` (M7's Test Lab) from the
+build, and a checked-in or documented way to reproduce the export. Comes last, once every other
+milestone's features are in the build being shared.
 
 ## Scope rule
 
