@@ -20,6 +20,24 @@
 - Winning disables ball physics immediately after `reset()`. Reset must place the ball
   on the paddle synchronously; waiting for `_physics_process()` leaves it in flight.
 
+## Network services (hard rule)
+
+This project needs no database or network service, and none may be added. The rule below
+applies to every builder and reviewer, every model family, and manual/local work alike.
+
+- Never start a network service or daemon (Syncthing, CouchDB, a database, a web server, etc.)
+  outside the repo's own test harness. Don't launch a "disposable" service just to get a fixture.
+- If a test needs a real service response, record it read-only from a service that is already
+  running, or build the fixture by hand. Label hand-built fixtures as synthetic; never claim they
+  were captured. Never write to or reconfigure a live service, its config, keys, credentials,
+  folders or data.
+- Never enable discovery or relays. Any listener an authorized repo test harness starts must
+  bind explicitly and only to `127.0.0.1`: never a wildcard IPv4/IPv6 address, a LAN address or
+  any other interface. If a harness can't comply, stop and ask Chris; don't run it or make an
+  exception.
+- The harness owns its temporary state and cleans up its own processes. Never use the
+  builder's default home directory as disposable service state.
+
 Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the sources of truth.
 
 - Ball direction rules live in `ball_rules.gd`, a plain `RefCounted` script that

@@ -29,6 +29,12 @@ renderer. M4 (below) is current.
   then the test runner.
 - **Art:** all art (sprites, textures, icons) is Chris's own. The team never creates, replaces,
   or regenerates it; a missing asset gets a plain placeholder shape, called out in the PR.
+- **No network services (operational safety constraint, accepted 2026-11-04):** the game and
+  its tests need no database or network service, and none is added. Builders never start
+  services or daemons outside the repo's own test harness, never write to live services, never
+  enable discovery/relays, and any harness listener binds only to `127.0.0.1`. This is a
+  working rule for the team, not a gameplay milestone or design decision; the full wording is
+  in `AGENTS.md` under "Network services (hard rule)".
 
 ## Milestones
 
