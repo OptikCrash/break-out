@@ -20,7 +20,11 @@ func _set_feedback_scale(value: Vector2) -> void:
 
 func _update_sprite_scale() -> void:
 	# Compose with width effects; never animate the collision surface.
-	$Sprite2D.scale = Vector2(half_width / 64.0, 0.53125) * feedback_scale
+	# Fit the art to the collision surface: width follows half_width, height the
+	# shared (unscaled) shape, so any texture size lines up with the hitbox.
+	var texture_size: Vector2 = $Sprite2D.texture.get_size()
+	var surface := Vector2(half_width * 2.0, $CollisionShape2D.shape.size.y)
+	$Sprite2D.scale = surface / texture_size * feedback_scale
 
 func set_width_multiplier(multiplier: float) -> void:
 	half_width = 64.0 * multiplier

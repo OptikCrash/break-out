@@ -1,11 +1,10 @@
-[gd_resource type="Resource" load_steps=2 format=3]
+[gd_resource type="Resource" format=3 uid="uid://bh5a45yntstvj"]
 
-[ext_resource type="Script" path="res://effect_definition.gd" id="1"]
+[ext_resource type="Script" uid="uid://cg86kbnefbqqj" path="res://effect_definition.gd" id="1"]
 
 [resource]
 script = ExtResource("1")
 id = &"slow_ball"
 display_name = "Slow Ball"
-hazard = false
 duration = 10.0
 ball_speed_multiplier = 0.75

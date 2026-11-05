@@ -22,7 +22,8 @@ func run() -> void:
 				game.paddle.position.x = 700
 				game.ball.launched = true
 				for brick in game.bricks.get_children():
-					if brick.definition.destructible:
+					# Resistant is optional and Breaker-only, so clearing skips it.
+					if brick.definition.destructible and brick.definition.counts_for_completion:
 						total += brick.definition.points
 						for hit in brick.definition.hit_points:
 							game.ball._break_brick(brick)

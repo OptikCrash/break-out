@@ -24,5 +24,13 @@ func _on_body_entered(body: Node2D) -> void:
 	caught.emit(effect)
 
 func _on_area_entered(area: Area2D) -> void:
+	if is_queued_for_deletion():
+		return
 	if area.is_in_group("death_zone"):
 		queue_free()
+	elif area.is_in_group("force_field"):
+		# A charged bubble stops hazards before they reach the paddle; power-ups
+		# and a spent bubble let the capsule fall on through.
+		if effect != null and effect.hazard and area.is_blocking():
+			queue_free()
+			area.block(effect, global_position)

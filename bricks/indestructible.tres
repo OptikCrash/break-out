@@ -1,12 +1,13 @@
-[gd_resource type="Resource" load_steps=2 format=3]
+[gd_resource type="Resource" format=3 uid="uid://oy7pdbxtpj4w"]
 
-[ext_resource type="Script" path="res://brick_definition.gd" id="1"]
+[ext_resource type="Script" uid="uid://bf0cwkvjmknxu" path="res://brick_definition.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://4cetv3llhvd1" path="res://assets/brick_indestructable.png" id="2_shet2"]
 
 [resource]
 script = ExtResource("1")
 id = &"indestructible"
 grid_symbol = "o"
-hit_points = 0
-points = 0
-destructible = false
 counts_for_completion = false
+destructible = false
+texture = ExtResource("2_shet2")
+particle_color = Color(0.8, 0.82, 0.88, 1)

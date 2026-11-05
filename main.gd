@@ -8,7 +8,14 @@ const BallRules = preload("res://ball_rules.gd")
 const Capsule = preload("res://capsule.tscn")
 const FloatingPoints = preload("res://floating_points.tscn")
 var effects = EffectRules.new()
-var force_field_charges := 0
+const ForceFieldBubble = preload("res://force_field_bubble.tscn")
+# Charges stay here (not in effects.active); the bubble only mirrors them.
+var force_field_charges := 0:
+	set(value):
+		force_field_charges = value
+		if force_field:
+			force_field.set_charges(value)
+var force_field: Area2D
 var capsule_rng := RandomNumberGenerator.new()
 
 const COMPANION_SCENE = preload("res://companion_paddle.tscn")
@@ -21,7 +28,10 @@ var split_generation := 0
 const BOLT_SCENE = preload("res://blaster_bolt.tscn")
 const BALL_SCENE = preload("res://ball.tscn")
 const OrbVisual = preload("res://placeholder_satellite_orbs.gd")
-const BRICK_BURST_SCENE = preload("res://placeholder_brick_burst.tscn")
+# Blaster bolts start this far in from each end of the paddle.
+const BLASTER_EDGE_INSET := 8.0
+const BRICK_BURST_SCENE = preload("res://brick_burst.tscn")
+const BRICK_SPARKS_SCENE = preload("res://brick_sparks.tscn")
 
 # Shake sizes in pixels and seconds. MainBG extends 32 px past the viewport so
 # the strongest shake never shows the clear colour at the edges.
@@ -33,6 +43,8 @@ const TITLE_SCENE := "res://TitleScreen.tscn"
 	preload("res://levels/level_1.tres"),
 	preload("res://levels/level_2.tres"),
 	preload("res://levels/level_3.tres"),
+	preload("res://levels/level_4.tres"),
+	preload("res://levels/level_5.tres"),
 ]
 @export var lives = 3
 @onready var paddle := $PlayArea/Paddle
@@ -73,11 +85,17 @@ func _ready() -> void:
 	bricks.brick_broken.connect(_show_points)
 	bricks.brick_broken.connect(func(_points: int, _at: Vector2): sounds.play_cue(&"brick_break"))
 	bricks.brick_destroyed.connect(_spawn_brick_burst)
+	bricks.brick_struck.connect(_spawn_brick_sparks)
 	paddle_start = paddle.position
 	# A child of the paddle, so the orbit follows it without extra code.
 	orb_visual = OrbVisual.new()
 	orb_visual.name = "PlaceholderSatelliteOrbs"
 	paddle.add_child(orb_visual)
+	# Also a paddle child, so the bubble and its hitbox follow the paddle.
+	force_field = ForceFieldBubble.instantiate()
+	force_field.name = "ForceField"
+	force_field.hazard_blocked.connect(_catch_capsule)
+	paddle.add_child(force_field)
 	for active_ball in get_balls():
 		_connect_ball(active_ball)
 	if levels.is_empty():
@@ -226,15 +244,19 @@ func _physics_process(delta: float) -> void:
 	effects.advance(delta)
 	if not reset_ready and not level_complete and Input.is_action_just_pressed("power_action"):
 		if effects.fire_blaster():
-			var bolt = BOLT_SCENE.instantiate()
-			bolt.position = $PlayArea.to_local(paddle.global_position)
-			bolt.speed = effects.active[&"blaster"].definition.bolt_speed
-			bolt.brick_broken.connect(_on_ball_brick_broken)
-			$PlayArea.add_child(bolt)
+			# One bolt from each end of the paddle, using its current (Wide/Shrink) width.
+			var edge: float = paddle.half_width - BLASTER_EDGE_INSET
+			for side in [-1.0, 1.0]:
+				var bolt = BOLT_SCENE.instantiate()
+				bolt.position = $PlayArea.to_local(paddle.global_position + Vector2(edge * side, 0.0))
+				bolt.speed = effects.active[&"blaster"].definition.bolt_speed
+				bolt.brick_broken.connect(_on_ball_brick_broken)
+				$PlayArea.add_child(bolt)
 	_update_ball_effects()
 	paddle.set_width_multiplier(effects.width_multiplier())
 	hud.update_effects(effects.active, force_field_charges)
-	orb_visual.orbit_size.x = paddle.half_width + 28.0
+	orb_visual.orbit_size.x = paddle.half_width + OrbVisual.ORBIT_MARGIN_X
+	force_field.set_half_width(paddle.half_width)
 	# Read in the physics step, like ball.gd, so both see the same "just pressed".
 	# No arbitration: one press can also fire Blaster and release a Sticky catch.
 	if Input.is_action_just_pressed("power_action"):
@@ -275,11 +297,25 @@ func _add_capsule(at: Vector2) -> void:
 
 # Every destroyed brick, whichever ball or bolt hit it. The final brick of a
 # level gets its burst too, so there is no end-of-level check here.
-func _spawn_brick_burst(at: Vector2) -> void:
+func _spawn_brick_burst(at: Vector2, color: Color) -> void:
 	var burst := BRICK_BURST_SCENE.instantiate()
 	burst.add_to_group("brick_burst")
 	burst.position = $PlayArea.to_local(at)
+	burst.tint(color)
 	$PlayArea.add_child(burst)
+
+# Every contact on a live brick, so surviving hits get feedback too.
+func _spawn_brick_sparks(at: Vector2, away: Vector2, color: Color) -> void:
+	var sparks := BRICK_SPARKS_SCENE.instantiate()
+	sparks.add_to_group("brick_sparks")
+	sparks.position = $PlayArea.to_local(at)
+	if away == Vector2.ZERO:
+		# A centre hit (no contact point) has no face to fly off, so spray all round.
+		sparks.spread = 180.0
+	else:
+		sparks.rotation = away.angle()
+	sparks.tint(color)
+	$PlayArea.add_child(sparks)
 
 func _catch_capsule(effect: Resource, at := Vector2.INF) -> void:
 	if reset_ready or level_complete:

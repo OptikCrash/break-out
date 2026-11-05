@@ -56,8 +56,10 @@ A detrimental Capsule effect, using the same pickup mechanics as a Power-up. Cat
 0 points.
 
 **Breaker** (ball state):
-A temporary state a ball can carry, with its own duration timer, letting it destroy a Resistant
-Brick in one hit instead of bouncing off it. A property of the ball, not a separate ball type —
+A temporary state a ball can carry, with its own duration timer, letting it destroy any destructible
+brick in one hit: Normal, Mystery, Reinforced (skipping its second hit) and Resistant (instead of
+bouncing off it). Indestructible bricks still survive. The ball passes through a destroyed Resistant
+brick but bounces off the others as usual. A property of the ball, not a separate ball type —
 see [ADR-0001](docs/adr/0001-power-up-ball-state.md).
 
 **Mystery Brick**:
@@ -137,12 +139,13 @@ usual split spread are implementation defaults for review.
 
 **Blaster tuning (issue #64 provisional defaults)**:
 Blaster (`blaster`) lasts 10 seconds, awards 25 catch points and refreshes without
-stacking. Each press fires one bolt straight up from the paddle center, with exactly
+stacking. Each press fires two bolts straight up, one 8 pixels in from each end of the
+paddle (following its current Wide/Shrink width), with exactly
 0.3 seconds between shots; holding the action does not repeat. Refreshing does not
 bypass cooldown. Bolts move at 1200 pixels/second (speed unspecified by the design),
 ignore balls, paddle and walls, and disappear on any brick contact or above the
-Play Area. They use the same damage as a Breaker ball: Resistant breaks in one hit,
-Reinforced still needs two hits, and Indestructible survives. No ammo count.
+Play Area. They use the same damage as a Breaker ball: Resistant and Reinforced break in one hit,
+and Indestructible survives. No ammo count.
 Life loss and level completion clear bolts and cooldown along with the effect.
 **Force Field (issue #65)**:
 `force_field` is a power-up worth 25 catch points. Catching it sets three charges,
@@ -153,6 +156,12 @@ Charges have no timer. The HUD shows remaining charges in the active-effects pan
 Life loss (last live ball) and level completion clear charges, following other capsule
 effects. The design does not specify charge clearing; this is an implementation default
 for review.
+While charged, the field is a visible bubble around the main paddle, and the bubble is
+its hitbox: a hazard capsule touching it is blocked there (spending a charge exactly as
+a paddle catch would), before it reaches the paddle. Power-up capsules and balls pass
+through. The bubble follows the paddle's Wide/Shrink width and blinks while only one
+charge remains, warning that the next hazard pops it. The field stays charge-only, with
+no timer. (Chosen with Chris on 2026-11-05.)
 
 **Companion Paddle (issue #67 provisional defaults)**:
 `companion_paddle` awards 25 catch points and always replaces the whole power-up with
@@ -162,7 +171,7 @@ Each follows its own horizontal target at 600 pixels/second without overshoot; v
 placement stays 96 pixels above the main paddle. When one dies the other's horizontal
 target becomes the main paddle center; it catches up at the same speed rather than
 teleporting. Offsets and follow speed are authored in the effect definition.
-Each retains the ordinary base 128×16 paddle surface and existing paddle sprite;
+Each is half-width: a 64×16 surface made by scaling the shared paddle shape and sprite by 0.5;
 Wide/Shrink and Sticky affect only the main paddle. Companion bounces use ordinary
 paddle angles and preserve ball speed. Only top-face bounces spend one health;
 side and underside contacts reflect off the collision normal at unchanged speed,
@@ -175,7 +184,7 @@ or level completion; pending creation is canceled too. Spacing, speed, fixed bas
 Sticky interaction, gradual re-centering and lifecycle clearing are implementation
 defaults where the design was unspecified. Always resetting on any re-catch generalizes
 PLAN.md's one-survivor reset rule, as requested by issue #67; it remains provisional.
-Companion centers are clamped between the inner wall edges plus/minus their 64-pixel
+Companion centers are clamped between the inner wall edges plus/minus their 32-pixel
 half-width, including on spawn, so their whole bounce surface stays inside the play area.
 This placement rule is a provisional default following issue #67 review feedback.
 

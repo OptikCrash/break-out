@@ -28,6 +28,8 @@ func _run() -> void:
 		var points: int = brick.definition.points
 		var before := get_nodes_in_group("point_popup").size()
 		if symbol == "x":
+			# Breaker one-shots Reinforced, so take the non-final hit as an ordinary ball.
+			game.ball.breaker_time_left = 0.0
 			game.ball._break_brick(brick)
 			_check(get_nodes_in_group("point_popup").size() == before, "Non-final hit has no popup")
 		game.ball.breaker_time_left = 10.0
@@ -58,7 +60,7 @@ func _run() -> void:
 	paddle.set_width_multiplier(1.5)
 	paddle.play_feedback()
 	await create_timer(0.3).timeout
-	_check(paddle.get_node("Sprite2D").scale.is_equal_approx(Vector2(1.5, 0.53125)), "Repeated feedback returns to current width")
+	_check(paddle.get_node("Sprite2D").scale.is_equal_approx(Vector2(1.5, 1.0)), "Repeated feedback returns to current width")
 	_check(paddle.half_width == 96.0 and paddle.get_node("CollisionShape2D").scale == Vector2(1.5, shape_scale.y), "Feedback leaves bounce width and collider untouched")
 
 	var popup = preload("res://floating_points.tscn").instantiate()

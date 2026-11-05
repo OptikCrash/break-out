@@ -8,6 +8,13 @@ var offset := Vector2.ZERO
 var follow_speed := 0.0
 # World-space inner wall edges, supplied by the owning gameplay scene.
 var horizontal_bounds := Vector2(-INF, INF)
+# Companions are half the main paddle's width. Set through set_width_multiplier()
+# so the collider, sprite and half_width (used for bounces and clamping) stay in sync;
+# the shared shape resource is scaled, never replaced.
+const WIDTH_MULTIPLIER := 0.5
+
+func _ready() -> void:
+	set_width_multiplier(WIDTH_MULTIPLIER)
 
 # Reuse the paddle shape and bounce contract, without reading player input.
 func _input(_event: InputEvent) -> void:

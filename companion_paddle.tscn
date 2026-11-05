@@ -1,8 +1,11 @@
-[gd_scene load_steps=3 format=3 uid="uid://bgkmtbsti2f17"]
+[gd_scene format=3 uid="uid://bgkmtbsti2f17"]
 
-[ext_resource type="PackedScene" path="res://paddle.tscn" id="1"]
-[ext_resource type="Script" path="res://companion_paddle.gd" id="2"]
+[ext_resource type="PackedScene" uid="uid://bq3iit4ymvq6c" path="res://paddle.tscn" id="1"]
+[ext_resource type="Script" uid="uid://bntyrh1oqrj2u" path="res://companion_paddle.gd" id="2"]
 
-[node name="CompanionPaddle" groups=["paddle", "companion"] instance=ExtResource("1")]
+[node name="CompanionPaddle" unique_id=1920244471 groups=["paddle", "companion"] instance=ExtResource("1")]
 collision_mask = 0
 script = ExtResource("2")
+
+[node name="CollisionShape2D" parent="." index="0" unique_id=1117799013]
+visible = false

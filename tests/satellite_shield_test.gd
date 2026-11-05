@@ -49,6 +49,8 @@ func _check_launches() -> void:
 	_check(game.satellite_orbs == 0 and game.orb_visual.count == 0, "Starts with no orbs")
 	game._catch_capsule(Shield)
 	_check(game.satellite_orbs == 3 and game.orb_visual.count == 3, "Catch sets three orbs and shows them")
+	_check(game.orb_visual.frames == game.ball.get_node("Sprite2D").sprite_frames, "Waiting orbs use the ball's art")
+	_check(game.orb_visual.orbit_size.y >= 48.0 and game.orb_visual.orbit_size.x >= game.paddle.half_width + 48.0, "Orbit clears the paddle by more than a ball width")
 	_check(game.score == 25 and not game.effects.active.has(&"satellite_shield"), "Catch scores without a timer")
 	_check(game.get_balls() == [first], "Orbiting orbs are not balls")
 	_check(not game.orb_visual is PhysicsBody2D and not game.orb_visual.is_in_group("ball"), "Orb visual has no physics or ball group")
@@ -90,7 +92,7 @@ func _check_launches() -> void:
 	await _press_power_action()
 	first.set_physics_process(false)
 	_check(not first.caught and game.satellite_orbs == orbs_before - 1, "One press releases the catch and launches an orb")
-	_check(get_nodes_in_group("blaster_bolt").size() == 1, "The same press also fires one Blaster bolt")
+	_check(get_nodes_in_group("blaster_bolt").size() == 2, "The same press also fires a Blaster pair")
 	# A resting ball takes the shared press for its own launch.
 	game._clear_effects_and_capsules()
 	first.reset()

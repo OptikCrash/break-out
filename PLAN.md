@@ -100,6 +100,8 @@ beyond what's listed here (power-up-dependent brick types are explicitly M4's, b
   1. Today's layout minus one row (17×4), all Normal bricks.
   2. A geometric pattern introducing Reinforced bricks.
   3. A geometric pattern introducing Indestructible bricks alongside Reinforced.
+  4. (Added later) A chevron introducing Mystery bricks alongside Reinforced and Indestructible.
+  5. (Added later) A castle introducing Resistant battlements, with Mystery bricks as the Breaker source.
 
 ### M4: Power-ups
 
@@ -127,7 +129,8 @@ Acceptance criteria:
   - **Slow Ball** — timed, reduces the speed of every ball currently in play.
   - **Extra Life** — instant, +1 life, no timer.
   - **Breaker** — timed; every ball currently in play enters the Breaker state (see ADR-0001):
-    while active, a ball breaks a Resistant Brick in one hit instead of bouncing off it.
+    while active, a ball destroys any destructible brick in one hit (including Reinforced) and
+    breaks a Resistant Brick instead of bouncing off it. Indestructible still survives.
   - **Sticky Paddle** — timed; a caught ball centers on the paddle instead of bouncing. Releasing
     it (via `power_action`) uses the same angle-from-paddle-position formula as a normal bounce,
     and factors the paddle's recent movement into the release angle/speed.
@@ -157,7 +160,8 @@ charge-based (not timed) lifecycle. Not broken into issues until M4 ships and Ch
 - **Blaster** — timed paddle weapon (named to leave room for a differently-functioning "Laser"
   later). `power_action` fires a bolt on the paddle's axis with a ~0.3s cooldown between shots
   (duration-gated at 10s like other timed effects, no separate ammo count); a bolt does the same
-  damage as the Breaker state (destroys a Resistant Brick in one hit).
+  damage as the Breaker state (destroys any destructible brick, including Reinforced and Resistant,
+  in one hit).
 - **Satellite Shield** — 3 balls orbit the paddle. `power_action` launches them one at a time (or
   all at once — decide during implementation planning) as ordinary balls in the Breaker state,
   with the Breaker timer starting at launch, not while orbiting. Once launched they behave exactly

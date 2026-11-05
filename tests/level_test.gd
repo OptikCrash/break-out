@@ -48,11 +48,13 @@ func _run() -> void:
 		_check(sample.validation_error().is_empty(), "Either destructible brick type makes a layout playable")
 	_check_designed_level(2, 32, 25, 0, 82)
 	_check_designed_level(3, 16, 45, 14, 106)
+	_check_designed_level(4, 20, 42, 6, 113, 9)
+	_check_designed_level(5, 19, 47, 0, 121, 8, 20)
 	quit(1 if failures else 0)
 
 # These layouts deliberately leave every target's column open to the paddle.
 # Removing lower targets exposes upper ones; no permanent roof blocks that route.
-func _check_designed_level(number: int, normal: int, reinforced: int, permanent: int, hits: int) -> void:
+func _check_designed_level(number: int, normal: int, reinforced: int, permanent: int, hits: int, mystery := 0, resistant := 0) -> void:
 	var level: Level = load("res://levels/level_%d.tres" % number)
 	_check(level.validation_error().is_empty(), "Designed level must validate")
 	var rows := level.grid.split("\n")
@@ -62,13 +64,15 @@ func _check_designed_level(number: int, normal: int, reinforced: int, permanent:
 	_check(level.grid.count("#") == normal, "Normal count must match design")
 	_check(level.grid.count("x") == reinforced, "Reinforced count must match design")
 	_check(level.grid.count("o") == permanent, "Indestructible count must match design")
-	_check(normal + 2 * reinforced == hits, "Required hits must pin the difficulty ramp")
+	_check(level.grid.count("?") == mystery, "Mystery count must match design")
+	_check(level.grid.count("r") == resistant, "Resistant count must match design")
+	_check(normal + 2 * reinforced + mystery == hits, "Required hits must pin the difficulty ramp")
 	var bricks = Node2D.new()
 	bricks.set_script(preload("res://bricks.gd"))
 	root.add_child(bricks)
 	bricks.load_level(level)
 	var cells := level.brick_cells()
-	_check(bricks.get_child_count() == normal + reinforced + permanent, "All designed bricks must load")
+	_check(bricks.get_child_count() == normal + reinforced + permanent + mystery + resistant, "All designed bricks must load")
 	for i in cells.size():
 		var cell := cells[i]
 		var brick = bricks.get_child(i)
@@ -76,9 +80,14 @@ func _check_designed_level(number: int, normal: int, reinforced: int, permanent:
 		# Inside wall faces are x=32/1120 and y=32; paddle starts at y=900.
 		_check(brick.position.x >= 32 and brick.position.x + 64 <= 1120, "Brick must fit between side walls")
 		_check(brick.position.y >= 32 and brick.position.y + 32 < 900, "Brick must fit above the paddle")
-		if level.brick_symbol_at(cell) != "o":
+		var symbol := level.brick_symbol_at(cell)
+		if symbol != "o":
 			for lower in range(cell.y + 1, rows.size()):
-				_check(level.brick_symbol_at(Vector2i(cell.x, lower)) != "o", "Every target needs an approach from below without permanent blockers")
+				var below := level.brick_symbol_at(Vector2i(cell.x, lower))
+				_check(below != "o", "Every target needs an approach from below without permanent blockers")
+				# Resistant needs Breaker, so it must never wall off a required brick.
+				if symbol != "r":
+					_check(below != "r", "Resistant bricks must not block a required brick from below")
 	# Each open column is 64px wide, exceeding the ball's 32px diameter.
 	bricks.free()
 

@@ -61,8 +61,38 @@ func _run() -> void:
 	_check(game.reset_ready and game.bricks_left == 0 and game.score == 110, "Required brick completes level with Resistant remaining")
 	_check(not survivor.is_queued_for_deletion() and not ball.breaker_active and game.effects.active.is_empty(), "Completion leaves optional brick and clears effects")
 	game.free()
+	_check_breaker_brick_types()
 	await _check_physics_collision()
 	quit(1 if failures else 0)
+
+func _check_breaker_brick_types() -> void:
+	var level := Level.new()
+	level.grid = "#xox"
+	var game = preload("res://main.tscn").instantiate()
+	game.levels.assign([level])
+	game.process_mode = Node.PROCESS_MODE_DISABLED
+	root.add_child(game)
+	var ball = game.ball
+	var normal = game.bricks.get_child(0)
+	var reinforced = game.bricks.get_child(1)
+	var indestructible = game.bricks.get_child(2)
+	var other_reinforced = game.bricks.get_child(3)
+	ball.breaker_active = true
+	ball.velocity = Vector2(0, -550)
+	ball._hit_surface(reinforced, Vector2.DOWN)
+	_check(reinforced.is_queued_for_deletion() and game.score == 20, "Breaker destroys Reinforced in one hit for its full points")
+	_check(ball.velocity == Vector2(0, 550), "Breaker still bounces off a destroyed Reinforced brick")
+	# Repeat before yielding: queue_free leaves the collider live until frame end.
+	ball._hit_surface(reinforced, Vector2.DOWN)
+	_check(game.score == 20, "Same-frame repeated Reinforced hit awards once")
+	ball._hit_surface(indestructible, Vector2.DOWN)
+	_check(not indestructible.is_queued_for_deletion() and game.score == 20, "Breaker cannot destroy Indestructible")
+	ball._hit_surface(normal, Vector2.DOWN)
+	_check(normal.is_queued_for_deletion() and game.score == 30, "Breaker destroys Normal in one hit")
+	ball.breaker_active = false
+	ball._hit_surface(other_reinforced, Vector2.DOWN)
+	_check(other_reinforced.hit_points == 1 and not other_reinforced.is_queued_for_deletion(), "Expired Breaker deals ordinary one-point damage")
+	game.free()
 
 func _check_physics_collision() -> void:
 	var world := Node2D.new()

@@ -39,7 +39,7 @@ func _run() -> void:
 	for index in range(2):
 		var companion = game.companions[index]
 		companion.set_physics_process(false)
-		_check(companion.health == 3 and companion.half_width == 64.0, "Fresh full-width paddle")
+		_check(companion.health == 3 and companion.half_width == 32.0 and companion.get_node("CollisionShape2D").scale.x == 0.5, "Fresh half-width paddle")
 		_check(companion.global_position == game.paddle.global_position + Vector2(-160 if index == 0 else 160, -96), "Left/right spawn offsets")
 		_check(companion.get_node("CollisionShape2D").shape == game.paddle.get_node("CollisionShape2D").shape, "Reuse paddle shape resource")
 	var left = game.companions[0]
@@ -55,9 +55,9 @@ func _run() -> void:
 		await process_frame
 		for follower in game.companions:
 			follower.set_physics_process(false)
-			_check(follower.global_position.x >= 480.0 and follower.global_position.x <= 1440.0, "Spawn stays inside inner walls")
+			_check(follower.global_position.x >= 448.0 and follower.global_position.x <= 1472.0, "Spawn stays inside inner walls")
 			follower._physics_process(1.0)
-			_check(follower.global_position.x >= 480.0 and follower.global_position.x <= 1440.0, "Follow stays inside inner walls")
+			_check(follower.global_position.x >= 448.0 and follower.global_position.x <= 1472.0, "Follow stays inside inner walls")
 	game.paddle.position = paddle_start
 	game._catch_capsule(EFFECT)
 	await process_frame
@@ -75,14 +75,14 @@ func _run() -> void:
 	_check(ball.velocity.is_equal_approx(Vector2(0, 550)) and not ball.caught, "Underside reflects downward at unchanged speed")
 	ball._physics_process(0.01)
 	_check(left.health == 3 and ball.velocity.y > 0, "Two underside steps preserve health and leave the companion")
-	ball.global_position = left.global_position + Vector2(-90, 0)
+	ball.global_position = left.global_position + Vector2(-58, 0)
 	ball.velocity = Vector2(550, 0)
 	ball._physics_process(0.03)
 	_check(ball.velocity.is_equal_approx(Vector2(-550, 0)) and not ball.caught, "Side reflects outward at unchanged speed")
 	ball._physics_process(0.01)
 	_check(left.health == 3 and ball.velocity.x < 0, "Two side steps preserve health and leave the companion")
 	for remaining in [2, 1, 0]:
-		ball.global_position = left.global_position + Vector2(32, -30)
+		ball.global_position = left.global_position + Vector2(16, -30)
 		ball.launched = true
 		ball.velocity = Vector2(0, 550)
 		ball._physics_process(0.03)

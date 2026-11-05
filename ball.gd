@@ -30,7 +30,10 @@ var caught_speed := 0.0
 # One-use Multi-ball spread for copies created while caught.
 var release_rotation := 0.0
 # Each ball owns its independent duration.
-var breaker_time_left := 0.0
+var breaker_time_left := 0.0:
+	set(value):
+		breaker_time_left = value
+		_update_breaker_glow()
 var breaker_active: bool:
 	get:
 		return breaker_time_left > 0.0
@@ -52,7 +55,8 @@ func _physics_process(delta: float) -> void:
 			# Mostly straight up, with a small random lean left or right.
 			velocity = BallRules.launch_direction() * speed * speed_multiplier
 		return
-		
+
+	_set_rolling(true)
 	var collision := move_and_collide(velocity * delta)
 
 	if collision:
@@ -80,27 +84,43 @@ func _physics_process(delta: float) -> void:
 			if hit.is_in_group("companion"):
 				hit.take_hit()
 		else:
-			_hit_surface(hit, collision.get_normal())
+			_hit_surface(hit, collision.get_normal(), collision.get_position())
 
-func _hit_surface(hit: Node, normal: Vector2) -> void:
+func _hit_surface(hit: Node, normal: Vector2, contact := Vector2.INF) -> void:
 	var passes_through := false
 	var brick_broke := false
 	if hit.is_in_group("brick"):
 		# A queued brick can still collide in another physics step this frame.
 		passes_through = breaker_active and hit.definition.requires_breaker
-		brick_broke = _break_brick(hit)
+		brick_broke = _break_brick(hit, contact)
 	if not passes_through:
 		# Destruction already requests brick_break through Bricks' signal.
 		if not brick_broke:
 			sound_requested.emit(&"paddle_bounce" if hit.is_in_group("paddle") else &"wall_bounce")
 		velocity = velocity.bounce(normal)
 
-func _break_brick(brick: Node) -> bool:
-	return BrickDamage.hit(brick, breaker_active, brick_broken.emit)
+func _break_brick(brick: Node, contact := Vector2.INF) -> bool:
+	return BrickDamage.hit(brick, breaker_active, brick_broken.emit, contact)
 
 func _rest_on_paddle() -> void:
 	# Half the paddle's height (8) plus the ball's radius (16): resting on top, no gap.
 	position = paddle.position + Vector2(0, -24)
+	_set_rolling(false)
+
+func _update_breaker_glow() -> void:
+	var glow := get_node_or_null("Glow") as CanvasItem
+	if glow:
+		glow.visible = BallRules.breaker_glow_visible(breaker_time_left)
+
+# The roll animation only runs while the ball is in flight.
+func _set_rolling(rolling: bool) -> void:
+	var sprite := get_node_or_null("Sprite2D") as AnimatedSprite2D
+	if sprite == null or sprite.is_playing() == rolling:
+		return
+	if rolling:
+		sprite.play()
+	else:
+		sprite.pause()
 
 func reset() -> void:
 	boost_active = false

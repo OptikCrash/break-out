@@ -42,13 +42,18 @@ func _run() -> void:
 	await _press()
 	game.ball.set_physics_process(false)
 	var bolts := get_nodes_in_group("blaster_bolt")
-	_check(bolts.size() == 1 and not game.ball.caught, "Same press fires and releases Sticky")
+	for bolt in bolts:
+		bolt.set_physics_process(false)
+	_check(bolts.size() == 2 and not game.ball.caught, "Same press fires two bolts and releases Sticky")
+	var edge: float = game.paddle.half_width - game.BLASTER_EDGE_INSET
+	var xs := [bolts[0].global_position.x, bolts[1].global_position.x]
+	xs.sort()
+	_check(is_equal_approx(xs[0], game.paddle.global_position.x - edge) and is_equal_approx(xs[1], game.paddle.global_position.x + edge), "Bolts start at each end of the paddle")
 	_check(game.force_field_charges == 3, "Firing preserves Force Field charges")
 	await _press()
-	_check(get_nodes_in_group("blaster_bolt").size() == 1, "Early second press does not fire")
+	_check(get_nodes_in_group("blaster_bolt").size() == 2, "Early second press does not fire")
 	# Route a real bolt collision through main's existing score/completion callback.
 	var fired = bolts[0]
-	fired.set_physics_process(false)
 	var target = game.bricks.get_child(game.bricks.get_child_count() - 1)
 	var before: int = game.score
 	fired.global_position = target.get_node("CollisionShape2D").global_position + Vector2(0, 80)
@@ -97,6 +102,20 @@ func _collision() -> void:
 	escaped.set_physics_process(false)
 	escaped._physics_process(0.01)
 	_check(escaped.is_queued_for_deletion(), "Bolt leaving top is freed")
+	var reinforced = preload("res://brick.tscn").instantiate()
+	reinforced.configure("x")
+	reinforced.position = Vector2(1000, 300)
+	world.add_child(reinforced)
+	var second_bolt = preload("res://blaster_bolt.tscn").instantiate()
+	second_bolt.position = Vector2(1032, 400)
+	world.add_child(second_bolt)
+	second_bolt.set_physics_process(false)
+	var reinforced_awards: Array[int] = []
+	second_bolt.brick_broken.connect(func(points: int): reinforced_awards.append(points))
+	await physics_frame
+	await physics_frame
+	second_bolt._physics_process(0.1)
+	_check(reinforced.is_queued_for_deletion() and reinforced_awards == [20], "One bolt destroys Reinforced and scores twenty")
 	world.free()
 
 func _check(condition: bool, message: String) -> void:
