@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://odaiej3by05f"
-path="res://.godot/imported/ball.png-ca93c4f2e7b7f8325cbd933673092ff4.ctex"
+uid="uid://cjfki3djg8rr7"
+path="res://.godot/imported/blaster_bolt.png-53e04bde756b6aeed035a8648ef2c8a5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ball.png"
-dest_files=["res://.godot/imported/ball.png-ca93c4f2e7b7f8325cbd933673092ff4.ctex"]
+source_file="res://assets/blaster_bolt.png"
+dest_files=["res://.godot/imported/blaster_bolt.png-53e04bde756b6aeed035a8648ef2c8a5.ctex"]
 
 [params]
 

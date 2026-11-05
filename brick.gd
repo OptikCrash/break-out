@@ -37,7 +37,7 @@ func take_hit(breaker := false) -> bool:
 	return false
 
 func _update_color() -> void:
-	var sprite: Sprite2D = $CollisionShape2D/Sprite2D
+	var sprite: Sprite2D = $Sprite2D
 	var damaged: bool = definition.destructible and hit_points < definition.hit_points
 	if damaged and definition.damaged_texture:
 		sprite.texture = definition.damaged_texture

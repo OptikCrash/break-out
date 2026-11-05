@@ -42,13 +42,18 @@ func _run() -> void:
 	await _press()
 	game.ball.set_physics_process(false)
 	var bolts := get_nodes_in_group("blaster_bolt")
-	_check(bolts.size() == 1 and not game.ball.caught, "Same press fires and releases Sticky")
+	for bolt in bolts:
+		bolt.set_physics_process(false)
+	_check(bolts.size() == 2 and not game.ball.caught, "Same press fires two bolts and releases Sticky")
+	var edge: float = game.paddle.half_width - game.BLASTER_EDGE_INSET
+	var xs := [bolts[0].global_position.x, bolts[1].global_position.x]
+	xs.sort()
+	_check(is_equal_approx(xs[0], game.paddle.global_position.x - edge) and is_equal_approx(xs[1], game.paddle.global_position.x + edge), "Bolts start at each end of the paddle")
 	_check(game.force_field_charges == 3, "Firing preserves Force Field charges")
 	await _press()
-	_check(get_nodes_in_group("blaster_bolt").size() == 1, "Early second press does not fire")
+	_check(get_nodes_in_group("blaster_bolt").size() == 2, "Early second press does not fire")
 	# Route a real bolt collision through main's existing score/completion callback.
 	var fired = bolts[0]
-	fired.set_physics_process(false)
 	var target = game.bricks.get_child(game.bricks.get_child_count() - 1)
 	var before: int = game.score
 	fired.global_position = target.get_node("CollisionShape2D").global_position + Vector2(0, 80)

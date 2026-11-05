@@ -21,6 +21,8 @@ var split_generation := 0
 const BOLT_SCENE = preload("res://blaster_bolt.tscn")
 const BALL_SCENE = preload("res://ball.tscn")
 const OrbVisual = preload("res://placeholder_satellite_orbs.gd")
+# Blaster bolts start this far in from each end of the paddle.
+const BLASTER_EDGE_INSET := 8.0
 const BRICK_BURST_SCENE = preload("res://placeholder_brick_burst.tscn")
 
 # Shake sizes in pixels and seconds. MainBG extends 32 px past the viewport so
@@ -34,7 +36,7 @@ const TITLE_SCENE := "res://TitleScreen.tscn"
 	preload("res://levels/level_2.tres"),
 	preload("res://levels/level_3.tres"),
 ]
-@export var lives = 30
+@export var lives = 3
 @onready var paddle := $PlayArea/Paddle
 # Convenience for callers needing the first ball; lifecycle uses the whole group.
 var ball: Node2D:
@@ -226,15 +228,18 @@ func _physics_process(delta: float) -> void:
 	effects.advance(delta)
 	if not reset_ready and not level_complete and Input.is_action_just_pressed("power_action"):
 		if effects.fire_blaster():
-			var bolt = BOLT_SCENE.instantiate()
-			bolt.position = $PlayArea.to_local(paddle.global_position)
-			bolt.speed = effects.active[&"blaster"].definition.bolt_speed
-			bolt.brick_broken.connect(_on_ball_brick_broken)
-			$PlayArea.add_child(bolt)
+			# One bolt from each end of the paddle, using its current (Wide/Shrink) width.
+			var edge: float = paddle.half_width - BLASTER_EDGE_INSET
+			for side in [-1.0, 1.0]:
+				var bolt = BOLT_SCENE.instantiate()
+				bolt.position = $PlayArea.to_local(paddle.global_position + Vector2(edge * side, 0.0))
+				bolt.speed = effects.active[&"blaster"].definition.bolt_speed
+				bolt.brick_broken.connect(_on_ball_brick_broken)
+				$PlayArea.add_child(bolt)
 	_update_ball_effects()
 	paddle.set_width_multiplier(effects.width_multiplier())
 	hud.update_effects(effects.active, force_field_charges)
-	orb_visual.orbit_size.x = paddle.half_width + 28.0
+	orb_visual.orbit_size.x = paddle.half_width + OrbVisual.ORBIT_MARGIN_X
 	# Read in the physics step, like ball.gd, so both see the same "just pressed".
 	# No arbitration: one press can also fire Blaster and release a Sticky catch.
 	if Input.is_action_just_pressed("power_action"):

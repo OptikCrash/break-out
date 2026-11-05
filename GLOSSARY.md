@@ -137,7 +137,8 @@ usual split spread are implementation defaults for review.
 
 **Blaster tuning (issue #64 provisional defaults)**:
 Blaster (`blaster`) lasts 10 seconds, awards 25 catch points and refreshes without
-stacking. Each press fires one bolt straight up from the paddle center, with exactly
+stacking. Each press fires two bolts straight up, one 8 pixels in from each end of the
+paddle (following its current Wide/Shrink width), with exactly
 0.3 seconds between shots; holding the action does not repeat. Refreshing does not
 bypass cooldown. Bolts move at 1200 pixels/second (speed unspecified by the design),
 ignore balls, paddle and walls, and disappear on any brick contact or above the
@@ -162,7 +163,7 @@ Each follows its own horizontal target at 600 pixels/second without overshoot; v
 placement stays 96 pixels above the main paddle. When one dies the other's horizontal
 target becomes the main paddle center; it catches up at the same speed rather than
 teleporting. Offsets and follow speed are authored in the effect definition.
-Each retains the ordinary base 128×16 paddle surface and existing paddle sprite;
+Each is half-width: a 64×16 surface made by scaling the shared paddle shape and sprite by 0.5;
 Wide/Shrink and Sticky affect only the main paddle. Companion bounces use ordinary
 paddle angles and preserve ball speed. Only top-face bounces spend one health;
 side and underside contacts reflect off the collision normal at unchanged speed,
@@ -175,7 +176,7 @@ or level completion; pending creation is canceled too. Spacing, speed, fixed bas
 Sticky interaction, gradual re-centering and lifecycle clearing are implementation
 defaults where the design was unspecified. Always resetting on any re-catch generalizes
 PLAN.md's one-survivor reset rule, as requested by issue #67; it remains provisional.
-Companion centers are clamped between the inner wall edges plus/minus their 64-pixel
+Companion centers are clamped between the inner wall edges plus/minus their 32-pixel
 half-width, including on spawn, so their whole bounce surface stays inside the play area.
 This placement rule is a provisional default following issue #67 review feedback.
 

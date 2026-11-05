@@ -58,7 +58,7 @@ func _run() -> void:
 	paddle.set_width_multiplier(1.5)
 	paddle.play_feedback()
 	await create_timer(0.3).timeout
-	_check(paddle.get_node("Sprite2D").scale.is_equal_approx(Vector2(1.5, 0.53125)), "Repeated feedback returns to current width")
+	_check(paddle.get_node("Sprite2D").scale.is_equal_approx(Vector2(1.5, 1.0)), "Repeated feedback returns to current width")
 	_check(paddle.half_width == 96.0 and paddle.get_node("CollisionShape2D").scale == Vector2(1.5, shape_scale.y), "Feedback leaves bounce width and collider untouched")
 
 	var popup = preload("res://floating_points.tscn").instantiate()
