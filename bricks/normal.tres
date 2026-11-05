@@ -10,3 +10,4 @@ grid_symbol = "#"
 hit_points = 1
 points = 10
 texture = ExtResource("2_uea1a")
+particle_color = Color(1, 0.4, 0.47, 1)

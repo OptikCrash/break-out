@@ -88,6 +88,7 @@ pause={
 2d_physics/layer_1="Walls"
 2d_physics/layer_2="Paddle"
 2d_physics/layer_3="Ball"
+2d_physics/layer_6="Force Field"
 
 [physics]
 

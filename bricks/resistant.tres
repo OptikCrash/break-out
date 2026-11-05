@@ -12,3 +12,4 @@ points = 50
 requires_breaker = true
 counts_for_completion = false
 texture = ExtResource("2_22m60")
+particle_color = Color(0.95, 0.45, 0.32, 1)

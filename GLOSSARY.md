@@ -154,6 +154,12 @@ Charges have no timer. The HUD shows remaining charges in the active-effects pan
 Life loss (last live ball) and level completion clear charges, following other capsule
 effects. The design does not specify charge clearing; this is an implementation default
 for review.
+While charged, the field is a visible bubble around the main paddle, and the bubble is
+its hitbox: a hazard capsule touching it is blocked there (spending a charge exactly as
+a paddle catch would), before it reaches the paddle. Power-up capsules and balls pass
+through. The bubble follows the paddle's Wide/Shrink width and blinks while only one
+charge remains, warning that the next hazard pops it. The field stays charge-only, with
+no timer. (Chosen with Chris on 2026-11-05.)
 
 **Companion Paddle (issue #67 provisional defaults)**:
 `companion_paddle` awards 25 catch points and always replaces the whole power-up with

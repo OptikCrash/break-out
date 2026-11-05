@@ -80,23 +80,23 @@ func _physics_process(delta: float) -> void:
 			if hit.is_in_group("companion"):
 				hit.take_hit()
 		else:
-			_hit_surface(hit, collision.get_normal())
+			_hit_surface(hit, collision.get_normal(), collision.get_position())
 
-func _hit_surface(hit: Node, normal: Vector2) -> void:
+func _hit_surface(hit: Node, normal: Vector2, contact := Vector2.INF) -> void:
 	var passes_through := false
 	var brick_broke := false
 	if hit.is_in_group("brick"):
 		# A queued brick can still collide in another physics step this frame.
 		passes_through = breaker_active and hit.definition.requires_breaker
-		brick_broke = _break_brick(hit)
+		brick_broke = _break_brick(hit, contact)
 	if not passes_through:
 		# Destruction already requests brick_break through Bricks' signal.
 		if not brick_broke:
 			sound_requested.emit(&"paddle_bounce" if hit.is_in_group("paddle") else &"wall_bounce")
 		velocity = velocity.bounce(normal)
 
-func _break_brick(brick: Node) -> bool:
-	return BrickDamage.hit(brick, breaker_active, brick_broken.emit)
+func _break_brick(brick: Node, contact := Vector2.INF) -> bool:
+	return BrickDamage.hit(brick, breaker_active, brick_broken.emit, contact)
 
 func _rest_on_paddle() -> void:
 	# Half the paddle's height (8) plus the ball's radius (16): resting on top, no gap.

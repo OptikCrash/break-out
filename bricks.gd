@@ -1,7 +1,8 @@
 extends Node2D
 signal brick_broken(points: int, at: Vector2)
 signal capsule_dropped(at: Vector2)
-signal brick_destroyed(at: Vector2)
+signal brick_destroyed(at: Vector2, color: Color)
+signal brick_struck(at: Vector2, away: Vector2, color: Color)
 
 const protoBrick := preload("res://brick.tscn")
 
@@ -33,6 +34,7 @@ func load_level(next_level: Level) -> bool:
 		brick.position = grid_start + Vector2(cell) * brick_size
 		brick.capsule_dropped.connect(func(at: Vector2): capsule_dropped.emit(at))
 		brick.broken.connect(func(points: int, at: Vector2): brick_broken.emit(points, at))
-		brick.destroyed.connect(func(at: Vector2): brick_destroyed.emit(at))
+		brick.destroyed.connect(func(at: Vector2, color: Color): brick_destroyed.emit(at, color))
+		brick.struck.connect(func(at: Vector2, away: Vector2, color: Color): brick_struck.emit(at, away, color))
 		add_child(brick)
 	return true

@@ -12,3 +12,4 @@ hit_points = 2
 points = 20
 texture = ExtResource("2_oilkj")
 damaged_texture = ExtResource("3_crack")
+particle_color = Color(0.95, 0.45, 0.32, 1)

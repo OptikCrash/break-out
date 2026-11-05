@@ -10,3 +10,4 @@ grid_symbol = "o"
 counts_for_completion = false
 destructible = false
 texture = ExtResource("2_shet2")
+particle_color = Color(0.8, 0.82, 0.88, 1)

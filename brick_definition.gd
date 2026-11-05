@@ -11,6 +11,8 @@ extends Resource
 @export var texture: Texture2D
 # Shown once a multi-hit brick has taken damage; empty keeps `texture`.
 @export var damaged_texture: Texture2D
+# Tint for hit sparks and the destruction burst, matched by eye to `texture`.
+@export var particle_color := Color.WHITE
 
 func validation_error() -> String:
 	if id == &"" or grid_symbol.length() != 1:

@@ -2,7 +2,7 @@ extends SceneTree
 
 const ScreenShake = preload("res://screen_shake.gd")
 const BrickDamage = preload("res://brick_damage.gd")
-const BURST = preload("res://placeholder_brick_burst.tscn")
+const BURST = preload("res://brick_burst.tscn")
 const FIELD = preload("res://effects/force_field.tres")
 const SHRINK = preload("res://effects/shrink_paddle.tres")
 const WIDE = preload("res://effects/wide_paddle.tres")

@@ -10,3 +10,4 @@ grid_symbol = "?"
 hit_points = 1
 drops_capsule = true
 texture = ExtResource("2_p6qf4")
+particle_color = Color(1, 0.7, 0.25, 1)

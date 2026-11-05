@@ -133,9 +133,23 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - Brick bursts hang off `brick.destroyed(at)` (forwarded as `bricks.brick_destroyed`), not
   `brick_broken`, so they need no score data. Add them to `PlayArea`, never `Bricks`:
   completion recounts read `definition` on every `Bricks` child.
-- A destroyed brick emits both `broken(points, at)` (point popups) and `destroyed(at)` (bursts);
+- A destroyed brick emits both `broken(points, at)` (point popups) and `destroyed(at, color)` (bursts);
   `Bricks` relays each one. Score still comes from the ball's `brick_broken`. Hook new
   presentation onto one of these signals rather than adding another emit.
+- `struck(at, away, color)` fires on every contact with a live brick (before the damage
+  check, so Indestructible and un-Breakered Resistant spark too) and never on a queued
+  brick. `at` is the collision point passed through `BrickDamage.hit(..., contact)`; callers
+  without one get the centre and an all-round spray. Particle tints live on each brick
+  definition's `particle_color`.
+- `one_shot_particles.gd` drives both the sparks and the burst: it starts child
+  CPUParticles2D layers with the root and frees on the root's `finished`, so a child layer's
+  lifetime must not exceed the root's.
+- Don't add `Light2D` nodes for glow: the first one on screen compiles lit variants of every
+  visible shader (~0.5 s stall the first time a Blaster bolt appeared). Use an additive
+  `CanvasItemMaterial` sprite instead, as `blaster_bolt.tscn`'s `Glow` does.
+- When rendering preview frames from a `--script` run, wait ~30 frames after loading
+  `main.tscn` before spawning effects: load and shader-compile hitches make the first
+  frames longer than a 0.3 s particle lifetime, so short effects never appear.
 
 ## Level data
 
@@ -238,6 +252,11 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - Force Field charges live separately on `main.gd`, never in the timed `active`
   dictionary. HUD charge entries are display-only; hazard gating happens before
   applying any capsule effects. Charges clear with the other capsule effects.
+- The Force Field bubble (`force_field_bubble.tscn`, added to the paddle by `main.gd`) is an
+  Area2D on layer 6 that monitors nothing: capsules detect it (their mask is paddle + Death Zone +
+  Force Field) and call `block()`, which routes through `_catch_capsule()`. Set charges only via
+  `main.force_field_charges` (its setter mirrors them to the bubble). The hitbox polygon is the
+  drawn outline and is created per instance, so resizing never mutates a shared shape.
 
 - Companion scenes inherit `paddle.tscn` with their own root script and retain the
   `paddle` group for shared ball/capsule detection. Only the main paddle collects
