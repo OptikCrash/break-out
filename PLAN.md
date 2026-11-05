@@ -255,6 +255,32 @@ Acceptance criteria:
 
 ### M8: Local high scores
 
+Persist a local arcade-style leaderboard across launches. This is deliberately local-only;
+M9's web export may decide later how, or whether, browser storage is exposed to players.
+
+- Keep exactly the top 10 **completed runs**, ordered by final score descending. A newer run
+  ranks ahead of an older run with the same score; therefore a score tied with the current
+  tenth place qualifies and displaces that older entry.
+- A completed run means either terminal outcome: **Game Over** or **You Win!**. The final
+  score is the only ranking value; do not record or display level reached, lives, duration,
+  or date.
+- When a completed run qualifies, replace the usual end buttons with a **New High Score!**
+  entry panel. The player must explicitly confirm exactly three uppercase `A`–`Z` initials
+  before the row is saved. It must work with typing and a focused, controller-operable
+  on-screen selector; no score is saved until confirmation.
+- After confirmation, show the complete leaderboard and visibly highlight the newly saved
+  row. It then offers the ordinary Restart and Back to Title choices. A non-qualifying run
+  goes directly to those existing end buttons.
+- Make the full leaderboard available from a **High Scores** choice on the title screen,
+  with navigation that works by mouse, keyboard, and gamepad.
+- Each board row displays only rank, initials, and score. No in-game reset control belongs
+  in M8: entries persist until the local save is removed outside the game. Missing or
+  unreadable local data must recover safely to an empty board rather than blocking play.
+- Store the data only in Godot's per-user local storage (`user://`); no network service,
+  account, or online leaderboard is in scope. Keep persistence/ranking/input behavior in
+  independently testable scripts and add headless coverage for insertion, tie ordering,
+  qualification, save/load round-trips, corrupt-data recovery, and initials validation.
+
 ### M9: Web export
 
 The goal stated up front: a small, finished, polished game Chris can share as a web build.
