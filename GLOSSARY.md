@@ -211,6 +211,15 @@ therefore preserve their existing speed behavior. Weighting, cap, duration and t
 lifecycle interactions are implementation defaults for review; no new content ID or
 capsule is introduced.
 
+**High-score board (M8)**:
+The local high-score board holds exactly ten completed runs at most, ordered by final
+score descending. A newer equal score appears above the older one, so a score equal to
+tenth place qualifies and removes the former tenth-place row. A completed run ends in
+either Game Over or You Win!. Rows show only rank, three uppercase `A`–`Z` initials, and
+score. A qualifying player confirms initials before the row is saved; there is no
+in-game board reset. The board persists only in Godot's `user://` storage, and missing or
+unreadable data recovers to an empty board.
+
 **Test Lab**:
 A development-only scene (`devtools/test_lab.tscn`) for trying out levels, power-ups/hazards and
 art in the real gameplay loop without playing through it — opened directly in the Godot editor,
