@@ -56,8 +56,10 @@ A detrimental Capsule effect, using the same pickup mechanics as a Power-up. Cat
 0 points.
 
 **Breaker** (ball state):
-A temporary state a ball can carry, with its own duration timer, letting it destroy a Resistant
-Brick in one hit instead of bouncing off it. A property of the ball, not a separate ball type —
+A temporary state a ball can carry, with its own duration timer, letting it destroy any destructible
+brick in one hit: Normal, Mystery, Reinforced (skipping its second hit) and Resistant (instead of
+bouncing off it). Indestructible bricks still survive. The ball passes through a destroyed Resistant
+brick but bounces off the others as usual. A property of the ball, not a separate ball type —
 see [ADR-0001](docs/adr/0001-power-up-ball-state.md).
 
 **Mystery Brick**:
@@ -142,8 +144,8 @@ paddle (following its current Wide/Shrink width), with exactly
 0.3 seconds between shots; holding the action does not repeat. Refreshing does not
 bypass cooldown. Bolts move at 1200 pixels/second (speed unspecified by the design),
 ignore balls, paddle and walls, and disappear on any brick contact or above the
-Play Area. They use the same damage as a Breaker ball: Resistant breaks in one hit,
-Reinforced still needs two hits, and Indestructible survives. No ammo count.
+Play Area. They use the same damage as a Breaker ball: Resistant and Reinforced break in one hit,
+and Indestructible survives. No ammo count.
 Life loss and level completion clear bolts and cooldown along with the effect.
 **Force Field (issue #65)**:
 `force_field` is a power-up worth 25 catch points. Catching it sets three charges,

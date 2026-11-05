@@ -35,7 +35,7 @@ func take_hit(breaker := false, contact := Vector2.INF) -> bool:
 	struck.emit(at, (at - center).normalized(), definition.particle_color)
 	if not BrickRules.can_damage(definition, breaker):
 		return false
-	hit_points = BrickRules.remaining_hit_points(hit_points, definition.destructible)
+	hit_points = BrickRules.remaining_hit_points(hit_points, definition.destructible, breaker)
 	if hit_points == 0:
 		queue_free()
 		broken.emit(definition.points, $CollisionShape2D.global_position)

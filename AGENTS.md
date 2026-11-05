@@ -248,7 +248,8 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   must not inherit an earlier split’s spread.
 
 - Balls and Blaster bolts share `brick_damage.gd` for take_hit and score reporting;
-  Breaker damage permits Resistant hits, but does not bypass Reinforced hit points.
+  Breaker damage permits Resistant hits and destroys Reinforced in one hit
+  (`BrickRules.remaining_hit_points(..., breaker)`); Indestructible still survives.
 - Force Field charges live separately on `main.gd`, never in the timed `active`
   dictionary. HUD charge entries are display-only; hazard gating happens before
   applying any capsule effects. Charges clear with the other capsule effects.

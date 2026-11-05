@@ -43,6 +43,8 @@ const TITLE_SCENE := "res://TitleScreen.tscn"
 	preload("res://levels/level_1.tres"),
 	preload("res://levels/level_2.tres"),
 	preload("res://levels/level_3.tres"),
+	preload("res://levels/level_4.tres"),
+	preload("res://levels/level_5.tres"),
 ]
 @export var lives = 3
 @onready var paddle := $PlayArea/Paddle

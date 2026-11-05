@@ -28,6 +28,8 @@ func _run() -> void:
 		var points: int = brick.definition.points
 		var before := get_nodes_in_group("point_popup").size()
 		if symbol == "x":
+			# Breaker one-shots Reinforced, so take the non-final hit as an ordinary ball.
+			game.ball.breaker_time_left = 0.0
 			game.ball._break_brick(brick)
 			_check(get_nodes_in_group("point_popup").size() == before, "Non-final hit has no popup")
 		game.ball.breaker_time_left = 10.0

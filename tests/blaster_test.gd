@@ -102,6 +102,20 @@ func _collision() -> void:
 	escaped.set_physics_process(false)
 	escaped._physics_process(0.01)
 	_check(escaped.is_queued_for_deletion(), "Bolt leaving top is freed")
+	var reinforced = preload("res://brick.tscn").instantiate()
+	reinforced.configure("x")
+	reinforced.position = Vector2(1000, 300)
+	world.add_child(reinforced)
+	var second_bolt = preload("res://blaster_bolt.tscn").instantiate()
+	second_bolt.position = Vector2(1032, 400)
+	world.add_child(second_bolt)
+	second_bolt.set_physics_process(false)
+	var reinforced_awards: Array[int] = []
+	second_bolt.brick_broken.connect(func(points: int): reinforced_awards.append(points))
+	await physics_frame
+	await physics_frame
+	second_bolt._physics_process(0.1)
+	_check(reinforced.is_queued_for_deletion() and reinforced_awards == [20], "One bolt destroys Reinforced and scores twenty")
 	world.free()
 
 func _check(condition: bool, message: String) -> void:

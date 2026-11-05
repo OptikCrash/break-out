@@ -25,6 +25,8 @@ func _run() -> void:
 	_check(BrickRules.remaining_hit_points(1, true) == 0, "Final hit leaves zero HP")
 	_check(BrickRules.remaining_hit_points(0, true) == 0, "HP cannot become negative")
 	_check(BrickRules.remaining_hit_points(0, false) == 0, "Indestructible HP does not count down")
+	_check(BrickRules.remaining_hit_points(2, true, true) == 0, "Breaker damage destroys a reinforced brick in one hit")
+	_check(BrickRules.remaining_hit_points(0, false, true) == 0, "Breaker damage leaves Indestructible untouched")
 	var invalid = BrickRules.DEFINITIONS[0].duplicate()
 	invalid.id = &""
 	_check(not invalid.validation_error().is_empty(), "Empty IDs fail validation")

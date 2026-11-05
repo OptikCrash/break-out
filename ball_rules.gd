@@ -1,6 +1,9 @@
 extends RefCounted
 
 const BREAKER_DURATION := 10.0
+# The Breaker glow flickers for this many final seconds, toggling every BREAKER_FLICKER_STEP.
+const BREAKER_FLICKER_TIME := 3.0
+const BREAKER_FLICKER_STEP := 0.15
 const BOOST_VELOCITY_FACTOR := 0.25
 const BOOST_CAP := 550.0
 const BOOST_DURATION := 3.0
@@ -17,6 +20,15 @@ static func changed_multiplier_speed(current: float, boost: float, old: float, n
 
 static func tick_breaker(time_left: float, delta: float) -> float:
 	return maxf(0.0, time_left - delta)
+
+# Steady while plenty of Breaker time remains, flickering near the end, off once expired.
+# Driven by time left (not wall-clock), so it freezes with the timer when the game pauses.
+static func breaker_glow_visible(time_left: float) -> bool:
+	if time_left <= 0.0:
+		return false
+	if time_left > BREAKER_FLICKER_TIME:
+		return true
+	return int((BREAKER_FLICKER_TIME - time_left) / BREAKER_FLICKER_STEP) % 2 == 0
 
 
 static func launch_direction() -> Vector2:

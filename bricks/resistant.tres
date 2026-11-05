@@ -1,7 +1,7 @@
 [gd_resource type="Resource" format=3 uid="uid://bxdxdo82ibdfu"]
 
 [ext_resource type="Script" uid="uid://bf0cwkvjmknxu" path="res://brick_definition.gd" id="1"]
-[ext_resource type="Texture2D" uid="uid://c6d6fk8qqqoms" path="res://assets/brick_sturdy.png" id="2_22m60"]
+[ext_resource type="Texture2D" uid="uid://cmdsbpriexbsd" path="res://assets/brick_tough.png" id="2_22m60"]
 
 [resource]
 script = ExtResource("1")
@@ -12,4 +12,4 @@ points = 50
 requires_breaker = true
 counts_for_completion = false
 texture = ExtResource("2_22m60")
-particle_color = Color(0.95, 0.45, 0.32, 1)
+particle_color = Color(1.1551381e-06, 0.49124038, 0.7285984, 1)

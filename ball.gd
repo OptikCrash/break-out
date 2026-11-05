@@ -30,7 +30,10 @@ var caught_speed := 0.0
 # One-use Multi-ball spread for copies created while caught.
 var release_rotation := 0.0
 # Each ball owns its independent duration.
-var breaker_time_left := 0.0
+var breaker_time_left := 0.0:
+	set(value):
+		breaker_time_left = value
+		_update_breaker_glow()
 var breaker_active: bool:
 	get:
 		return breaker_time_left > 0.0
@@ -52,7 +55,8 @@ func _physics_process(delta: float) -> void:
 			# Mostly straight up, with a small random lean left or right.
 			velocity = BallRules.launch_direction() * speed * speed_multiplier
 		return
-		
+
+	_set_rolling(true)
 	var collision := move_and_collide(velocity * delta)
 
 	if collision:
@@ -101,6 +105,22 @@ func _break_brick(brick: Node, contact := Vector2.INF) -> bool:
 func _rest_on_paddle() -> void:
 	# Half the paddle's height (8) plus the ball's radius (16): resting on top, no gap.
 	position = paddle.position + Vector2(0, -24)
+	_set_rolling(false)
+
+func _update_breaker_glow() -> void:
+	var glow := get_node_or_null("Glow") as CanvasItem
+	if glow:
+		glow.visible = BallRules.breaker_glow_visible(breaker_time_left)
+
+# The roll animation only runs while the ball is in flight.
+func _set_rolling(rolling: bool) -> void:
+	var sprite := get_node_or_null("Sprite2D") as AnimatedSprite2D
+	if sprite == null or sprite.is_playing() == rolling:
+		return
+	if rolling:
+		sprite.play()
+	else:
+		sprite.pause()
 
 func reset() -> void:
 	boost_active = false
