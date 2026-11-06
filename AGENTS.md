@@ -336,3 +336,15 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   loops so a failed Continue reports assertions instead of hanging the process.
 - Reset `Engine.max_fps` to 0 after deliberately limiting test frame rates, so later
   checks in the same process do not inherit the slow frame rate.
+
+## High scores
+
+- `high_score_rules.gd` is pure ranking/initials logic; `high_score_store.gd` owns local
+  persistence. Construct the store to load, call `qualifies(score)` without writing,
+  then `submit(initials, score)` only after a completed run's initials confirmation.
+  Submit returns the zero-based highlight index, or -1 for rejection/write failure.
+- `records()` returns deep copies containing only `initials: String` and `score: int`;
+  derive display rank from array position + 1. Do not mutate a returned row to save it.
+- JSON scores are decimal strings on disk to preserve GDScript's full 64-bit integers;
+  the public record score remains an int. Invalid saves recover as an empty board.
+  Tests use `user://high_score_store_test/`, never the default player's save.
