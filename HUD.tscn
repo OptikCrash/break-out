@@ -1,6 +1,8 @@
 [gd_scene format=3 uid="uid://bec754stvpw4h"]
 
 [ext_resource type="Script" uid="uid://cvp656wc3w05v" path="res://hud.gd" id="1_hud"]
+[ext_resource type="PackedScene" path="res://initials_entry.tscn" id="2_entry"]
+[ext_resource type="PackedScene" path="res://high_score_board.tscn" id="3_board"]
 
 [node name="Hud" type="CanvasLayer" unique_id=218766584]
 script = ExtResource("1_hud")
@@ -99,3 +101,62 @@ text = "Active Effects"
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 8
+
+[node name="HighScores" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Dim" type="ColorRect" parent="HighScores"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.85)
+
+[node name="Center" type="CenterContainer" parent="HighScores"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="InitialsEntry" parent="HighScores/Center" instance=ExtResource("2_entry")]
+visible = false
+layout_mode = 2
+
+[node name="BoardView" type="VBoxContainer" parent="HighScores/Center"]
+visible = false
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 40
+
+[node name="Board" parent="HighScores/Center/BoardView" instance=ExtResource("3_board")]
+layout_mode = 2
+
+[node name="Buttons" type="HBoxContainer" parent="HighScores/Center/BoardView"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 40
+alignment = 1
+
+[node name="Restart" type="Button" parent="HighScores/Center/BoardView/Buttons"]
+custom_minimum_size = Vector2(280, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Restart (R)"
+
+[node name="BackToTitle" type="Button" parent="HighScores/Center/BoardView/Buttons"]
+custom_minimum_size = Vector2(280, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Back to Title"

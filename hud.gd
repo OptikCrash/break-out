@@ -4,11 +4,56 @@ extends CanvasLayer
 signal continue_pressed
 signal restart_pressed
 signal back_to_title_pressed
+# Three confirmed A-Z letters. Saving them (and ranking the run) is the
+# caller's job; the HUD never reads or writes the high-score board itself.
+signal initials_confirmed(initials: String)
+
+@onready var high_scores: Control = $HighScores
+@onready var initials_entry: Control = $HighScores/Center/InitialsEntry
+@onready var board_view: Control = $HighScores/Center/BoardView
 
 func _ready() -> void:
 	$Continue.pressed.connect(continue_pressed.emit)
 	$EndButtons/Restart.pressed.connect(restart_pressed.emit)
 	$EndButtons/BackToTitle.pressed.connect(back_to_title_pressed.emit)
+	initials_entry.confirmed.connect(initials_confirmed.emit)
+	# The board's buttons mean the same as the end buttons, so they reuse their signals.
+	$HighScores/Center/BoardView/Buttons/Restart.pressed.connect(restart_pressed.emit)
+	$HighScores/Center/BoardView/Buttons/BackToTitle.pressed.connect(back_to_title_pressed.emit)
+
+# Shown instead of the end buttons when the caller has decided the run qualifies.
+func show_initials_entry(score: int) -> void:
+	$EndButtons.hide()
+	board_view.hide()
+	_show_high_scores_layer(true)
+	initials_entry.open(score)
+
+func hide_initials_entry() -> void:
+	initials_entry.hide()
+	_show_high_scores_layer(board_view.visible)
+
+func is_entering_initials() -> bool:
+	return initials_entry.is_visible_in_tree()
+
+# records: [{ initials: String, score: int }, ...] already ranked by the caller.
+# highlight_index marks the row just saved (0-based), or -1 for none.
+func show_high_scores(records: Array, highlight_index := -1) -> void:
+	$EndButtons.hide()
+	initials_entry.hide()
+	board_view.get_node("Board").show_records(records, highlight_index)
+	board_view.show()
+	_show_high_scores_layer(true)
+	board_view.get_node("Buttons/Restart").grab_focus()
+
+func hide_high_scores() -> void:
+	board_view.hide()
+	_show_high_scores_layer(initials_entry.visible)
+
+# The centred Game Over / You Win! message would show through the panel, so
+# it steps aside while the layer is up and comes back when it closes.
+func _show_high_scores_layer(value: bool) -> void:
+	high_scores.visible = value
+	$MessageLabel.visible = not value
 
 func update_lives(value: int) -> void:
 	$Lives.text = "Lives: " + str(value)

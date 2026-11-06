@@ -87,15 +87,16 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - An action pressed counts as "just pressed" during the next physics step, and the scene swap
   is applied before that step. If the key that leaves a screen is also a gameplay action
   (Space is `ui_accept` and `launch`), `await get_tree().physics_frame` before swapping, or the
-  new scene will act on the same press. `tests/title_screen_test.gd` covers this.
+  new scene will act on the same press. The title screen now uses Start / High Scores Buttons,
+  so it no longer needs the wait; `tests/title_screen_test.gd` still checks no launch leaks through.
 - Pausing: `get_tree().paused` belongs to the SceneTree, so it stays on across
   `reload_current_scene()` / `change_scene_to_file()`. Unpause before you swap scenes. Paused nodes
   get no input either, so the key that unpauses must be read by a node with
   `process_mode = Always` (`PauseScreen.tscn`), not by `main.gd`. A hidden CanvasLayer still
   receives `_unhandled_input`, so check `visible` first.
 - `Button` emits `pressed` on release, so the press has already stopped being "just pressed" and
-  a Space press on a menu button can't also launch the ball. The `physics_frame` wait in `title.gd`
-  is only needed because it acts on the raw press.
+  a Space press on a menu button can't also launch the ball. Only a screen acting on the raw
+  press (in `_unhandled_input`) needs the `physics_frame` wait.
 - Godot's built-in `ui_accept` has no gamepad button (only Enter, Keypad Enter, Space), so a
   focused `Button` can't be pressed by a pad. `project.godot` overrides `ui_accept` to add
   joypad A. An override replaces the built-in event list, so keep the three keys in it.
@@ -110,7 +111,7 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   partial tilt moves the paddle more slowly. In tests, release a stick by sending the same axis with `axis_value = 0.0`.
 - `Button`s fire on release, for keyboard and gamepad as well as the mouse, so leaving a scene
   from a button doesn't hand a fresh "just pressed" Space to the next scene. A press that
-  comes from `_unhandled_input`, like the title screen's, still needs the physics-frame wait.
+  comes from `_unhandled_input` still needs the physics-frame wait.
 - A full-screen Control that reads clicks in `_unhandled_input` needs `mouse_filter = Ignore`
   on itself and on any ColorRect/container over it, or the GUI eats the click first.
 - Input actions (`Input.is_action_just_pressed("launch")`) are updated before the GUI sees an
@@ -336,6 +337,10 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   loops so a failed Continue reports assertions instead of hanging the process.
 - Reset `Engine.max_fps` to 0 after deliberately limiting test frame rates, so later
   checks in the same process do not inherit the slow frame rate.
+- Send synthetic gameplay presses from the process phase (`await process_frame`), then
+  `Input.flush_buffered_events()`. A press parsed inside a physics step waits for the next
+  flush, and on a slow runner several physics steps can run first, so the press is missed.
+  Reproduce timing flakes with `godot --headless --path . --max-fps 5 --script <test>`.
 
 ## High scores
 
@@ -348,3 +353,18 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - JSON scores are decimal strings on disk to preserve GDScript's full 64-bit integers;
   the public record score remains an int. Invalid saves recover as an empty board.
   Tests use `user://high_score_store_test/`, never the default player's save.
+
+## High-score UI (M8)
+
+- `high_score_board.tscn` draws the `{ initials, score }` records it is given, in order, with an
+  optional highlight index; `initials_entry.tscn` emits `confirmed(initials)` once per `open()`.
+  Neither sorts, trims or saves; `tests/high_score_ui_test.gd` rejects `user://`/`FileAccess` in them.
+  The HUD drives both through `show_initials_entry()`, `initials_confirmed`, `show_high_scores()`
+  and its existing `restart_pressed` / `back_to_title_pressed`; the title reads `high_score_records`.
+- `main.gd` polls the `restart` action (R, pad Y) whenever `reset_ready` is set. While
+  `hud.is_entering_initials()` is true, typing R or pressing Y would restart the run, so the
+  integration must skip that poll during entry.
+- Space is `ui_accept`, so in the entry panel it presses the focused letter rather than typing.
+- `Input.flush_buffered_events()` dispatches at once. After showing a hidden panel, wait one
+  `process_frame` before sending arrow/D-pad presses: containers lay out at frame end, and focus
+  neighbours computed from unsized buttons go nowhere.

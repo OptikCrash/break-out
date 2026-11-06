@@ -110,21 +110,29 @@ func _run() -> void:
 	_check(ball.caught, "Shared press begins with a caught ball")
 	game.paddle.recent_velocity_x = 0.0
 	await physics_frame
+	# Press from the process phase and flush at once. A press parsed inside a
+	# physics step waits for the next main-loop flush; on a slow runner both
+	# physics steps below can run before it, so the ball never saw the press.
+	await process_frame
 	var press := InputEventKey.new()
 	press.physical_keycode = KEY_SPACE
 	press.pressed = true
 	Input.parse_input_event(press)
+	Input.flush_buffered_events()
 	ball.set_physics_process(true)
 	await physics_frame
 	await physics_frame
 	ball.set_physics_process(false)
 	press.pressed = false
 	Input.parse_input_event(press)
+	Input.flush_buffered_events()
 	_check(not ball.caught and ball.velocity.is_equal_approx(base), "Shared Space press releases at catch offset instead of fresh launch")
 	await physics_frame
 	# Fresh launch uses launch only, even with sticky enabled.
 	game._catch_capsule(Sticky)
 	ball.reset()
+	# Same clock rule as above: press outside a physics step.
+	await process_frame
 	Input.action_press("launch")
 	Input.action_press("power_action")
 	ball.set_physics_process(true)

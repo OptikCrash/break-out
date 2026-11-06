@@ -1,0 +1,82 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://coe8cbd7dgabl" path="res://initials_entry.gd" id="1_entry"]
+
+[node name="InitialsEntry" type="VBoxContainer"]
+mouse_filter = 2
+theme_override_constants/separation = 24
+script = ExtResource("1_entry")
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 2
+theme_override_font_sizes/font_size = 72
+text = "New High Score!"
+horizontal_alignment = 1
+
+[node name="Score" type="Label" parent="."]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "Score: 0"
+horizontal_alignment = 1
+
+[node name="Slots" type="HBoxContainer" parent="."]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="Slot1" type="Label" parent="Slots"]
+custom_minimum_size = Vector2(104, 120)
+layout_mode = 2
+theme_override_font_sizes/font_size = 80
+text = "_"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Slot2" type="Label" parent="Slots"]
+custom_minimum_size = Vector2(104, 120)
+layout_mode = 2
+theme_override_font_sizes/font_size = 80
+text = "_"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Slot3" type="Label" parent="Slots"]
+custom_minimum_size = Vector2(104, 120)
+layout_mode = 2
+theme_override_font_sizes/font_size = 80
+text = "_"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Letters" type="GridContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
+columns = 9
+
+[node name="Actions" type="HBoxContainer" parent="."]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 40
+alignment = 1
+
+[node name="Delete" type="Button" parent="Actions"]
+custom_minimum_size = Vector2(280, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Delete"
+
+[node name="Confirm" type="Button" parent="Actions"]
+custom_minimum_size = Vector2(280, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Confirm"
+
+[node name="Hint" type="Label" parent="."]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 28
+text = "Type or pick 3 letters   ·   Backspace / B: Delete   ·   Enter / A: Choose"
+horizontal_alignment = 1
