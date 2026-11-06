@@ -12,6 +12,7 @@ func run() -> void:
 		Engine.max_fps = frame_limit
 		for input_kind in ["keyboard", "mouse", "gamepad"]:
 			var game = preload("res://main.tscn").instantiate()
+			game.high_score_store = preload("res://tests/helpers/non_qualifying_store.gd").new()
 			root.add_child(game)
 			game.lives = 2
 			var total := 0
@@ -80,6 +81,7 @@ func _test_custom_sequence() -> void:
 	var last := Level.new()
 	last.grid = "ox"
 	var game = preload("res://main.tscn").instantiate()
+	game.high_score_store = preload("res://tests/helpers/non_qualifying_store.gd").new()
 	game.levels.assign([first, last])
 	# main owns the first level, so Bricks must not build a default layout first.
 	var built := [0]

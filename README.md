@@ -14,6 +14,15 @@ to move between buttons and A to press one.
 While the ball is in play, Escape (or gamepad Start) pauses the game and opens a
 menu with Resume, Restart and Back to Title. Start or B (Circle) also resumes.
 
+## Local high scores
+
+Game Over and You Win! both qualify for the local top ten. A qualifying run asks
+for three uppercase A–Z initials; confirm them to save and show the complete board
+with your new row highlighted. Restart and Back to Title become available after
+confirmation. R and gamepad Y cannot restart while entering initials. Other runs
+go directly to the usual end buttons. The title's High Scores choice reads the
+persisted board from `user://high_scores.json`; there is no in-game reset.
+
 ## Test Lab (development only)
 
 `devtools/test_lab.tscn` is a sandbox for trying levels, power-ups and art in the

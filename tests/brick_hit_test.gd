@@ -8,6 +8,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var game = preload("res://main.tscn").instantiate()
+	game.high_score_store = preload("res://tests/helpers/non_qualifying_store.gd").new()
 	var bricks = game.get_node("PlayArea/Bricks")
 	var level := Level.new()
 	level.grid = "##"

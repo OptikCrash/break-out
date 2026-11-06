@@ -368,3 +368,10 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
 - `Input.flush_buffered_events()` dispatches at once. After showing a hidden panel, wait one
   `process_frame` before sending arrow/D-pad presses: containers lay out at frame end, and focus
   neighbours computed from unsized buttons go nowhere.
+
+- Terminal-flow tests must inject a non-qualifying store when asserting ordinary end
+  buttons: an empty board qualifies even a zero-point run. `main.high_score_store` is
+  loaded lazily at terminal completion so the Test Lab never reads the player save.
+- Confirmation consumes the pending submission before calling the store, preventing
+  duplicate saves. A failed write shows the unchanged board with no highlighted row;
+  M8 does not specify retry/error UI, so that remains a reviewable fallback.

@@ -22,6 +22,7 @@ func open_title() -> Node:
 	change_scene_to_file(TITLE)
 	await process_frame
 	await process_frame
+	current_scene.high_score_records = []
 	return current_scene
 
 func check_layout() -> void:
@@ -101,7 +102,7 @@ func check_high_scores_navigation() -> void:
 		var board_view: Control = title.get_node("BoardView")
 		_check(board_view.visible and not title.get_node("Center").visible, "%s must open the board" % way[0])
 		_check(title.get_node("BoardView/Lines/Back").has_focus(), "%s: Back must have focus on the board" % way[0])
-		# No saved board is read here, so the empty state must show.
+		# This navigation fixture explicitly supplies an empty board.
 		_check(title.get_node("BoardView/Lines/Board/Empty").visible, "%s: an empty board must say so" % way[0])
 		for event in way[2]:
 			await press(event.call() if event is Callable else event)
