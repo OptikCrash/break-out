@@ -337,6 +337,10 @@ Gotchas learned while working on break-out. `PLAN.md` and `GLOSSARY.md` stay the
   loops so a failed Continue reports assertions instead of hanging the process.
 - Reset `Engine.max_fps` to 0 after deliberately limiting test frame rates, so later
   checks in the same process do not inherit the slow frame rate.
+- Send synthetic gameplay presses from the process phase (`await process_frame`), then
+  `Input.flush_buffered_events()`. A press parsed inside a physics step waits for the next
+  flush, and on a slow runner several physics steps can run first, so the press is missed.
+  Reproduce timing flakes with `godot --headless --path . --max-fps 5 --script <test>`.
 
 ## High scores
 
