@@ -2,8 +2,8 @@ extends Control
 
 const GAME_SCENE := "res://main.tscn"
 var starting := false
-# [{ initials: String, score: int }, ...], already ranked. The title only shows
-# what it is given; the M8 integration fills this from the high-score store.
+# Loaded on entry; injectable before ready for isolated scene tests.
+var high_score_store
 var high_score_records: Array = []
 
 @onready var start_button: Button = $Center/Lines/Menu/Start
@@ -12,6 +12,9 @@ var high_score_records: Array = []
 @onready var back_button: Button = $BoardView/Lines/Back
 
 func _ready() -> void:
+	if high_score_store == null:
+		high_score_store = preload("res://high_score_store.gd").new()
+	high_score_records = high_score_store.records()
 	start_button.pressed.connect(start_game)
 	high_scores_button.pressed.connect(show_high_scores)
 	back_button.pressed.connect(hide_high_scores)

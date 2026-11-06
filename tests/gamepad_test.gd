@@ -46,6 +46,7 @@ func start_game() -> Node:
 	change_scene_to_file(GAME)
 	await process_frame
 	await process_frame
+	current_scene.high_score_store = preload("res://tests/helpers/non_qualifying_store.gd").new()
 	return current_scene
 
 func check_movement(label: String, event: InputEvent, sign_x: int) -> void:

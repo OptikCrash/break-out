@@ -62,6 +62,10 @@ var paddle_start: Vector2
 var score = 0
 var bricks_left = 0
 var reset_ready := false
+# Lazy loading keeps the Test Lab away from the player’s saved board.
+var high_score_store
+var awaiting_initials := false
+var final_score := 0
 # Satellite Shield is charge-based, so its count lives here rather than in the
 # timed effects dictionary. The orbs are drawn only; they become balls at launch.
 var satellite_orbs := 0:
@@ -116,10 +120,11 @@ func _ready() -> void:
 	hud.update_lives(lives)
 	hud.restart_pressed.connect(restart)
 	hud.back_to_title_pressed.connect(back_to_title)
+	hud.initials_confirmed.connect(_confirm_initials)
 	_count_completion_bricks()
 
 func _process(_delta: float) -> void:
-	if reset_ready && Input.is_action_just_pressed("restart"):
+	if reset_ready and not awaiting_initials and Input.is_action_just_pressed("restart"):
 		restart()
 
 # Main stops getting input while the tree is paused, so closing the menu again
@@ -158,13 +163,15 @@ func _on_death_zone_body_entered(body: Node2D) -> void:
 # The last ball is gone and effects are already cleared. The Test Lab
 # (devtools/test_lab.gd) overrides this to respawn without costing a life.
 func _lose_life() -> void:
+	if reset_ready:
+		return
 	lives -= 1
 	hud.update_lives(lives)
 	if lives == 0:
 		reset_ready = true
 		sounds.play_cue(&"game_over")
 		hud.update_message("Game Over!")
-		hud.show_end_buttons()
+		_present_final_score()
 	else:
 		print("Lives left: ", lives)
 		add_ball()
@@ -181,6 +188,8 @@ func _on_ball_brick_broken(points: int) -> void:
 # Every completion brick is gone. The Test Lab overrides this to reload the
 # same level instead of showing "Level Complete" or "You Win!".
 func _finish_level() -> void:
+	if reset_ready or level_complete:
+		return
 	_clear_effects_and_capsules()
 	for active_ball in get_balls():
 		active_ball.reset()
@@ -195,18 +204,37 @@ func _finish_level() -> void:
 		reset_ready = true
 		sounds.play_cue(&"win")
 		hud.update_message("You Win!")
+		_present_final_score()
+
+# Capture once: later callbacks must neither change the submitted score nor reopen entry.
+func _present_final_score() -> void:
+	final_score = score
+	if high_score_store == null:
+		high_score_store = preload("res://high_score_store.gd").new()
+	awaiting_initials = high_score_store.qualifies(final_score)
+	if awaiting_initials:
+		hud.show_initials_entry(final_score)
+	else:
 		hud.show_end_buttons()
+
+func _confirm_initials(initials: String) -> void:
+	if not awaiting_initials or not preload("res://high_score_rules.gd").valid_initials(initials):
+		return
+	# Consume before submitting so repeated confirmation signals cannot save twice.
+	awaiting_initials = false
+	var highlight: int = high_score_store.submit(initials, final_score)
+	hud.show_high_scores(high_score_store.records(), highlight)
 
 # R and the Restart button both land here. Clearing reset_ready means a second
 # request in the same frame (R plus a click) can't ask for another scene change.
 func restart() -> void:
-	if not reset_ready:
+	if not reset_ready or awaiting_initials:
 		return
 	reset_ready = false
 	get_tree().reload_current_scene()
 
 func back_to_title() -> void:
-	if not reset_ready:
+	if not reset_ready or awaiting_initials:
 		return
 	reset_ready = false
 	get_tree().change_scene_to_file(TITLE_SCENE)
