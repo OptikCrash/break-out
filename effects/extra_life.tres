@@ -1,0 +1,9 @@
+[gd_resource type="Resource" format=3 uid="uid://box5pk6h122s8"]
+
+[ext_resource type="Script" uid="uid://cg86kbnefbqqj" path="res://effect_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"extra_life"
+display_name = "Extra Life"
+extra_lives = 1

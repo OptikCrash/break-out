@@ -1,0 +1,10 @@
+[gd_resource type="Resource" format=3 uid="uid://b8emkrlo7e0ue"]
+
+[ext_resource type="Script" uid="uid://cg86kbnefbqqj" path="res://effect_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"multi_ball"
+display_name = "Multi-ball"
+extra_balls = 2
+split_angle_degrees = 20.0

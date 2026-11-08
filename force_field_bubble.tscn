@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://dmfrq6r86v0kb"]
+
+[ext_resource type="Script" path="res://force_field_bubble.gd" id="1_ffb"]
+
+[node name="ForceFieldBubble" type="Area2D" groups=["force_field"]]
+collision_layer = 32
+collision_mask = 0
+monitoring = false
+script = ExtResource("1_ffb")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]

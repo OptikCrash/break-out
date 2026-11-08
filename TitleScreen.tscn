@@ -1,0 +1,100 @@
+[gd_scene format=3 uid="uid://c7t1tlsc4e3n0"]
+
+[ext_resource type="Script" uid="uid://bo8bjriwd2un2" path="res://title.gd" id="1_title"]
+[ext_resource type="PackedScene" path="res://high_score_board.tscn" id="2_board"]
+
+[node name="TitleScreen" type="Control" unique_id=1460192873]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_title")
+
+[node name="Background" type="ColorRect" parent="." unique_id=602518734]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Center" type="CenterContainer" parent="." unique_id=1873350261]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Lines" type="VBoxContainer" parent="Center" unique_id=95817264]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 32
+
+[node name="GameName" type="Label" parent="Center/Lines" unique_id=1330945518]
+layout_mode = 2
+theme_override_font_sizes/font_size = 128
+text = "BREAK-OUT"
+horizontal_alignment = 1
+
+[node name="Menu" type="VBoxContainer" parent="Center/Lines"]
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+theme_override_constants/separation = 24
+
+[node name="Start" type="Button" parent="Center/Lines/Menu"]
+custom_minimum_size = Vector2(480, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "Start"
+
+[node name="HighScores" type="Button" parent="Center/Lines/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "High Scores"
+
+[node name="ControlsHint" type="Label" parent="Center/Lines" unique_id=1987402316]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 32
+text = "Move: A/D or Arrows   ·   Launch: Space   ·   Restart: R"
+horizontal_alignment = 1
+
+[node name="BoardView" type="CenterContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Lines" type="VBoxContainer" parent="BoardView"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 40
+
+[node name="Board" parent="BoardView/Lines" instance=ExtResource("2_board")]
+layout_mode = 2
+
+[node name="Back" type="Button" parent="BoardView/Lines"]
+custom_minimum_size = Vector2(480, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 48
+text = "Back"
+
+[node name="BackHint" type="Label" parent="BoardView/Lines"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 32
+text = "Esc / B: Back"
+horizontal_alignment = 1

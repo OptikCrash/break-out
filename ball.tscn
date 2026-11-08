@@ -1,20 +1,79 @@
 [gd_scene format=3 uid="uid://cvngfod5x8bwh"]
 
 [ext_resource type="Script" uid="uid://cktggu8qma0xk" path="res://ball.gd" id="1_x8fbi"]
-[ext_resource type="Texture2D" uid="uid://odaiej3by05f" path="res://assets/ball.png" id="2_41u45"]
+[ext_resource type="Texture2D" uid="uid://b128xy3f4j0hu" path="res://assets/ball_sprite.png" id="2_41u45"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_wx6e8"]
 radius = 16.0
 
-[node name="Ball" type="CharacterBody2D" unique_id=1745437129]
+[sub_resource type="AtlasTexture" id="AtlasTexture_ktgx5"]
+atlas = ExtResource("2_41u45")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hgol0"]
+atlas = ExtResource("2_41u45")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n5601"]
+atlas = ExtResource("2_41u45")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gchj4"]
+atlas = ExtResource("2_41u45")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_wx6e8"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ktgx5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hgol0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n5601")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gchj4")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 12.0
+}]
+
+[sub_resource type="Gradient" id="Gradient_breaker_glow"]
+offsets = PackedFloat32Array(0, 0.35, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.5, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="Texture_breaker_glow"]
+gradient = SubResource("Gradient_breaker_glow")
+width = 96
+height = 96
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="CanvasItemMaterial" id="Material_breaker_glow"]
+blend_mode = 1
+
+[node name="Ball" type="CharacterBody2D" unique_id=1745437129 groups=["ball"]]
 collision_layer = 4
 collision_mask = 15
 script = ExtResource("1_x8fbi")
-speed = null
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=708792081]
+visible = false
 shape = SubResource("CircleShape2D_wx6e8")
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=438805240]
+[node name="Glow" type="Sprite2D" parent="." unique_id=1873520946]
+visible = false
+material = SubResource("Material_breaker_glow")
+modulate = Color(1, 0.55, 0.2, 0.9)
+texture = SubResource("Texture_breaker_glow")
+
+[node name="Sprite2D" type="AnimatedSprite2D" parent="." unique_id=434559287]
 position = Vector2(0, 9.536743e-07)
-texture = ExtResource("2_41u45")
+sprite_frames = SubResource("SpriteFrames_wx6e8")
+autoplay = "default"
+frame_progress = 0.036716525

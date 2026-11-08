@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="Level" format=3 uid="uid://bbfpektfuqxbe"]
+
+[ext_resource type="Script" uid="uid://dyq4mnu2gql6d" path="res://level.gd" id="1_level"]
+
+[resource]
+script = ExtResource("1_level")
+grid = "#################
+#################
+#################
+#################"

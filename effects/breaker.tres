@@ -1,0 +1,9 @@
+[gd_resource type="Resource" format=3 uid="uid://cppe8j01pdd5q"]
+
+[ext_resource type="Script" uid="uid://cg86kbnefbqqj" path="res://effect_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"breaker"
+display_name = "Breaker"
+duration = 10.0
